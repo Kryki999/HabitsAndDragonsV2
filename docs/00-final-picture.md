@@ -60,6 +60,10 @@ STOLICA (hub) ──► MAPA KRÓLESTWA
 Gold **nie** odblokowuje fabuły. Model: [`06`](06-economy-loot.md).
 ---
 
+## Gdzie jest kod (V2)
+
+Cienki scaffold: `apps/mobile` (Expo Router, 5 tabów z `18`). Nawyki lokalnie; mapa / Hero / social / Mentor = later. V1 nie jest kotwicą architektury — [`reference/v1-to-v2-architecture-audit.md`](reference/v1-to-v2-architecture-audit.md).
+
 ## Na czym stoi (tech) — kierunki
 
 - App shell: **Expo / RN** (habit UX) — nie silnik gry jako całość (`12`).

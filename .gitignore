@@ -7,3 +7,42 @@ Desktop.ini
 .idea/
 .vscode/
 *.swp
+*.swo
+*~
+
+# Node / Expo (apps/mobile)
+node_modules/
+.expo/
+.expo-shared/
+dist/
+web-build/
+.turbo/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Native / EAS
+ios/
+android/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Env / secrets — never commit keys (Groq, Supabase service, etc.)
+.env
+.env.*
+!.env.example
+
+# Tests / coverage
+coverage/
+
+# Docs local scratch (keep bible markdown; ignore dumps)
+docs/**/*.pdf
+docs/inbox/*
+!docs/inbox/.gitkeep
+!docs/inbox/README.md
