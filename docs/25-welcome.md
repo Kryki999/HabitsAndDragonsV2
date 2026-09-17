@@ -10,14 +10,15 @@ Jeśli po tym pliku zostaną pytania — super. Pytaj, dochodzimy do konsensusu.
 
 ## 1. Gdzie jesteś
 
-Masz (albo dostaniesz) **dwie rzeczy**, które wyglądają jak „ta sama gra”, a nie są.
+Masz **trzy rzeczy**, które wyglądają jak „ta sama gra”, a nie są.
 
 | Co | Gdzie | Co z tym robić |
 |----|--------|----------------|
-| **V1 — prototyp** | Osobne repo / folder aplikacji (Expo) | Uruchom, poklikaj. UX zadań, kalendarz, feel odhaczenia — **to zostaje jako lekcja**. Architektura świata (obóz, klasy, karty lochów, smoki) — **nie** jest celem V2. |
-| **V2 — Concept Bible** | **To repo** (`habitsanddragons-v2`) | Markdown. Tu ustaliliśmy *jaką grę chcemy zrobić*. **Nie ma tu jeszcze aplikacji V2.** |
+| **V1 — prototyp** | Osobne repo ([HabitsAndDragons](https://github.com/Kryki999/HabitsAndDragons)) | Uruchom, poklikaj. UX zadań, kalendarz, feel odhaczenia — **to zostaje jako lekcja**. Architektura świata (obóz, klasy, karty lochów, smoki) — **nie** jest celem V2. |
+| **V2 — Concept Bible** | [`docs/`](README.md) w tym repo | Markdown. Tu ustaliliśmy *jaką grę chcemy zrobić*. Mapa filarów: [`README.md`](README.md). |
+| **V2 — apka** | [`apps/mobile/`](../apps/mobile) | Cienki Expo scaffold (5 tabów + lokalne nawyki). **Nie** dump V1. Audyt: [`reference/v1-to-v2-architecture-audit.md`](reference/v1-to-v2-architecture-audit.md). |
 
-To repo to **nie kod**. Pracujemy tu tak: pomysł → plik filaru → gdy się ustabilizuje, ląduje w [`00-final-picture.md`](00-final-picture.md). Kod startujemy dopiero gdy świadomie wyjdziemy z trybu koncepcji.
+Biblia i kod są **rozdzielone**. Pracujemy tak: pomysł → plik filaru → gdy się ustabilizuje, ląduje w [`00-final-picture.md`](00-final-picture.md). Kod w `apps/mobile` tylko gdy świadomie wychodzimy z trybu koncepcji — i wtedy bez god-store / Groq w kliencie / smoków w nawigacji.
 
 **Twoja rola (szkic):** znasz backend najlepiej — przy stacku, modelu danych, syncu, anti-cheat ekonomii i AI przez serwer **będziesz współdecydować**, nie tylko implementować. Frontend / art / fabuła też możesz ruszać; backend to kij, na którym stoimy.
 
