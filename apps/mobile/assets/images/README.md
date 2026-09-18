@@ -12,3 +12,13 @@ When you have real art, drop it here:
 | `item_*.png` | Optional per-item icons in `RarityItemSlot` (today: `LootGlyph`) |
 
 Camp / castle stills already in this folder are for **Questy** (`HomeScenePanel`), not Hero.
+
+**World tab** stills (owner art):
+
+| File | Use |
+|------|-----|
+| `world/map-kingdom.png` | Kingdom orbit map (pan/zoom + pins) |
+| `world/hub-crownhaven.png` | Crownhaven close-up hub |
+| `world/dungeon-gutterjack.png` | Gutterjack cellar |
+
+Pin / hotspot fractions: `apps/mobile/world/layout.ts`.

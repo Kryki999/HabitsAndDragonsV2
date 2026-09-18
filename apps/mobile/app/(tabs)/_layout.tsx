@@ -32,7 +32,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="world"
         options={{
-          title: 'Świat',
+          title: 'World',
           tabBarIcon: tabIcon('map-outline'),
         }}
       />
