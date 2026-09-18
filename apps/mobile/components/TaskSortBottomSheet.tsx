@@ -34,7 +34,15 @@ export default function TaskSortBottomSheet({ visible, onClose }: Props) {
   );
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
+      statusBarTranslucent
+      navigationBarTranslucent
+      presentationStyle="overFullScreen"
+    >
       <View style={styles.overlay}>
         <Pressable style={styles.overlayBg} onPress={onClose} />
         <View style={styles.sheet}>
