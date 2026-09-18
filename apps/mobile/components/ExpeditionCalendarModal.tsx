@@ -3,17 +3,15 @@ import {
   View,
   Text,
   StyleSheet,
-  Modal,
   Pressable,
   ScrollView,
   Alert,
-  Platform,
   FlatList,
   useWindowDimensions,
   TextInput,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import DraggableFlatList, { RenderItemParams, ScaleDecorator } from "react-native-draggable-flatlist";
 import {
   X,
@@ -32,6 +30,7 @@ import { useHabitsStore } from "@/habits/store";
 import AddHabitModal from "@/components/AddHabitModal";
 import DayQuestLogReadOnly from "@/components/DayQuestLogReadOnly";
 import DailyReflectionPanel from "@/components/DailyReflectionPanel";
+import FullscreenModal from "@/components/FullscreenModal";
 import TaskCardOverlay, { type CardMetrics } from "@/components/TaskCardOverlay";
 import { applyPlanningOrderForDate } from "@/lib/planningDayOrder";
 import { impactAsync, ImpactFeedbackStyle } from "@/lib/hapticsGate";
@@ -691,7 +690,7 @@ export default function ExpeditionCalendarModal({
   );
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <FullscreenModal visible={visible} onRequestClose={onClose}>
       <View style={styles.shell}>
         <LinearGradient
           colors={["#1a0f2e", "#120a1c", "#080510"]}
@@ -700,7 +699,8 @@ export default function ExpeditionCalendarModal({
           end={{ x: 0.5, y: 1 }}
         />
 
-        <View style={[styles.safeTop, { paddingTop: Math.max(insets.top, 12) }]}>
+        <SafeAreaView style={styles.safeFill} edges={["top"]}>
+        <View style={styles.safeTop}>
           {/* Header */}
           <View style={styles.headerBar}>
             <Pressable
@@ -929,6 +929,7 @@ export default function ExpeditionCalendarModal({
             }
           />
         )}
+        </SafeAreaView>
 
         {addOpen ? (
           <AddHabitModal
@@ -943,7 +944,7 @@ export default function ExpeditionCalendarModal({
         ) : null}
 
         {rescheduleOpen ? (
-          <Modal visible transparent={false} animationType="slide" onRequestClose={() => setRescheduleOpen(false)}>
+          <FullscreenModal visible onRequestClose={() => setRescheduleOpen(false)}>
             <View style={styles.fullModalShell}>
               <LinearGradient
                 colors={["#1a0f2e", "#120a1c", "#080510"]}
@@ -951,7 +952,8 @@ export default function ExpeditionCalendarModal({
                 start={{ x: 0.5, y: 0 }}
                 end={{ x: 0.5, y: 1 }}
               />
-              <View style={[styles.fullModalHeader, { paddingTop: Math.max(insets.top, 14) }]}>
+              <SafeAreaView style={styles.safeFill} edges={["top"]}>
+              <View style={styles.fullModalHeader}>
                 <Pressable
                   onPress={() => setRescheduleOpen(false)}
                   style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
@@ -1048,12 +1050,13 @@ export default function ExpeditionCalendarModal({
                   </Pressable>
                 </View>
               </ScrollView>
+              </SafeAreaView>
             </View>
-          </Modal>
+          </FullscreenModal>
         ) : null}
 
         {editOpen ? (
-          <Modal visible transparent={false} animationType="slide" onRequestClose={() => setEditOpen(false)}>
+          <FullscreenModal visible onRequestClose={() => setEditOpen(false)}>
             <View style={styles.fullModalShell}>
               <LinearGradient
                 colors={["#1a0f2e", "#120a1c", "#080510"]}
@@ -1061,7 +1064,8 @@ export default function ExpeditionCalendarModal({
                 start={{ x: 0.5, y: 0 }}
                 end={{ x: 0.5, y: 1 }}
               />
-              <View style={[styles.fullModalHeader, { paddingTop: Math.max(insets.top, 14) }]}>
+              <SafeAreaView style={styles.safeFill} edges={["top"]}>
+              <View style={styles.fullModalHeader}>
                 <Pressable
                   onPress={() => setEditOpen(false)}
                   style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
@@ -1146,8 +1150,9 @@ export default function ExpeditionCalendarModal({
                   </Pressable>
                 </View>
               </ScrollView>
+              </SafeAreaView>
             </View>
-          </Modal>
+          </FullscreenModal>
         ) : null}
 
         {/* Return to Today floating button */}
@@ -1176,12 +1181,7 @@ export default function ExpeditionCalendarModal({
         ) : null}
 
         {reflectionOpen ? (
-          <Modal
-            visible
-            transparent={false}
-            animationType="slide"
-            onRequestClose={() => setReflectionOpen(false)}
-          >
+          <FullscreenModal visible onRequestClose={() => setReflectionOpen(false)}>
             <View style={styles.reflectionModalShell}>
               <LinearGradient
                 colors={["#1a0f2e", "#120a1c", "#080510"]}
@@ -1189,7 +1189,8 @@ export default function ExpeditionCalendarModal({
                 start={{ x: 0.5, y: 0 }}
                 end={{ x: 0.5, y: 1 }}
               />
-              <View style={[styles.reflectionModalHeader, { paddingTop: Math.max(insets.top, 16) }]}>
+              <SafeAreaView style={styles.safeFill} edges={["top"]}>
+              <View style={styles.reflectionModalHeader}>
                 <Pressable
                   onPress={() => setReflectionOpen(false)}
                   style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
@@ -1220,18 +1221,22 @@ export default function ExpeditionCalendarModal({
                   <Text style={styles.reflectionCancelText}>Anuluj</Text>
                 </Pressable>
               </ScrollView>
+              </SafeAreaView>
             </View>
-          </Modal>
+          </FullscreenModal>
         ) : null}
       </View>
-    </Modal>
+    </FullscreenModal>
   );
 }
 
 const styles = StyleSheet.create({
   shell: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.94)",
+    backgroundColor: "#080510",
+  },
+  safeFill: {
+    flex: 1,
   },
   safeTop: {
     paddingHorizontal: 16,

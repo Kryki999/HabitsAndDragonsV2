@@ -336,6 +336,8 @@ export default function TaskCardOverlay({
       transparent
       animationType="none"
       statusBarTranslucent
+      navigationBarTranslucent
+      presentationStyle="overFullScreen"
       onRequestClose={triggerClose}
     >
       {/* ── Backdrop ── */}

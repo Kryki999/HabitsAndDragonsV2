@@ -399,6 +399,8 @@ export default function AddHabitModal({ visible, onClose, onAddHabit, initialSch
       animationType="fade"
       onRequestClose={handleClose}
       statusBarTranslucent
+      navigationBarTranslucent
+      presentationStyle="overFullScreen"
     >
       {view === 'choose' ? (
         <View style={styles.overlay}>

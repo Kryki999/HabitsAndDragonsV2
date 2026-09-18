@@ -1,11 +1,12 @@
 import React, { useCallback, useMemo, useState, useEffect } from "react";
-import { View, Text, StyleSheet, Modal, Pressable, ScrollView, Alert } from "react-native";
+import { View, Text, StyleSheet, Pressable, ScrollView, Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { X, ChevronDown, ChevronUp } from "lucide-react-native";
 import Colors from "@/constants/colors";
 import ActivityHeatmap from "@/components/ActivityHeatmap";
 import DayQuestLogReadOnly from "@/components/DayQuestLogReadOnly";
+import FullscreenModal from "@/components/FullscreenModal";
 import { impactAsync, ImpactFeedbackStyle } from "@/lib/hapticsGate";
 import { useHabitsStore } from "@/habits/store";
 import type { Habit } from "@/habits/types";
@@ -40,7 +41,6 @@ export default function ActivityChroniclesModal({
   activityByDate,
   completedHabitNamesByDate,
 }: Props) {
-  const insets = useSafeAreaInsets();
   const allHabits = useHabitsStore((s) => s.habits);
   const removeHabit = useHabitsStore((s) => s.removeHabit);
 
@@ -79,7 +79,7 @@ export default function ActivityChroniclesModal({
   const pickerLabel = trailHabit ? `${trailHabit.icon} ${trailHabit.name}` : "Choose a habit…";
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
+    <FullscreenModal visible={visible} onRequestClose={handleClose}>
       <View style={styles.shell}>
         <LinearGradient
           colors={["#1a0f2e", "#120a1c", "#080510"]}
@@ -88,7 +88,7 @@ export default function ActivityChroniclesModal({
           end={{ x: 0.5, y: 1 }}
         />
 
-        <View style={[styles.topPad, { paddingTop: Math.max(insets.top, 10) }]}>
+        <SafeAreaView style={styles.topPad} edges={["top", "bottom"]}>
           <View style={styles.headerBar}>
             <Pressable
               onPress={handleClose}
@@ -221,16 +221,16 @@ export default function ActivityChroniclesModal({
 
             <View style={{ height: 32 }} />
           </ScrollView>
-        </View>
+        </SafeAreaView>
       </View>
-    </Modal>
+    </FullscreenModal>
   );
 }
 
 const styles = StyleSheet.create({
   shell: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.94)",
+    backgroundColor: "#080510",
   },
   topPad: {
     flex: 1,
