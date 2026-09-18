@@ -40,7 +40,7 @@ export default function FullscreenModal({
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: "#080510",
   },
 });
