@@ -20,6 +20,6 @@ npx expo start
 
 Typecheck: `npm run typecheck` w `apps/mobile`.
 
-Pięć tabów: **Questy · Świat · Bohater · Społeczność · Mentor**. Na starcie działa tylko lokalna lista nawyków (Questy). Reszta to placeholdery.
+Pięć tabów: **Questy · Świat · Bohater · Społeczność · Mentor**. Questy = V1 Castle UI (lista, karty, scena domu, kalendarz, kroniki) na czystym store `habits`. Reszta to placeholdery.
 
 Pełna mapa filarów: [`docs/README.md`](docs/README.md).
