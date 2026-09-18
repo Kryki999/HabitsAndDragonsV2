@@ -39,7 +39,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="hero"
         options={{
-          title: 'Bohater',
+          title: 'Hero',
           tabBarIcon: tabIcon('person-outline'),
         }}
       />

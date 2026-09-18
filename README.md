@@ -20,6 +20,6 @@ npx expo start
 
 Typecheck: `npm run typecheck` w `apps/mobile`.
 
-Pięć tabów: **Questy · Świat · Bohater · Społeczność · Mentor**. Questy = V1 Castle UI (lista, karty, scena domu, kalendarz, kroniki) na czystym store `habits`. Reszta to placeholdery.
+Pięć tabów: **Questy · Świat · Hero · Społeczność · Mentor**. Questy = V1 Castle UI na store `habits`. Hero = V1 Hero UI na cienkim store `hero` (EN). Świat / Społeczność / Mentor = placeholdery.
 
 Pełna mapa filarów: [`docs/README.md`](docs/README.md).
