@@ -16,7 +16,7 @@ Typecheck: `npm run typecheck`
 - 5 tabów: Questy · **World** · **Hero** · Społeczność · Mentor
 - Tab **Questy** = V1 Castle UI 1:1 (HomeScenePanel, HabitCard + overlay, calendar, chronicles, sort, add quest)
 - Tab **Hero** = V1 Hero UI 1:1 (sheet + hex radar, equipment/backpack shell, timeline, heatmap) on a thin `hero/` store
-- Tab **World** = playground: Crownhaven hub still → kingdom map (pan/zoom + pins) → Gutterjack cellar stub, on a thin `world/` store
+- Tab **World** = playground: kingdom map first → Crownhaven hub → tavern → Gutterjack cellar, on a thin `world/` store
 - Zustand **habits/** + **hero/** + **world/** (hub|map|location, discovered flags, gutterjackCleared)
 
 **Nie:** god-store, Groq / Oracle, smoki, klasy, tab D&D, `profiles.game_state`.

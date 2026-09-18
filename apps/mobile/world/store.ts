@@ -16,7 +16,7 @@ function uniquePush(ids: string[], id: string): string[] {
 export const useWorldStore = create<WorldStore>()(
   persist(
     (set) => ({
-      currentScreen: 'hub',
+      currentScreen: 'map',
       currentLocationId: null,
       discoveredLocationIds: [...ALWAYS_DISCOVERED],
       gutterjackCleared: false,
@@ -40,11 +40,16 @@ export const useWorldStore = create<WorldStore>()(
     }),
     {
       name: 'hnd-world-local',
-      version: 1,
+      version: 2,
       storage: createJSONStorage(() => AsyncStorage),
+      migrate: (persisted) => {
+        const prev = persisted as Partial<WorldState> | undefined;
+        return {
+          discoveredLocationIds: prev?.discoveredLocationIds ?? [...ALWAYS_DISCOVERED],
+          gutterjackCleared: prev?.gutterjackCleared ?? false,
+        };
+      },
       partialize: (state) => ({
-        currentScreen: state.currentScreen,
-        currentLocationId: state.currentLocationId,
         discoveredLocationIds: state.discoveredLocationIds,
         gutterjackCleared: state.gutterjackCleared,
       }),

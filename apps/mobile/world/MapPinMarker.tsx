@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Castle, Lock, Wine } from 'lucide-react-native';
+import { Castle, Lock } from 'lucide-react-native';
 
 import Colors from '@/constants/colors';
 import { impactAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
@@ -14,16 +14,15 @@ type Props = {
   /** Image-space pixels (unscaled). Anchor = pin tip. */
   left: number;
   top: number;
-  cleared?: boolean;
   onPress: () => void;
 };
 
 const HEAD = 32;
 
-export default function MapPinMarker({ label, chip, kind, left, top, cleared, onPress }: Props) {
+export default function MapPinMarker({ label, chip, kind, left, top, onPress }: Props) {
   const locked = kind === 'locked';
-  const accent = locked ? Colors.dark.textMuted : kind === 'home' ? Colors.dark.gold : Colors.dark.emerald;
-  const zIndex = kind === 'home' ? 5 : kind === 'dungeon' ? 4 : 3;
+  const accent = locked ? Colors.dark.textMuted : Colors.dark.gold;
+  const zIndex = kind === 'home' ? 5 : 3;
 
   return (
     <View
@@ -41,8 +40,6 @@ export default function MapPinMarker({ label, chip, kind, left, top, cleared, on
         <View style={[styles.head, { borderColor: accent, backgroundColor: locked ? '#1a1524ee' : '#120c1cee' }]}>
           {kind === 'home' ? (
             <Castle size={16} color={accent} strokeWidth={2.4} />
-          ) : kind === 'dungeon' ? (
-            <Wine size={16} color={accent} strokeWidth={2.4} />
           ) : (
             <Lock size={16} color={accent} strokeWidth={2.4} />
           )}
@@ -54,7 +51,7 @@ export default function MapPinMarker({ label, chip, kind, left, top, cleared, on
           {label}
         </Text>
         <Text style={styles.chip} numberOfLines={1}>
-          {cleared ? 'Cleared' : chip}
+          {chip}
         </Text>
       </View>
     </View>

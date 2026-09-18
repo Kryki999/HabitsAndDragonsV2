@@ -1,7 +1,5 @@
 import type { ImageSourcePropType } from 'react-native';
 
-import type { WorldLocationId } from './types';
-
 /**
  * World playground layout — pin / hotspot coordinates.
  *
@@ -14,8 +12,6 @@ import type { WorldLocationId } from './types';
  * 1. Replace the JPEG in `apps/mobile/assets/images/world/` (keep the filename).
  * 2. Update `MAP_INTRINSIC` / `HUB_INTRINSIC` if the pixel size changed.
  * 3. Nudge `x` / `y` below. 0.01 ≈ 1% of the still.
- * 4. Optional probe: on the Map screen, long-press the art. A readout shows
- *    the normalized coordinate under your finger.
  *
  * Art ingest
  * ----------
@@ -35,7 +31,7 @@ export const MAP_INTRINSIC = { width: 1254, height: 1254 } as const;
 export const HUB_INTRINSIC = { width: 941, height: 1672 } as const;
 export const GUTTERJACK_INTRINSIC = { width: 941, height: 1672 } as const;
 
-export type MapPinKind = 'home' | 'dungeon' | 'locked';
+export type MapPinKind = 'home' | 'locked';
 
 export type MapPinDef = {
   id: string;
@@ -45,15 +41,15 @@ export type MapPinDef = {
   x: number;
   y: number;
   kind: MapPinKind;
-  /** Hub cellar — playground shortcut from the map. Bible: not a fog pin. */
-  opens?: 'hub' | WorldLocationId;
+  /** Crownhaven is the only map pin that opens a hub. */
+  opens?: 'hub';
 };
 
 /**
  * Kingdom orbit pins (square map, Crownhaven in the middle).
  *
- * Landmarks on the full still: keep on the central hill, terracotta town,
- * wrecked ship in the SW cove, watchtower + stone bridge on the south road.
+ * Only Crownhaven is interactive. Side pins stay locked. Gutterjack is a
+ * tavern hotspot on the hub — not a kingdom-map pin.
  */
 export const KINGDOM_PINS: MapPinDef[] = [
   {
@@ -64,15 +60,6 @@ export const KINGDOM_PINS: MapPinDef[] = [
     y: 0.35,
     kind: 'home',
     opens: 'hub',
-  },
-  {
-    id: 'gutterjack',
-    label: 'Gutterjack',
-    chip: 'Tavern cellar',
-    x: 0.58,
-    y: 0.5,
-    kind: 'dungeon',
-    opens: 'gutterjack',
   },
   {
     id: 'smugglers-teeth',
@@ -107,7 +94,7 @@ export type HubHotspotDef = {
  * Crownhaven close-up (9:16): palace on the hill, stall left, tavern/chalice right.
  *
  * Palace = gold-trimmed entrance doors up the stairs. Tavern = arched doors of
- * the chalice-sign building (right). Market = veg crates under the striped awning.
+ * the chalice-sign building (right) → Gutterjack cellar. Market = veg crates.
  */
 export const HUB_HOTSPOTS: HubHotspotDef[] = [
   {

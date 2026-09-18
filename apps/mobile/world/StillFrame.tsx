@@ -28,6 +28,27 @@ export function fitContain(
   };
 }
 
+/** Cover the box; crop overflow. Art fills to the tab bar — no letterbox strip. */
+export function fitCover(
+  imageWidth: number,
+  imageHeight: number,
+  boxWidth: number,
+  boxHeight: number,
+): FittedBox {
+  if (boxWidth <= 0 || boxHeight <= 0 || imageWidth <= 0 || imageHeight <= 0) {
+    return { width: 0, height: 0, left: 0, top: 0 };
+  }
+  const scale = Math.max(boxWidth / imageWidth, boxHeight / imageHeight);
+  const width = imageWidth * scale;
+  const height = imageHeight * scale;
+  return {
+    width,
+    height,
+    left: (boxWidth - width) / 2,
+    top: (boxHeight - height) / 2,
+  };
+}
+
 type Props = {
   source: ImageSourcePropType;
   intrinsicWidth: number;
@@ -35,12 +56,12 @@ type Props = {
   children?: (box: FittedBox) => React.ReactNode;
 };
 
-/** Letterboxed still — never crops the owner's art. Children layout in image space. */
+/** Cover-fit still. Children layout in image space. */
 export default function StillFrame({ source, intrinsicWidth, intrinsicHeight, children }: Props) {
   const [viewport, setViewport] = useState({ width: 0, height: 0 });
 
   const fitted = useMemo(
-    () => fitContain(intrinsicWidth, intrinsicHeight, viewport.width, viewport.height),
+    () => fitCover(intrinsicWidth, intrinsicHeight, viewport.width, viewport.height),
     [intrinsicWidth, intrinsicHeight, viewport.height, viewport.width],
   );
 
@@ -74,6 +95,7 @@ export default function StillFrame({ source, intrinsicWidth, intrinsicHeight, ch
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+    overflow: 'hidden',
   },
   frame: {
     position: 'absolute',

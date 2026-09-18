@@ -1,6 +1,6 @@
 export type WorldView = 'hub' | 'map' | 'location';
 
-/** Playground locations. Hub cellar only — not a fog-map pin in the bible. */
+/** Playground locations. Hub cellar only — not a fog-map pin. */
 export type WorldLocationId = 'gutterjack';
 
 export type WorldState = {

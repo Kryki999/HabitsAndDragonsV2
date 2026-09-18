@@ -10,16 +10,21 @@ export default function WorldScreen() {
   const screen = useWorldStore((s) => s.currentScreen);
   const locationId = useWorldStore((s) => s.currentLocationId);
   const openHub = useWorldStore((s) => s.openHub);
+  const openMap = useWorldStore((s) => s.openMap);
 
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
       const current = useWorldStore.getState().currentScreen;
-      if (current === 'hub') return false;
-      openHub();
+      if (current === 'map') return false;
+      if (current === 'location') {
+        openHub();
+        return true;
+      }
+      openMap();
       return true;
     });
     return () => sub.remove();
-  }, [openHub]);
+  }, [openHub, openMap]);
 
   return (
     <View style={styles.root}>

@@ -94,7 +94,7 @@ export default function HubCrownhaven() {
         insets={insets}
         kicker="Capital"
         title="Crownhaven"
-        right={{ label: 'Map', onPress: openMap }}
+        left={{ label: 'Map', onPress: openMap }}
       />
 
       {soon ? (
@@ -115,11 +115,7 @@ export default function HubCrownhaven() {
             </Pressable>
           </View>
         </View>
-      ) : (
-        <View pointerEvents="none" style={[styles.hintWrap, { paddingBottom: 12 + insets.bottom }]}>
-          <Text style={styles.hint}>Tap the tavern for Gutterjack · Map for the kingdom</Text>
-        </View>
-      )}
+      ) : null}
     </View>
   );
 }
@@ -228,20 +224,5 @@ const styles = StyleSheet.create({
     color: Colors.dark.gold,
     fontSize: 12,
     fontWeight: '800',
-  },
-  hintWrap: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    bottom: 0,
-    alignItems: 'center',
-  },
-  hint: {
-    color: 'rgba(240, 230, 211, 0.72)',
-    fontSize: 11,
-    fontWeight: '600',
-    textAlign: 'center',
-    textShadowColor: 'rgba(0,0,0,0.8)',
-    textShadowRadius: 6,
   },
 });
