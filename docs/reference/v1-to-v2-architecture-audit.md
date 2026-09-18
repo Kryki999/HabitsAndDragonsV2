@@ -41,7 +41,7 @@
 - Hex radar, Daily Flow, Sage onboarding wizard
 - Friends / ranking (tab **Społeczność** istnieje jako stub)
 - Mapa królestwa (tab **Świat** = playground)
-- Full Hero port (ekwipunek, hex, milestone) — tab **Bohater** = tytuł
+- Full Hero port (ekwipunek, hex, milestone) — tab **Bohater** = tytuł w pierwszym PR. **Slice A:** UI 1:1 na store `hero` (demo hex + inventory shell; bez god-store / ekonomii lochów).
 - Supabase Auth + cloud sync
 - RPG level curve / gold economy (HomeScenePanel pokazuje **demo tier**; liczby XP/gold na kartach są wizualne)
 
