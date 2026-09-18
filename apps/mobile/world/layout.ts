@@ -114,7 +114,7 @@ export const HUB_HOTSPOTS: HubHotspotDef[] = [
     id: 'tavern',
     label: 'Tavern',
     hint: 'Gutterjack',
-    x: 0.84,
+    x: 0.88,
     y: 0.78,
     action: 'gutterjack',
   },
