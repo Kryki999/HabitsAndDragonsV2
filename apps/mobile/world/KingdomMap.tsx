@@ -32,6 +32,9 @@ function clampOffsets(
 ): { scale: number; tx: number; ty: number } {
   'worklet';
   const s = clamp(nextScale, MIN_SCALE, MAX_SCALE);
+  if (mapSize <= 0 || viewW <= 0 || viewH <= 0) {
+    return { scale: s, tx: 0, ty: 0 };
+  }
   const scaled = mapSize * s;
   const minX = viewW - scaled;
   const maxX = 0;
@@ -97,17 +100,20 @@ export default function KingdomMap() {
       savedTy.value = ty.value;
     })
     .onUpdate((e) => {
-      tx.value = savedTx.value + e.translationX;
-      ty.value = savedTy.value + e.translationY;
-    })
-    .onEnd(() => {
-      const next = clampOffsets(scale.value, tx.value, ty.value, content.value, vw.value, vh.value);
-      scale.value = next.scale;
+      const next = clampOffsets(
+        scale.value,
+        savedTx.value + e.translationX,
+        savedTy.value + e.translationY,
+        content.value,
+        vw.value,
+        vh.value,
+      );
       tx.value = next.tx;
       ty.value = next.ty;
-      savedScale.value = next.scale;
-      savedTx.value = next.tx;
-      savedTy.value = next.ty;
+    })
+    .onEnd(() => {
+      savedTx.value = tx.value;
+      savedTy.value = ty.value;
     });
 
   const pinch = Gesture.Pinch()
@@ -120,25 +126,33 @@ export default function KingdomMap() {
       const nextScale = clamp(savedScale.value * e.scale, MIN_SCALE, MAX_SCALE);
       const contentX = (e.focalX - savedTx.value) / savedScale.value;
       const contentY = (e.focalY - savedTy.value) / savedScale.value;
-      scale.value = nextScale;
-      tx.value = e.focalX - contentX * nextScale;
-      ty.value = e.focalY - contentY * nextScale;
-    })
-    .onEnd(() => {
-      const next = clampOffsets(scale.value, tx.value, ty.value, content.value, vw.value, vh.value);
+      const next = clampOffsets(
+        nextScale,
+        e.focalX - contentX * nextScale,
+        e.focalY - contentY * nextScale,
+        content.value,
+        vw.value,
+        vh.value,
+      );
       scale.value = next.scale;
       tx.value = next.tx;
       ty.value = next.ty;
-      savedScale.value = next.scale;
-      savedTx.value = next.tx;
-      savedTy.value = next.ty;
+    })
+    .onEnd(() => {
+      savedScale.value = scale.value;
+      savedTx.value = tx.value;
+      savedTy.value = ty.value;
     });
 
   const composed = Gesture.Simultaneous(pan, pinch);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: tx.value }, { translateY: ty.value }, { scale: scale.value }],
-  }));
+  const animatedStyle = useAnimatedStyle(() => {
+    const next = clampOffsets(scale.value, tx.value, ty.value, content.value, vw.value, vh.value);
+    return {
+      transformOrigin: 'top left',
+      transform: [{ translateX: next.tx }, { translateY: next.ty }, { scale: next.scale }],
+    };
+  });
 
   const onLayout = (event: LayoutChangeEvent) => {
     const { width, height } = event.nativeEvent.layout;
@@ -169,8 +183,7 @@ export default function KingdomMap() {
               {KINGDOM_PINS.map((pin) => (
                 <MapPinMarker
                   key={pin.id}
-                  label={pin.label}
-                  chip={pin.chip}
+                  accessibilityLabel={pin.label}
                   kind={pin.kind}
                   left={pin.x * mapSize}
                   top={pin.y * mapSize}
@@ -197,6 +210,7 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: '#070510',
+    overflow: 'hidden',
   },
   stage: {
     flex: 1,

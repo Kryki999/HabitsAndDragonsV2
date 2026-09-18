@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Castle, Lock } from 'lucide-react-native';
 
 import Colors from '@/constants/colors';
@@ -8,8 +8,8 @@ import { impactAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
 import type { MapPinKind } from './layout';
 
 type Props = {
-  label: string;
-  chip: string;
+  /** Spoken name only — overview map shows the icon, not a text label. */
+  accessibilityLabel: string;
   kind: MapPinKind;
   /** Image-space pixels (unscaled). Anchor = pin tip. */
   left: number;
@@ -18,8 +18,10 @@ type Props = {
 };
 
 const HEAD = 32;
+const STEM = 10;
+const WRAP = 44;
 
-export default function MapPinMarker({ label, chip, kind, left, top, onPress }: Props) {
+export default function MapPinMarker({ accessibilityLabel, kind, left, top, onPress }: Props) {
   const locked = kind === 'locked';
   const accent = locked ? Colors.dark.textMuted : Colors.dark.gold;
   const zIndex = kind === 'home' ? 5 : 3;
@@ -27,9 +29,11 @@ export default function MapPinMarker({ label, chip, kind, left, top, onPress }: 
   return (
     <View
       pointerEvents="box-none"
-      style={[styles.wrap, { left: left - 54, top: top - 42, zIndex }]}
+      style={[styles.wrap, { left: left - WRAP / 2, top: top - (HEAD + STEM), zIndex }]}
     >
       <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={locked ? `${accessibilityLabel}, locked` : accessibilityLabel}
         onPress={() => {
           impactAsync(locked ? ImpactFeedbackStyle.Light : ImpactFeedbackStyle.Medium);
           onPress();
@@ -46,14 +50,6 @@ export default function MapPinMarker({ label, chip, kind, left, top, onPress }: 
         </View>
         <View style={[styles.stem, { backgroundColor: accent }]} />
       </Pressable>
-      <View pointerEvents="none" style={[styles.labelCard, locked && styles.labelCardLocked]}>
-        <Text style={[styles.label, { color: accent }]} numberOfLines={1}>
-          {label}
-        </Text>
-        <Text style={styles.chip} numberOfLines={1}>
-          {chip}
-        </Text>
-      </View>
     </View>
   );
 }
@@ -61,7 +57,7 @@ export default function MapPinMarker({ label, chip, kind, left, top, onPress }: 
 const styles = StyleSheet.create({
   wrap: {
     position: 'absolute',
-    width: 108,
+    width: WRAP,
     alignItems: 'center',
   },
   headHit: {
@@ -81,35 +77,8 @@ const styles = StyleSheet.create({
   },
   stem: {
     width: 2,
-    height: 10,
+    height: STEM,
     marginTop: -1,
     opacity: 0.85,
-  },
-  labelCard: {
-    marginTop: 4,
-    maxWidth: 108,
-    paddingHorizontal: 7,
-    paddingVertical: 4,
-    borderRadius: 8,
-    backgroundColor: 'rgba(10, 8, 18, 0.82)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 200, 69, 0.22)',
-    alignItems: 'center',
-  },
-  labelCardLocked: {
-    borderColor: 'rgba(107, 94, 122, 0.45)',
-  },
-  label: {
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.2,
-  },
-  chip: {
-    marginTop: 1,
-    fontSize: 9,
-    fontWeight: '700',
-    color: Colors.dark.textMuted,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
   },
 });

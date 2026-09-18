@@ -4,8 +4,8 @@ import type { ImageSourcePropType } from 'react-native';
  * World playground layout — pin / hotspot coordinates.
  *
  * All positions are **normalized 0–1** over the still (x = left→right, y = top→bottom).
- * Map pins: anchor = stem tip on the landmark. Hub hotspots: (x, y) is below the
- * icon (icon sits ~0.05 above y on a 430px-wide 9:16 stage). Tune this file only.
+ * Map pins: icon only (no name labels). Anchor = stem tip on the landmark.
+ * Hub hotspots: (x, y) is below the icon. Tune this file only.
  *
  * How to retune
  * -------------
@@ -35,9 +35,8 @@ export type MapPinKind = 'home' | 'locked';
 
 export type MapPinDef = {
   id: string;
+  /** Spoken / fog-hint name. Not drawn on the overview map. */
   label: string;
-  /** Short chip under the name (e.g. Home, Locked). */
-  chip: string;
   x: number;
   y: number;
   kind: MapPinKind;
@@ -55,7 +54,6 @@ export const KINGDOM_PINS: MapPinDef[] = [
   {
     id: 'crownhaven',
     label: 'Crownhaven',
-    chip: 'Home',
     x: 0.52,
     y: 0.35,
     kind: 'home',
@@ -64,7 +62,6 @@ export const KINGDOM_PINS: MapPinDef[] = [
   {
     id: 'smugglers-teeth',
     label: "Smuggler's Teeth",
-    chip: 'Locked',
     x: 0.22,
     y: 0.7,
     kind: 'locked',
@@ -72,7 +69,6 @@ export const KINGDOM_PINS: MapPinDef[] = [
   {
     id: 'crown-approaches',
     label: 'Crown Approaches',
-    chip: 'Locked',
     x: 0.54,
     y: 0.63,
     kind: 'locked',
