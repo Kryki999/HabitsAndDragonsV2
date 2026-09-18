@@ -6,11 +6,12 @@ import type { WorldLocationId } from './types';
  * World playground layout — pin / hotspot coordinates.
  *
  * All positions are **normalized 0–1** over the still (x = left→right, y = top→bottom).
- * Anchor = pin tip / hotspot center. Tune by editing this file only.
+ * Map pins: anchor = stem tip on the landmark. Hub hotspots: (x, y) is below the
+ * icon (icon sits ~0.05 above y on a 430px-wide 9:16 stage). Tune this file only.
  *
  * How to retune
  * -------------
- * 1. Replace the PNG in `apps/mobile/assets/images/world/` (keep the filename).
+ * 1. Replace the JPEG in `apps/mobile/assets/images/world/` (keep the filename).
  * 2. Update `MAP_INTRINSIC` / `HUB_INTRINSIC` if the pixel size changed.
  * 3. Nudge `x` / `y` below. 0.01 ≈ 1% of the still.
  * 4. Optional probe: on the Map screen, long-press the art. A readout shows
@@ -18,18 +19,16 @@ import type { WorldLocationId } from './types';
  *
  * Art ingest
  * ----------
- * Cursor chat attachments cap at **768KB** (exactly 786432 bytes). Owner PNG
- * stills (~2MB+) arrive truncated: IHDR is full size, IDAT stops ~28–34% down,
- * lower canvas is black, no IEND. Do **not** commit those copies.
- *
- * To land complete stills: commit the PNGs from a local clone, **or** re-export
- * JPEG/WebP so the *whole* frame is under ~700KB and re-attach.
+ * Cursor chat PNG attachments cap at **768KB** (exactly 786432 bytes) and arrive
+ * truncated (full IHDR, black lower canvas, no IEND). Ship **JPEG/WebP under
+ * ~700KB** so the whole frame lands. Current stills are complete JPEGs
+ * (~213–410KB, live bottoms, 1254² map / 941×1672 hub & cellar).
  */
 
 export const WORLD_ART = {
-  map: require('@/assets/images/world/map-kingdom.png') as ImageSourcePropType,
-  hub: require('@/assets/images/world/hub-crownhaven.png') as ImageSourcePropType,
-  gutterjack: require('@/assets/images/world/dungeon-gutterjack.png') as ImageSourcePropType,
+  map: require('@/assets/images/world/map-kingdom.jpg') as ImageSourcePropType,
+  hub: require('@/assets/images/world/hub-crownhaven.jpg') as ImageSourcePropType,
+  gutterjack: require('@/assets/images/world/dungeon-gutterjack.jpg') as ImageSourcePropType,
 };
 
 export const MAP_INTRINSIC = { width: 1254, height: 1254 } as const;
@@ -53,18 +52,16 @@ export type MapPinDef = {
 /**
  * Kingdom orbit pins (square map, Crownhaven in the middle).
  *
- * Live top strip of the truncated file: Titan tower NW, pyramid, NE forest
- * castle, basilisk-eye grove, red-roof sliver at ~y=0.26 = north edge of
- * Crownhaven. Pins below assume the **full** square: city center, SW coast,
- * south approaches. Re-probe after complete art lands.
+ * Landmarks on the full still: keep on the central hill, terracotta town,
+ * wrecked ship in the SW cove, watchtower + stone bridge on the south road.
  */
 export const KINGDOM_PINS: MapPinDef[] = [
   {
     id: 'crownhaven',
     label: 'Crownhaven',
     chip: 'Home',
-    x: 0.5,
-    y: 0.48,
+    x: 0.52,
+    y: 0.35,
     kind: 'home',
     opens: 'hub',
   },
@@ -73,7 +70,7 @@ export const KINGDOM_PINS: MapPinDef[] = [
     label: 'Gutterjack',
     chip: 'Tavern cellar',
     x: 0.58,
-    y: 0.52,
+    y: 0.5,
     kind: 'dungeon',
     opens: 'gutterjack',
   },
@@ -81,16 +78,16 @@ export const KINGDOM_PINS: MapPinDef[] = [
     id: 'smugglers-teeth',
     label: "Smuggler's Teeth",
     chip: 'Locked',
-    x: 0.18,
-    y: 0.78,
+    x: 0.22,
+    y: 0.7,
     kind: 'locked',
   },
   {
     id: 'crown-approaches',
     label: 'Crown Approaches',
     chip: 'Locked',
-    x: 0.62,
-    y: 0.72,
+    x: 0.54,
+    y: 0.63,
     kind: 'locked',
   },
 ];
@@ -109,10 +106,8 @@ export type HubHotspotDef = {
 /**
  * Crownhaven close-up (9:16): palace on the hill, stall left, tavern/chalice right.
  *
- * Palace lower gate + stairs is in the live top strip (~y=0.23).
- * Tavern **doors** and market stall sit in the lower two-thirds — coordinates
- * match that composition (chalice building right, veg stall left). Re-probe
- * with the long-press readout once a complete hub PNG is in the bundle.
+ * Palace = gold-trimmed entrance doors up the stairs. Tavern = arched doors of
+ * the chalice-sign building (right). Market = veg crates under the striped awning.
  */
 export const HUB_HOTSPOTS: HubHotspotDef[] = [
   {
@@ -120,7 +115,7 @@ export const HUB_HOTSPOTS: HubHotspotDef[] = [
     label: 'Tavern',
     hint: 'Gutterjack',
     x: 0.84,
-    y: 0.8,
+    y: 0.78,
     action: 'gutterjack',
   },
   {
@@ -128,15 +123,15 @@ export const HUB_HOTSPOTS: HubHotspotDef[] = [
     label: 'Market',
     hint: 'Coming soon',
     x: 0.18,
-    y: 0.78,
+    y: 0.83,
     action: 'comingSoon',
   },
   {
     id: 'castle',
     label: 'Palace',
     hint: 'Coming soon',
-    x: 0.4,
-    y: 0.23,
+    x: 0.5,
+    y: 0.24,
     action: 'comingSoon',
   },
 ];

@@ -17,8 +17,8 @@ Camp / castle stills already in this folder are for **Questy** (`HomeScenePanel`
 
 | File | Use |
 |------|-----|
-| `world/map-kingdom.png` | Kingdom orbit map (pan/zoom + pins) |
-| `world/hub-crownhaven.png` | Crownhaven close-up hub |
-| `world/dungeon-gutterjack.png` | Gutterjack cellar |
+| `world/map-kingdom.jpg` | Kingdom orbit map (pan/zoom + pins) |
+| `world/hub-crownhaven.jpg` | Crownhaven close-up hub |
+| `world/dungeon-gutterjack.jpg` | Gutterjack cellar |
 
 Pin / hotspot fractions: `apps/mobile/world/layout.ts`.

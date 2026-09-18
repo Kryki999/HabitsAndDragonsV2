@@ -22,6 +22,6 @@ Typecheck: `npm run typecheck`
 **Nie:** god-store, Groq / Oracle, smoki, klasy, tab D&D, `profiles.game_state`.
 Gold/XP na kartach Questy są **wizualne** (stub). Hero gold / XP ring / hex are a demo slice — not the full RPG economy. Loot trajectory and the real level curve are not ported.
 
-V1 raster assets were gitignored (`assets/` in V1). Hero slots use Lucide glyphs. World stills live in `apps/mobile/assets/images/world/` (`map-kingdom.png`, `hub-crownhaven.png`, `dungeon-gutterjack.png`). Pin coordinates: `world/layout.ts`.
+V1 raster assets were gitignored (`assets/` in V1). Hero slots use Lucide glyphs. World stills live in `apps/mobile/assets/images/world/` (`map-kingdom.jpg`, `hub-crownhaven.jpg`, `dungeon-gutterjack.jpg`). Pin coordinates: `world/layout.ts`.
 
 V1 is the UX source to copy, not the architecture anchor.
