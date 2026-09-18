@@ -45,7 +45,9 @@
 
 ## C. Do dopisania razem
 
-Gdy domkniemy journey: kalendarz nawyków (z prototypu — reuse?), settings, auth gates, loot detail, path level-up, capital upgrade celebration…
+Kalendarz nawyków + heatmapa aktywności: **reuse UX z prototypu na tabie Questy** (personal-dev, bez XP/gold) — [`reference/v1-quests-ux-audit.md`](reference/v1-quests-ux-audit.md).
+
+Dalej do dopisania: settings, auth gates, loot detail, path level-up, capital upgrade celebration…
 
 ---
 

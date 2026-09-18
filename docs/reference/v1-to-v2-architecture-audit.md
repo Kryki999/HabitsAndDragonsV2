@@ -37,8 +37,9 @@
 ## PARK
 
 - Smoki jako fantasy later (gryzie się z mapą; wracamy osobno — `18`)
-- Loot trajectory, battle modal, Lottie home scene
-- Hex radar, heatmapa, Daily Flow, Sage onboarding wizard
+- Loot trajectory **do HUD złota**, battle modal, Lottie home scene
+- Hex radar, Daily Flow, Sage onboarding wizard
+- Heatmapa GitHub-like + kalendarz nawyków: **odparkowane na Questy** jako personal-dev (nie XP) — [`v1-quests-ux-audit.md`](v1-quests-ux-audit.md)
 - Friends / ranking (tab **Społeczność** istnieje jako stub)
 - Mapa królestwa (tab **Świat** = playground, nie budujemy mapy w pierwszym PR)
 - Full Hero port (ekwipunek, hex, milestone) — tab **Bohater** = tytuł

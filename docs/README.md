@@ -72,9 +72,10 @@ Kod w `apps/mobile` tylko gdy świadomie wychodzimy z trybu koncepcji (albo gdy 
 | [`ideas-inbox.md`](ideas-inbox.md) | Surowy dump pomysłów (Twoje + archiwum) |
 | [`reference/prototype-v1.md`](reference/prototype-v1.md) | As-is prototypu (referencja UX/zadań — nie cel) |
 | [`reference/v1-to-v2-architecture-audit.md`](reference/v1-to-v2-architecture-audit.md) | KEEP / REWRITE / KILL / PARK — architektura V1 → V2 |
+| [`reference/v1-quests-ux-audit.md`](reference/v1-quests-ux-audit.md) | Castle/Habits UX → tab **Questy** (KEEP feel, REWRITE store, KILL RPG) |
 | [`reference/art/`](reference/art/) | Refy art (mapa itd.) |
 | [`reference/archive-concept-mid.md`](reference/archive-concept-mid.md) | Starsza koncepcja „dodatków do prototypu” |
 
 ## Stan
 
-Filarom służy Markdown. Scaffold V2 w `apps/mobile` jest **cienkim plasterkiem** (5 tabów + lokalne nawyki) — nie dumpem V1.
+Filarom służy Markdown. Scaffold V2 w `apps/mobile`: 5 tabów; **Questy** ma pętlę nawyków (lista / overlay / kalendarz / heatmapa), bez dumpa V1 RPG.

@@ -11,4 +11,8 @@ export const colors = {
   goldDim: 'rgba(255, 200, 69, 0.16)',
   tabBar: '#120e1c',
   tabInactive: '#5a4e6e',
+  emerald: '#3dd68c',
+  fire: '#ff6b4a',
+  ruby: '#e85d75',
+  purple: '#9b6cff',
 } as const;

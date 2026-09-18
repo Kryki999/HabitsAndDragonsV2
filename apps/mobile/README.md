@@ -14,10 +14,10 @@ Typecheck: `npm run typecheck`
 ## Co tu jest (i czego nie ma)
 
 - 5 tabów: Questy · Świat · Bohater · Społeczność · Mentor
-- Zustand **tylko** `habits/` — CRUD + complete lokalnie (AsyncStorage)
-- HabitCard-like feel + haptic na odhaczenie
+- Zustand **tylko** `habits/` — CRUD, complete, historia dni (AsyncStorage)
+- Questy: karta + overlay, dodawanie, kalendarz, heatmapa GitHub-like, kroniki (log dnia)
 - World / Social / Mentor = stub. Hero = tytuł.
 
-**Nie:** god-store, Groq, smoki, klasy, tab D&D, `profiles.game_state`, mapa.
+**Nie:** god-store, Groq, smoki, klasy, tab D&D, `profiles.game_state`, mapa, XP/gold.
 
-V1 jest referencją UX, nie źródłem do kopiowania.
+UX Zamku V1 (co KEEP/KILL): [`../../docs/reference/v1-quests-ux-audit.md`](../../docs/reference/v1-quests-ux-audit.md).
