@@ -64,7 +64,7 @@ function HudButton({ label, onPress }: HudAction) {
 const styles = StyleSheet.create({
   topFade: {
     paddingHorizontal: 12,
-    paddingBottom: 28,
+    paddingBottom: 16,
   },
   row: {
     flexDirection: 'row',

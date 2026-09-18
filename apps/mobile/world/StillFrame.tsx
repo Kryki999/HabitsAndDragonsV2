@@ -24,7 +24,7 @@ export function fitContain(
     width,
     height,
     left: (boxWidth - width) / 2,
-    top: (boxHeight - height) / 2,
+    top: 0,
   };
 }
 

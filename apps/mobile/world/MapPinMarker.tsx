@@ -11,43 +11,45 @@ type Props = {
   label: string;
   chip: string;
   kind: MapPinKind;
-  /** Image-space pixels (unscaled). */
+  /** Image-space pixels (unscaled). Anchor = pin tip. */
   left: number;
   top: number;
   cleared?: boolean;
   onPress: () => void;
 };
 
-const PIN_W = 86;
+const HEAD = 32;
 
 export default function MapPinMarker({ label, chip, kind, left, top, cleared, onPress }: Props) {
   const locked = kind === 'locked';
   const accent = locked ? Colors.dark.textMuted : kind === 'home' ? Colors.dark.gold : Colors.dark.emerald;
+  const zIndex = kind === 'home' ? 5 : kind === 'dungeon' ? 4 : 3;
 
   return (
-    <Pressable
-      onPress={() => {
-        impactAsync(locked ? ImpactFeedbackStyle.Light : ImpactFeedbackStyle.Medium);
-        onPress();
-      }}
-      hitSlop={10}
-      style={({ pressed }) => [
-        styles.wrap,
-        { left: left - PIN_W / 2, top: top - 52 },
-        pressed && styles.pressed,
-      ]}
+    <View
+      pointerEvents="box-none"
+      style={[styles.wrap, { left: left - 54, top: top - 42, zIndex }]}
     >
-      <View style={[styles.head, { borderColor: accent, backgroundColor: locked ? '#1a1524ee' : '#120c1cee' }]}>
-        {kind === 'home' ? (
-          <Castle size={16} color={accent} strokeWidth={2.4} />
-        ) : kind === 'dungeon' ? (
-          <Wine size={16} color={accent} strokeWidth={2.4} />
-        ) : (
-          <Lock size={16} color={accent} strokeWidth={2.4} />
-        )}
-      </View>
-      <View style={[styles.stem, { backgroundColor: accent }]} />
-      <View style={[styles.labelCard, locked && styles.labelCardLocked]}>
+      <Pressable
+        onPress={() => {
+          impactAsync(locked ? ImpactFeedbackStyle.Light : ImpactFeedbackStyle.Medium);
+          onPress();
+        }}
+        hitSlop={8}
+        style={({ pressed }) => [styles.headHit, pressed && styles.pressed]}
+      >
+        <View style={[styles.head, { borderColor: accent, backgroundColor: locked ? '#1a1524ee' : '#120c1cee' }]}>
+          {kind === 'home' ? (
+            <Castle size={16} color={accent} strokeWidth={2.4} />
+          ) : kind === 'dungeon' ? (
+            <Wine size={16} color={accent} strokeWidth={2.4} />
+          ) : (
+            <Lock size={16} color={accent} strokeWidth={2.4} />
+          )}
+        </View>
+        <View style={[styles.stem, { backgroundColor: accent }]} />
+      </Pressable>
+      <View pointerEvents="none" style={[styles.labelCard, locked && styles.labelCardLocked]}>
         <Text style={[styles.label, { color: accent }]} numberOfLines={1}>
           {label}
         </Text>
@@ -55,25 +57,27 @@ export default function MapPinMarker({ label, chip, kind, left, top, cleared, on
           {cleared ? 'Cleared' : chip}
         </Text>
       </View>
-    </Pressable>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   wrap: {
     position: 'absolute',
-    width: PIN_W,
+    width: 108,
     alignItems: 'center',
-    zIndex: 2,
+  },
+  headHit: {
+    alignItems: 'center',
   },
   pressed: {
     opacity: 0.85,
     transform: [{ scale: 0.96 }],
   },
   head: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: HEAD,
+    height: HEAD,
+    borderRadius: HEAD / 2,
     borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
@@ -86,7 +90,7 @@ const styles = StyleSheet.create({
   },
   labelCard: {
     marginTop: 4,
-    maxWidth: PIN_W + 20,
+    maxWidth: 108,
     paddingHorizontal: 7,
     paddingVertical: 4,
     borderRadius: 8,

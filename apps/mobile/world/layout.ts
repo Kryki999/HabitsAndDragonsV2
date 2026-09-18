@@ -57,7 +57,8 @@ export type MapPinDef = {
  * the live strip — likely the *north* edge of Crownhaven.
  *
  * Crownhaven is placed just below that sliver (center of the square).
- * Gutterjack sits slightly east of the city (tavern in the capital).
+ * Gutterjack sits east-south of the city (tavern in the capital) — keep ≥0.12
+ * away from Crownhaven so pin heads do not steal taps.
  * Teeth = SW coast. Approaches = south gate / fields.
  */
 export const KINGDOM_PINS: MapPinDef[] = [
@@ -74,8 +75,8 @@ export const KINGDOM_PINS: MapPinDef[] = [
     id: 'gutterjack',
     label: 'Gutterjack',
     chip: 'Tavern cellar',
-    x: 0.57,
-    y: 0.5,
+    x: 0.66,
+    y: 0.56,
     kind: 'dungeon',
     opens: 'gutterjack',
   },
