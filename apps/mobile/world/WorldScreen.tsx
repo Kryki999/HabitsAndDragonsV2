@@ -23,11 +23,13 @@ export default function WorldScreen() {
 
   return (
     <View style={styles.root}>
-      {screen === 'map' ? <KingdomMap /> : null}
-      {screen === 'location' && locationId === 'gutterjack' ? <GutterjackLocation /> : null}
-      {screen === 'hub' || (screen === 'location' && locationId !== 'gutterjack') ? (
-        <HubCrownhaven />
-      ) : null}
+      <View style={styles.stage}>
+        {screen === 'map' ? <KingdomMap /> : null}
+        {screen === 'location' && locationId === 'gutterjack' ? <GutterjackLocation /> : null}
+        {screen === 'hub' || (screen === 'location' && locationId !== 'gutterjack') ? (
+          <HubCrownhaven />
+        ) : null}
+      </View>
     </View>
   );
 }
@@ -36,5 +38,11 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: '#070510',
+    alignItems: 'center',
+  },
+  stage: {
+    flex: 1,
+    width: '100%',
+    maxWidth: 430,
   },
 });

@@ -112,14 +112,16 @@ export type HubHotspotDef = {
  * Crownhaven close-up hotspots (same 9:16 language as the bible):
  * palace on the hill, stall left, tavern / chalice right, fountain mid.
  * The attached hub PNG currently shows the palace + tavern roof (top ~28%).
+ * Tavern hotspot is parked on that visible roof until the complete still lands
+ * (then move toward the chalice / door, ~0.82 × 0.56).
  */
 export const HUB_HOTSPOTS: HubHotspotDef[] = [
   {
     id: 'tavern',
     label: 'Tavern',
     hint: 'Gutterjack',
-    x: 0.82,
-    y: 0.56,
+    x: 0.86,
+    y: 0.22,
     action: 'gutterjack',
   },
   {
