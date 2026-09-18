@@ -37,14 +37,21 @@
 ## PARK
 
 - Smoki jako fantasy later (gryzie się z mapą; wracamy osobno — `18`)
-- Loot trajectory, battle modal, Lottie home scene
-- Hex radar, heatmapa, Daily Flow, Sage onboarding wizard
+- Loot trajectory (lot złota z checkboxa), battle modal, Lottie campfire overlay
+- Hex radar, Daily Flow, Sage onboarding wizard
 - Friends / ranking (tab **Społeczność** istnieje jako stub)
-- Mapa królestwa (tab **Świat** = playground, nie budujemy mapy w pierwszym PR)
+- Mapa królestwa (tab **Świat** = playground)
 - Full Hero port (ekwipunek, hex, milestone) — tab **Bohater** = tytuł
-- Supabase Auth + cloud sync — opcjonalne; pierwszy PR = **lokalne nawyki**
+- Supabase Auth + cloud sync
+- RPG level curve / gold economy (HomeScenePanel pokazuje **demo tier**; liczby XP/gold na kartach są wizualne)
 
-## Pierwszy PR (scope lock)
+## Castle UI lift (Questy)
+
+Owner lock: tab **Questy** ma wyglądać i zachowywać się jak V1 Castle (`app/(tabs)/index.tsx`), nie jak cienki redesign. Port plik-po-pliku (`HabitCard`, `HomeScenePanel`, overlay, calendar, chronicles, sort) + domain `habits` store. **Nie** kontynuować podejścia z PR #3 (cienki Questy UX). Heatmapa i scena domu są częścią tego liftu, nie PARK.
+
+## Pierwszy PR (scope lock — historical)
+
+Scaffold Expo + 5 tabów + lokalne nawyki. Kolejne PR-y Questy **zastępują** cienką listę Castle UI 1:1.
 
 Dokładnie:
 
