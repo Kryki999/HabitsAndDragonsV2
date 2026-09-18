@@ -16,13 +16,14 @@ import type { WorldLocationId } from './types';
  * 4. Optional probe: on the Map screen, long-press the art. A readout shows
  *    the normalized coordinate under your finger.
  *
- * Upload note (this slice)
- * ------------------------
- * The three stills arrived truncated (~top 28–34% of pixels, rest black).
- * Coordinates below assume the *intended* full composition from the Concept
- * Bible (Crownhaven in the square's middle; hub = palace top / stall left /
- * tavern right). When the owner drops complete PNGs, retune — especially
- * Crownhaven / Gutterjack map pins and the tavern hotspot.
+ * Art ingest
+ * ----------
+ * Cursor chat attachments cap at **768KB** (exactly 786432 bytes). Owner PNG
+ * stills (~2MB+) arrive truncated: IHDR is full size, IDAT stops ~28–34% down,
+ * lower canvas is black, no IEND. Do **not** commit those copies.
+ *
+ * To land complete stills: commit the PNGs from a local clone, **or** re-export
+ * JPEG/WebP so the *whole* frame is under ~700KB and re-attach.
  */
 
 export const WORLD_ART = {
@@ -50,16 +51,12 @@ export type MapPinDef = {
 };
 
 /**
- * Kingdom orbit pins.
+ * Kingdom orbit pins (square map, Crownhaven in the middle).
  *
- * Visible in the truncated map (top ~28%): Titan tower (NW), pyramid, NE
- * forest castle, basilisk-eye grove, a red-roof sliver at bottom-center of
- * the live strip — likely the *north* edge of Crownhaven.
- *
- * Crownhaven is placed just below that sliver (center of the square).
- * Gutterjack sits east-south of the city (tavern in the capital) — keep ≥0.12
- * away from Crownhaven so pin heads do not steal taps.
- * Teeth = SW coast. Approaches = south gate / fields.
+ * Live top strip of the truncated file: Titan tower NW, pyramid, NE forest
+ * castle, basilisk-eye grove, red-roof sliver at ~y=0.26 = north edge of
+ * Crownhaven. Pins below assume the **full** square: city center, SW coast,
+ * south approaches. Re-probe after complete art lands.
  */
 export const KINGDOM_PINS: MapPinDef[] = [
   {
@@ -67,7 +64,7 @@ export const KINGDOM_PINS: MapPinDef[] = [
     label: 'Crownhaven',
     chip: 'Home',
     x: 0.5,
-    y: 0.46,
+    y: 0.48,
     kind: 'home',
     opens: 'hub',
   },
@@ -75,8 +72,8 @@ export const KINGDOM_PINS: MapPinDef[] = [
     id: 'gutterjack',
     label: 'Gutterjack',
     chip: 'Tavern cellar',
-    x: 0.66,
-    y: 0.56,
+    x: 0.58,
+    y: 0.52,
     kind: 'dungeon',
     opens: 'gutterjack',
   },
@@ -84,16 +81,16 @@ export const KINGDOM_PINS: MapPinDef[] = [
     id: 'smugglers-teeth',
     label: "Smuggler's Teeth",
     chip: 'Locked',
-    x: 0.22,
-    y: 0.74,
+    x: 0.18,
+    y: 0.78,
     kind: 'locked',
   },
   {
     id: 'crown-approaches',
     label: 'Crown Approaches',
     chip: 'Locked',
-    x: 0.66,
-    y: 0.68,
+    x: 0.62,
+    y: 0.72,
     kind: 'locked',
   },
 ];
@@ -110,35 +107,36 @@ export type HubHotspotDef = {
 };
 
 /**
- * Crownhaven close-up hotspots (same 9:16 language as the bible):
- * palace on the hill, stall left, tavern / chalice right, fountain mid.
- * The attached hub PNG currently shows the palace + tavern roof (top ~28%).
- * Tavern hotspot is parked on that visible roof until the complete still lands
- * (then move toward the chalice / door, ~0.82 × 0.56).
+ * Crownhaven close-up (9:16): palace on the hill, stall left, tavern/chalice right.
+ *
+ * Palace lower gate + stairs is in the live top strip (~y=0.23).
+ * Tavern **doors** and market stall sit in the lower two-thirds — coordinates
+ * match that composition (chalice building right, veg stall left). Re-probe
+ * with the long-press readout once a complete hub PNG is in the bundle.
  */
 export const HUB_HOTSPOTS: HubHotspotDef[] = [
   {
     id: 'tavern',
     label: 'Tavern',
     hint: 'Gutterjack',
-    x: 0.86,
-    y: 0.22,
+    x: 0.84,
+    y: 0.8,
     action: 'gutterjack',
   },
   {
     id: 'market',
     label: 'Market',
     hint: 'Coming soon',
-    x: 0.2,
-    y: 0.74,
+    x: 0.18,
+    y: 0.78,
     action: 'comingSoon',
   },
   {
     id: 'castle',
     label: 'Palace',
     hint: 'Coming soon',
-    x: 0.42,
-    y: 0.16,
+    x: 0.4,
+    y: 0.23,
     action: 'comingSoon',
   },
 ];
