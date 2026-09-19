@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
 import { BackHandler, StyleSheet, View } from 'react-native';
 
+import DevPanel from './DevPanel';
 import GutterjackLocation from './GutterjackLocation';
 import HubCrownhaven from './HubCrownhaven';
 import KingdomMap from './KingdomMap';
+import LocationScreen from './LocationScreen';
 import { useWorldStore } from './store';
 
 export default function WorldScreen() {
@@ -15,9 +17,14 @@ export default function WorldScreen() {
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
       const current = useWorldStore.getState().currentScreen;
+      const loc = useWorldStore.getState().currentLocationId;
       if (current === 'map') return false;
-      if (current === 'location') {
+      if (current === 'location' && loc === 'gutterjack') {
         openHub();
+        return true;
+      }
+      if (current === 'location') {
+        openMap();
         return true;
       }
       openMap();
@@ -30,10 +37,10 @@ export default function WorldScreen() {
     <View style={styles.root}>
       <View style={styles.stage}>
         {screen === 'map' ? <KingdomMap /> : null}
+        {screen === 'hub' ? <HubCrownhaven /> : null}
         {screen === 'location' && locationId === 'gutterjack' ? <GutterjackLocation /> : null}
-        {screen === 'hub' || (screen === 'location' && locationId !== 'gutterjack') ? (
-          <HubCrownhaven />
-        ) : null}
+        {screen === 'location' && locationId && locationId !== 'gutterjack' ? <LocationScreen /> : null}
+        <DevPanel />
       </View>
     </View>
   );

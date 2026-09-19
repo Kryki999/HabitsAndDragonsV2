@@ -6,16 +6,20 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Colors from '@/constants/colors';
 
+import FogPatch from './FogPatch';
 import MapPinMarker from './MapPinMarker';
 import OverlayHud from './OverlayHud';
 import { KINGDOM_PINS, WORLD_ART } from './layout';
 import { useWorldStore } from './store';
+import type { WorldLocationId } from './types';
+import { isLocationUnlocked } from './unlock';
 
 /** Cover scale: square of max(viewport) fills the long side. No empty bands. */
 const MIN_SCALE = 1;
 const MAX_SCALE = 2.8;
 /** Closer than cover so Crownhaven fills the phone; pan to the rest. */
 const START_SCALE = 1.85;
+const FOG_SIZE_FRAC = 0.24;
 
 function clamp(n: number, min: number, max: number): number {
   'worklet';
@@ -48,6 +52,9 @@ type Viewport = { width: number; height: number };
 export default function KingdomMap() {
   const insets = useSafeAreaInsets();
   const openHub = useWorldStore((s) => s.openHub);
+  const openLocation = useWorldStore((s) => s.openLocation);
+  const playerLevel = useWorldStore((s) => s.playerLevel);
+  const unlockedLocationIds = useWorldStore((s) => s.unlockedLocationIds);
 
   const [viewport, setViewport] = useState<Viewport>({ width: 0, height: 0 });
   const [fogHint, setFogHint] = useState<string | null>(null);
@@ -69,8 +76,8 @@ export default function KingdomMap() {
       const home = KINGDOM_PINS.find((p) => p.id === 'crownhaven');
       const next = clampOffsets(
         START_SCALE,
-        view.width / 2 - (home?.x ?? 0.52) * size * START_SCALE,
-        view.height / 2 - (home?.y ?? 0.35) * size * START_SCALE,
+        view.width / 2 - (home?.x ?? 0.5) * size * START_SCALE,
+        view.height / 2 - (home?.y ?? 0.38) * size * START_SCALE,
         size,
         view.width,
         view.height,
@@ -162,12 +169,14 @@ export default function KingdomMap() {
   const onPin = (id: string) => {
     const pin = KINGDOM_PINS.find((p) => p.id === id);
     if (!pin) return;
-    if (pin.kind === 'locked') {
-      setFogHint(`${pin.label} is still in the fog.`);
+    const unlocked = isLocationUnlocked(id, playerLevel, unlockedLocationIds);
+    if (!unlocked) {
+      setFogHint(pin.fogHint);
       return;
     }
     setFogHint(null);
     if (pin.opens === 'hub') openHub();
+    else openLocation(id as WorldLocationId);
   };
 
   return (
@@ -180,22 +189,30 @@ export default function KingdomMap() {
               pointerEvents="box-none"
             >
               <Image source={WORLD_ART.map} style={{ width: mapSize, height: mapSize }} resizeMode="stretch" />
-              {KINGDOM_PINS.map((pin) => (
-                <MapPinMarker
-                  key={pin.id}
-                  accessibilityLabel={pin.label}
-                  kind={pin.kind}
-                  left={pin.x * mapSize}
-                  top={pin.y * mapSize}
-                  onPress={() => onPin(pin.id)}
-                />
-              ))}
+              {KINGDOM_PINS.map((pin) => {
+                const unlocked = isLocationUnlocked(pin.id, playerLevel, unlockedLocationIds);
+                return (
+                  <React.Fragment key={pin.id}>
+                    {unlocked ? null : (
+                      <FogPatch left={pin.x * mapSize} top={pin.y * mapSize} size={mapSize * FOG_SIZE_FRAC} />
+                    )}
+                    <MapPinMarker
+                      accessibilityLabel={pin.label}
+                      kind={pin.id === 'crownhaven' ? 'home' : unlocked ? 'open' : 'locked'}
+                      icon={pin.icon}
+                      left={pin.x * mapSize}
+                      top={pin.y * mapSize}
+                      onPress={() => onPin(pin.id)}
+                    />
+                  </React.Fragment>
+                );
+              })}
             </Animated.View>
           ) : null}
         </Animated.View>
       </GestureDetector>
 
-      <OverlayHud insets={insets} kicker="Kingdom" title="Map" />
+      <OverlayHud insets={insets} kicker={`Kingdom · Lv ${playerLevel}`} title="Map" />
 
       {fogHint ? (
         <View pointerEvents="none" style={styles.fogWrap}>

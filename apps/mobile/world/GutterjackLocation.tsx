@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Castle, Map as MapIcon, Swords } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Colors from '@/constants/colors';
@@ -8,7 +9,9 @@ import { impactAsync, ImpactFeedbackStyle, notificationAsync, NotificationFeedba
 
 import OverlayHud from './OverlayHud';
 import StillFrame from './StillFrame';
-import { GUTTERJACK_COPY, GUTTERJACK_INTRINSIC, WORLD_ART } from './layout';
+import WindowDock from './WindowDock';
+import { LOCATION_BY_ID } from './catalog';
+import { GUTTERJACK_COPY } from './layout';
 import { useWorldStore } from './store';
 
 type Phase = 'brief' | 'fight' | 'victory';
@@ -16,9 +19,13 @@ type Phase = 'brief' | 'fight' | 'victory';
 export default function GutterjackLocation() {
   const insets = useSafeAreaInsets();
   const openHub = useWorldStore((s) => s.openHub);
+  const openMap = useWorldStore((s) => s.openMap);
   const markGutterjackCleared = useWorldStore((s) => s.markGutterjackCleared);
   const alreadyCleared = useWorldStore((s) => s.gutterjackCleared);
   const [phase, setPhase] = useState<Phase>(alreadyCleared ? 'victory' : 'brief');
+
+  const loc = LOCATION_BY_ID.gutterjack;
+  const window = loc.windows[0]!;
 
   const onEnter = () => {
     impactAsync(ImpactFeedbackStyle.Medium);
@@ -53,22 +60,38 @@ export default function GutterjackLocation() {
             title: GUTTERJACK_COPY.title,
             body: GUTTERJACK_COPY.clearedBlurb,
             primary: GUTTERJACK_COPY.backToHub,
-            onPrimary: openHub,
+            onPrimary: () => openHub('tavern'),
           };
 
   return (
     <View style={styles.root}>
       <StillFrame
-        source={WORLD_ART.gutterjack}
-        intrinsicWidth={GUTTERJACK_INTRINSIC.width}
-        intrinsicHeight={GUTTERJACK_INTRINSIC.height}
+        source={window.source}
+        intrinsicWidth={window.intrinsicWidth}
+        intrinsicHeight={window.intrinsicHeight}
       />
 
       <OverlayHud
         insets={insets}
         kicker="Dungeon"
         title="Gutterjack"
-        left={{ label: GUTTERJACK_COPY.back, onPress: openHub }}
+        left={{ icon: Castle, accessibilityLabel: 'Crownhaven', onPress: () => openHub() }}
+        right={{ icon: MapIcon, accessibilityLabel: 'Kingdom map', onPress: openMap }}
+      />
+
+      <WindowDock
+        windows={loc.windows}
+        currentWindowId="fight"
+        onSelectWindow={() => undefined}
+        onMap={openMap}
+        extra={[
+          {
+            id: 'hub',
+            label: 'Square',
+            icon: Castle,
+            onPress: () => openHub(),
+          },
+        ]}
       />
 
       <View pointerEvents="box-none" style={[styles.sheetWrap, { paddingBottom: 12 + insets.bottom }]}>
@@ -84,13 +107,15 @@ export default function GutterjackLocation() {
                   impactAsync(ImpactFeedbackStyle.Light);
                   openHub();
                 }}
-                style={({ pressed }) => [styles.secondary, pressed && styles.pressed]}
+                style={({ pressed }) => [styles.iconAction, pressed && styles.pressed]}
+                accessibilityLabel="Back to Crownhaven"
               >
-                <Text style={styles.secondaryText}>{GUTTERJACK_COPY.back}</Text>
+                <Castle size={18} color={Colors.dark.textSecondary} strokeWidth={2.4} />
               </Pressable>
             ) : null}
             <Pressable
               onPress={panel.onPrimary}
+              accessibilityLabel={panel.primary}
               style={({ pressed }) => [
                 styles.primary,
                 phase === 'fight' && styles.primaryFight,
@@ -98,7 +123,13 @@ export default function GutterjackLocation() {
                 pressed && styles.pressed,
               ]}
             >
-              <Text style={styles.primaryText}>{panel.primary}</Text>
+              {phase === 'fight' ? (
+                <Swords size={18} color="#1a1220" strokeWidth={2.4} />
+              ) : phase === 'victory' ? (
+                <Castle size={18} color="#1a1220" strokeWidth={2.4} />
+              ) : (
+                <Swords size={18} color="#1a1220" strokeWidth={2.4} />
+              )}
             </Pressable>
           </View>
         </View>
@@ -115,7 +146,7 @@ const styles = StyleSheet.create({
   sheetWrap: {
     position: 'absolute',
     left: 0,
-    right: 0,
+    right: 64,
     bottom: 0,
   },
   fade: {
@@ -155,37 +186,28 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
   },
-  secondary: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 12,
+  iconAction: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: Colors.dark.border,
     alignItems: 'center',
-  },
-  secondaryText: {
-    color: Colors.dark.textSecondary,
-    fontSize: 14,
-    fontWeight: '800',
+    justifyContent: 'center',
   },
   primary: {
-    flex: 1.4,
-    paddingVertical: 12,
-    borderRadius: 12,
+    flex: 1,
+    height: 48,
+    borderRadius: 14,
     backgroundColor: Colors.dark.gold,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   primaryFight: {
     backgroundColor: Colors.dark.emerald,
   },
   primaryWon: {
     backgroundColor: Colors.dark.gold,
-  },
-  primaryText: {
-    color: '#1a1220',
-    fontSize: 14,
-    fontWeight: '900',
-    letterSpacing: 0.3,
   },
   pressed: {
     opacity: 0.86,

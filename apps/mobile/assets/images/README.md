@@ -2,23 +2,29 @@
 
 V1 kept `assets/` gitignored, so raster art did not travel with the repo.
 
-**Hero tab (this slice)** does not need those files: radar, rarity slots, and backpack use Lucide glyphs + emoji avatar.
+**Hero tab** does not need those files: radar, rarity slots, and backpack use Lucide glyphs + emoji avatar.
 
-When you have real art, drop it here:
+Camp / castle stills in this folder (`camp_lvl*`, `armory*`) are for **Questy** (`HomeScenePanel`), not World.
 
-| File (suggested) | Use |
-|------------------|-----|
-| `hero_portrait.png` | Circular avatar in the character sheet (replaces 🧙‍♂️) |
-| `item_*.png` | Optional per-item icons in `RarityItemSlot` (today: `LootGlyph`) |
-
-Camp / castle stills already in this folder are for **Questy** (`HomeScenePanel`), not Hero.
-
-**World tab** stills (owner art):
+**World tab** stills (owner dump — files stay flat; do not nest yet):
 
 | File | Use |
 |------|-----|
-| `world/map-kingdom.jpg` | Kingdom orbit map (pan/zoom + pins) |
-| `world/hub-crownhaven.jpg` | Crownhaven close-up hub |
-| `world/dungeon-gutterjack.jpg` | Gutterjack cellar |
+| `world map.png` | Kingdom orbit map (space in filename — Metro `require` string is exact) |
+| `crawnhaven.png` | Crownhaven hub (filename typo kept) |
+| `tavernsage.png` | Tavern interior window |
+| `mietek.png` | Gutterjack fight |
+| `piraci.png` / `pirates.png` / `marrow.png` | Smuggler's Teeth |
+| `przedmiescia.png` / `rozbojnicy.png` / `herszt.png` | Crown Approaches |
+| `las.png` / `krasnolud.png` / `bazyliszek.png` | Anvil Glade |
+| `zakazanylas.png` / `przewodniklas.png` | Closed Way ★1 |
+| `palantirtower.png` / `mage.png` | Pallglass |
+| `watertemple.png` / `waterboss.png` | Still-Tide Isle |
+| `wampirhouse.png` / `vampire.png` | Crimson Press |
+| `ravencastle.png` / `mnich.png` / `elitamnich.png` | Raven Keep ★2 |
+| `piramid.png` / `pyramid_elite.png` / `oziris.png` | Osiris ★3 |
+| `ananieltower.png` / `eliteananiel.png` / `ananiel.png` | Ananiel Titan |
 
-Pin / hotspot fractions: `apps/mobile/world/layout.ts`.
+Superseded (kept on disk): `world/map-kingdom.jpg`, `world/hub-crownhaven.jpg`, `world/dungeon-gutterjack.jpg`.
+
+Pin / hotspot fractions: `apps/mobile/world/catalog.ts` + `layout.ts`.
