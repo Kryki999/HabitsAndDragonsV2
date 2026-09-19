@@ -24,12 +24,10 @@ import type { ImageSourcePropType } from 'react-native';
 export const WORLD_ART = {
   map: require('@/assets/images/world/map-kingdom.jpg') as ImageSourcePropType,
   hub: require('@/assets/images/world/hub-crownhaven.jpg') as ImageSourcePropType,
-  gutterjack: require('@/assets/images/world/dungeon-gutterjack.jpg') as ImageSourcePropType,
 };
 
 export const MAP_INTRINSIC = { width: 1254, height: 1254 } as const;
 export const HUB_INTRINSIC = { width: 941, height: 1672 } as const;
-export const GUTTERJACK_INTRINSIC = { width: 941, height: 1672 } as const;
 
 export type MapPinKind = 'home' | 'locked';
 
@@ -118,18 +116,3 @@ export const HUB_HOTSPOTS: HubHotspotDef[] = [
     action: 'comingSoon',
   },
 ];
-
-export const GUTTERJACK_COPY = {
-  kicker: 'Common · Tutorial',
-  title: 'Gutterjack',
-  blurb:
-    'The sot who took the wine vault. Once a family restaurant. Now he sits a barrel-throne with a smashed-bottle tulip and will not give the cellar back.',
-  enter: 'Enter',
-  back: 'Back',
-  fightKicker: 'Tutorial fight · 100% win',
-  fightBlurb: 'No combat engine in this playground. Tap victory — Gutterjack always falls the first time.',
-  victory: 'Victory (tutorial)',
-  clearedKicker: 'Cleared',
-  clearedBlurb: 'The cellar is yours. The tavern can breathe again — for now. Common farm comes later.',
-  backToHub: 'Back to Crownhaven',
-} as const;

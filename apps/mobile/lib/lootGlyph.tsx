@@ -15,6 +15,7 @@ import {
   CircleDot,
   Anchor,
   Moon,
+  Wine,
 } from "lucide-react-native";
 import type { LootIconId } from "@/types/dungeonLoot";
 
@@ -59,6 +60,8 @@ export function LootGlyph({
       return <Anchor {...p} />;
     case "moon":
       return <Moon {...p} />;
+    case "wine":
+      return <Wine {...p} />;
     default:
       return <Sparkles {...p} />;
   }

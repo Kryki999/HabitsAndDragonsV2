@@ -16,7 +16,11 @@ export type LootIconId =
   | "sword"
   | "orb"
   | "anchor"
-  | "moon";
+  | "moon"
+  | "wine";
+
+/** Combat biome / tier affix (Act 1: Common only). */
+export type CombatSynergyTier = "common";
 
 /** Slot loadoutu: strój / zbroja vs relikwia / broń / artefakt / akcesoria. */
 export type ItemLoadoutSlot = "outfit" | "relic";
@@ -32,6 +36,12 @@ export interface LootItemEntry {
   /** Hidden combat relation used by auto-battler chance engine. */
   synergyBossId?: string | null;
   synergyWinChanceBonus?: number;
+  /** Broad affix, e.g. Tulip +10% vs Common. */
+  synergyTier?: CombatSynergyTier | null;
+  /** Sipped on Fight; not a loadout piece. */
+  consumable?: boolean;
+  /** Short combat line for item preview, e.g. "+10% win vs Common". */
+  combatHint?: string;
 }
 
 export interface LootGoldEntry {
@@ -44,7 +54,15 @@ export interface LootGoldEntry {
   goldMax: number;
 }
 
-export type DungeonLootEntry = LootItemEntry | LootGoldEntry;
+export interface LootEmptyEntry {
+  id: string;
+  kind: "empty";
+  name: string;
+  rarity: LootRarity;
+  description: string;
+}
+
+export type DungeonLootEntry = LootItemEntry | LootGoldEntry | LootEmptyEntry;
 
 /** Lower = more common (display / roll weight ordering). */
 export const LOOT_RARITY_ORDER: Record<LootRarity, number> = {
