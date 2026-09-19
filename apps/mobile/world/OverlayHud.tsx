@@ -17,9 +17,11 @@ type Props = {
   title: string;
   left?: HudAction;
   right?: HudAction;
+  /** Dev-only. Production titles stay inert. */
+  onTitleLongPress?: () => void;
 };
 
-export default function OverlayHud({ insets, kicker, title, left, right }: Props) {
+export default function OverlayHud({ insets, kicker, title, left, right, onTitleLongPress }: Props) {
   return (
     <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
       <LinearGradient
@@ -32,10 +34,13 @@ export default function OverlayHud({ insets, kicker, title, left, right }: Props
             {left ? <HudButton {...left} /> : null}
           </View>
           <View style={styles.center}>
-            {kicker ? <Text style={styles.kicker}>{kicker}</Text> : null}
-            <Text style={styles.title} numberOfLines={1}>
-              {title}
-            </Text>
+            {onTitleLongPress ? (
+              <Pressable onLongPress={onTitleLongPress} delayLongPress={520} hitSlop={10}>
+                <HudTitle kicker={kicker} title={title} />
+              </Pressable>
+            ) : (
+              <HudTitle kicker={kicker} title={title} />
+            )}
           </View>
           <View style={[styles.side, styles.sideRight]}>
             {right ? <HudButton {...right} /> : null}
@@ -43,6 +48,17 @@ export default function OverlayHud({ insets, kicker, title, left, right }: Props
         </View>
       </LinearGradient>
     </View>
+  );
+}
+
+function HudTitle({ kicker, title }: { kicker?: string; title: string }) {
+  return (
+    <>
+      {kicker ? <Text style={styles.kicker}>{kicker}</Text> : null}
+      <Text style={styles.title} numberOfLines={1}>
+        {title}
+      </Text>
+    </>
   );
 }
 

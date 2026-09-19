@@ -8,6 +8,8 @@ export type WorldState = {
   currentLocationId: WorldLocationId | null;
   /** Location ids the player has seen. Crownhaven starts discovered. */
   discoveredLocationIds: string[];
+  /** Kingdom-map fog holes that have opened. Crownhaven starts clear. */
+  discoveredRegionIds: string[];
   gutterjackCleared: boolean;
 };
 
@@ -16,4 +18,5 @@ export type WorldActions = {
   openMap: () => void;
   openLocation: (id: WorldLocationId) => void;
   markGutterjackCleared: () => void;
+  discoverRegion: (id: string) => void;
 };
