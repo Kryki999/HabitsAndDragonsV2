@@ -1,14 +1,17 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Image, StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Image, Pressable, StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Colors from '@/constants/colors';
+import { impactAsync, ImpactFeedbackStyle, notificationAsync, NotificationFeedbackType } from '@/lib/hapticsGate';
 
+import FogOverlay from './FogOverlay';
 import MapPinMarker from './MapPinMarker';
 import OverlayHud from './OverlayHud';
-import { KINGDOM_PINS, WORLD_ART } from './layout';
+import { isFogRegionRevealed, KINGDOM_PINS, WORLD_ART, type MapPinKind } from './layout';
+import { useFogReveal } from './useFogReveal';
 import { useWorldStore } from './store';
 
 /** Cover scale: square of max(viewport) fills the long side. No empty bands. */
@@ -45,12 +48,19 @@ function clampOffsets(
 
 type Viewport = { width: number; height: number };
 
+function pinKindFor(id: string, designKind: MapPinKind, discoveredRegionIds: string[]): MapPinKind {
+  if (designKind === 'home') return 'home';
+  return isFogRegionRevealed(id, discoveredRegionIds) ? 'landmark' : 'locked';
+}
+
 export default function KingdomMap() {
   const insets = useSafeAreaInsets();
   const openHub = useWorldStore((s) => s.openHub);
+  const { progress, discoveredRegionIds, discoverRegion, unveilNextRegion } = useFogReveal();
 
   const [viewport, setViewport] = useState<Viewport>({ width: 0, height: 0 });
-  const [fogHint, setFogHint] = useState<string | null>(null);
+  const [placeHint, setPlaceHint] = useState<string | null>(null);
+  const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const mapSize = viewport.width > 0 ? Math.max(viewport.width, viewport.height) : 0;
 
@@ -63,6 +73,20 @@ export default function KingdomMap() {
   const vw = useSharedValue(0);
   const vh = useSharedValue(0);
   const content = useSharedValue(0);
+
+  const whisper = useCallback((message: string | null) => {
+    if (hintTimer.current) clearTimeout(hintTimer.current);
+    setPlaceHint(message);
+    if (message) {
+      hintTimer.current = setTimeout(() => setPlaceHint(null), 2200);
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (hintTimer.current) clearTimeout(hintTimer.current);
+    };
+  }, []);
 
   const focusCrownhaven = useCallback(
     (size: number, view: Viewport) => {
@@ -159,15 +183,36 @@ export default function KingdomMap() {
     setViewport((prev) => (prev.width === width && prev.height === height ? prev : { width, height }));
   };
 
+  const unveil = useCallback(
+    (id: string) => {
+      if (isFogRegionRevealed(id, useWorldStore.getState().discoveredRegionIds)) return;
+      discoverRegion(id);
+      notificationAsync(NotificationFeedbackType.Success);
+      const pin = KINGDOM_PINS.find((entry) => entry.id === id);
+      whisper(pin?.label ?? null);
+    },
+    [discoverRegion, whisper],
+  );
+
   const onPin = (id: string) => {
     const pin = KINGDOM_PINS.find((p) => p.id === id);
     if (!pin) return;
-    if (pin.kind === 'locked') {
-      setFogHint(`${pin.label} is still in the fog.`);
+    const kind = pinKindFor(id, pin.kind, discoveredRegionIds);
+    if (kind === 'locked') return;
+    if (pin.opens === 'hub') {
+      whisper(null);
+      openHub();
       return;
     }
-    setFogHint(null);
-    if (pin.opens === 'hub') openHub();
+    whisper(pin.label);
+  };
+
+  const onDevUnveilNext = () => {
+    const id = unveilNextRegion();
+    if (!id) return;
+    notificationAsync(NotificationFeedbackType.Success);
+    const pin = KINGDOM_PINS.find((entry) => entry.id === id);
+    whisper(pin?.label ?? null);
   };
 
   return (
@@ -176,33 +221,83 @@ export default function KingdomMap() {
         <Animated.View style={styles.stage} onLayout={onLayout}>
           {mapSize > 0 ? (
             <Animated.View
+              collapsable={false}
               style={[styles.mapLayer, { width: mapSize, height: mapSize }, animatedStyle]}
               pointerEvents="box-none"
             >
               <Image source={WORLD_ART.map} style={{ width: mapSize, height: mapSize }} resizeMode="stretch" />
-              {KINGDOM_PINS.map((pin) => (
-                <MapPinMarker
-                  key={pin.id}
-                  accessibilityLabel={pin.label}
-                  kind={pin.kind}
-                  left={pin.x * mapSize}
-                  top={pin.y * mapSize}
-                  onPress={() => onPin(pin.id)}
-                />
-              ))}
+              <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+                <FogOverlay mapSize={mapSize} progress={progress} />
+              </View>
+              {KINGDOM_PINS.map((pin) => {
+                const kind = pinKindFor(pin.id, pin.kind, discoveredRegionIds);
+                if (kind === 'locked') {
+                  if (!__DEV__) return null;
+                  return (
+                    <DevFogMote
+                      key={pin.id}
+                      accessibilityLabel={pin.label}
+                      left={pin.x * mapSize}
+                      top={pin.y * mapSize}
+                      onLongPress={() => unveil(pin.id)}
+                    />
+                  );
+                }
+                return (
+                  <MapPinMarker
+                    key={pin.id}
+                    accessibilityLabel={pin.label}
+                    kind={kind}
+                    left={pin.x * mapSize}
+                    top={pin.y * mapSize}
+                    onPress={() => onPin(pin.id)}
+                  />
+                );
+              })}
             </Animated.View>
           ) : null}
         </Animated.View>
       </GestureDetector>
 
-      <OverlayHud insets={insets} kicker="Kingdom" title="Map" />
+      <OverlayHud
+        insets={insets}
+        kicker="Kingdom"
+        title="Map"
+        onTitleLongPress={__DEV__ ? onDevUnveilNext : undefined}
+      />
 
-      {fogHint ? (
+      {placeHint ? (
         <View pointerEvents="none" style={styles.fogWrap}>
-          <Text style={styles.fogHint}>{fogHint}</Text>
+          <Text style={styles.fogHint}>{placeHint}</Text>
         </View>
       ) : null}
     </View>
+  );
+}
+
+function DevFogMote({
+  accessibilityLabel,
+  left,
+  top,
+  onLongPress,
+}: {
+  accessibilityLabel: string;
+  left: number;
+  top: number;
+  onLongPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${accessibilityLabel}, hidden in fog`}
+      onLongPress={() => {
+        impactAsync(ImpactFeedbackStyle.Medium);
+        onLongPress();
+      }}
+      delayLongPress={480}
+      hitSlop={14}
+      style={[styles.mote, { left: left - 6, top: top - 6 }]}
+    />
   );
 }
 
@@ -218,6 +313,16 @@ const styles = StyleSheet.create({
   },
   mapLayer: {
     transformOrigin: 'top left',
+  },
+  mote: {
+    position: 'absolute',
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: 'rgba(236, 240, 246, 0.32)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.22)',
+    zIndex: 2,
   },
   fogWrap: {
     position: 'absolute',

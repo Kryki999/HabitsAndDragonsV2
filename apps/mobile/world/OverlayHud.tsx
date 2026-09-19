@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { EdgeInsets } from 'react-native-safe-area-context';
@@ -17,9 +17,11 @@ type Props = {
   title: string;
   left?: HudAction;
   right?: HudAction;
+  /** Dev-only. Production titles stay inert. */
+  onTitleLongPress?: () => void;
 };
 
-export default function OverlayHud({ insets, kicker, title, left, right }: Props) {
+export default function OverlayHud({ insets, kicker, title, left, right, onTitleLongPress }: Props) {
   return (
     <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
       <LinearGradient
@@ -32,10 +34,11 @@ export default function OverlayHud({ insets, kicker, title, left, right }: Props
             {left ? <HudButton {...left} /> : null}
           </View>
           <View style={styles.center}>
-            {kicker ? <Text style={styles.kicker}>{kicker}</Text> : null}
-            <Text style={styles.title} numberOfLines={1}>
-              {title}
-            </Text>
+            {onTitleLongPress ? (
+              <DevTitle kicker={kicker} title={title} onUnveil={onTitleLongPress} />
+            ) : (
+              <HudTitle kicker={kicker} title={title} />
+            )}
           </View>
           <View style={[styles.side, styles.sideRight]}>
             {right ? <HudButton {...right} /> : null}
@@ -43,6 +46,55 @@ export default function OverlayHud({ insets, kicker, title, left, right }: Props
         </View>
       </LinearGradient>
     </View>
+  );
+}
+
+function DevTitle({
+  kicker,
+  title,
+  onUnveil,
+}: {
+  kicker?: string;
+  title: string;
+  onUnveil: () => void;
+}) {
+  const taps = useRef(0);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const onPress = () => {
+    taps.current += 1;
+    if (timer.current) clearTimeout(timer.current);
+    if (taps.current >= 3) {
+      taps.current = 0;
+      onUnveil();
+      return;
+    }
+    timer.current = setTimeout(() => {
+      taps.current = 0;
+    }, 420);
+  };
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      onLongPress={onUnveil}
+      delayLongPress={400}
+      hitSlop={12}
+    >
+      <HudTitle kicker={kicker} title={title} />
+    </Pressable>
+  );
+}
+
+function HudTitle({ kicker, title }: { kicker?: string; title: string }) {
+  return (
+    <>
+      {kicker ? <Text style={styles.kicker}>{kicker}</Text> : null}
+      <Text style={styles.title} numberOfLines={1}>
+        {title}
+      </Text>
+    </>
   );
 }
 
