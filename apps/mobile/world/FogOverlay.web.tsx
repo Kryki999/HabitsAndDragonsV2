@@ -3,14 +3,17 @@ import { View } from 'react-native';
 import Svg, {
   Defs,
   Ellipse,
+  FeDisplacementMap,
+  FeGaussianBlur,
+  FeTurbulence,
+  Filter,
+  G,
   Mask,
-  RadialGradient,
   Rect,
-  Stop,
 } from 'react-native-svg';
 import type { SharedValue } from 'react-native-reanimated';
 
-import { MAP_FOG_DRIFTS, MAP_FOG_REGIONS } from './layout';
+import { MAP_FOG_SEEDS } from './layout';
 
 type FogOverlayProps = {
   mapSize: number;
@@ -18,8 +21,8 @@ type FogOverlayProps = {
 };
 
 /**
- * Web fallback: same fog data / holes as native Skia, without CanvasKit.
- * Native (`FogOverlay.tsx`) is the real look.
+ * Web preview of the continuous veil. Native Skia (noise-warped field) is the look.
+ * One mask: merged seeds, turbulenced + blurred so openings are bays, not stamps.
  */
 export default function FogOverlay({ mapSize, progress }: FogOverlayProps) {
   useFogTick(progress);
@@ -30,33 +33,35 @@ export default function FogOverlay({ mapSize, progress }: FogOverlayProps) {
     <View pointerEvents="none" style={{ width: mapSize, height: mapSize }}>
       <Svg width={mapSize} height={mapSize}>
         <Defs>
+          <Filter id="fog-edge" x="-25%" y="-25%" width="150%" height="150%">
+            <FeTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="3" seed="3" result="n" />
+            <FeDisplacementMap
+              in="SourceGraphic"
+              in2="n"
+              scale={mapSize * 0.05}
+              xChannelSelector="R"
+              yChannelSelector="G"
+            />
+            <FeGaussianBlur stdDeviation={mapSize * 0.02} />
+          </Filter>
           <Mask id="kingdom-fog-mask" maskUnits="userSpaceOnUse">
             <Rect x={0} y={0} width={mapSize} height={mapSize} fill="white" />
-            {MAP_FOG_REGIONS.map((region) => {
-              const p = progress[region.id]?.value ?? 0;
-              if (p <= 0.01) return null;
-              const grow = 0.86 + 0.14 * p;
-              const rx = (region.rx + region.feather) * mapSize * grow;
-              const ry = (region.ry + region.feather) * mapSize * grow;
-              const gid = `fog-hole-${region.id}`;
-              return (
-                <React.Fragment key={region.id}>
-                  <RadialGradient id={gid} cx="50%" cy="50%" rx="50%" ry="50%">
-                    <Stop offset="0%" stopColor="#000" stopOpacity={p} />
-                    <Stop offset="58%" stopColor="#000" stopOpacity={p} />
-                    <Stop offset="82%" stopColor="#888" stopOpacity={p * 0.4} />
-                    <Stop offset="100%" stopColor="#fff" stopOpacity={0} />
-                  </RadialGradient>
+            <G filter="url(#fog-edge)">
+              {MAP_FOG_SEEDS.map((seed) => {
+                const p = progress[seed.regionId]?.value ?? 0;
+                if (p <= 0.01) return null;
+                return (
                   <Ellipse
-                    cx={region.cx * mapSize}
-                    cy={region.cy * mapSize}
-                    rx={rx}
-                    ry={ry}
-                    fill={`url(#${gid})`}
+                    key={seed.id}
+                    cx={seed.cx * mapSize}
+                    cy={seed.cy * mapSize}
+                    rx={seed.rx * mapSize * p}
+                    ry={seed.ry * mapSize * p}
+                    fill="#000"
                   />
-                </React.Fragment>
-              );
-            })}
+                );
+              })}
+            </G>
           </Mask>
         </Defs>
         <Rect
@@ -64,7 +69,7 @@ export default function FogOverlay({ mapSize, progress }: FogOverlayProps) {
           y={0}
           width={mapSize}
           height={mapSize}
-          fill="rgba(176, 186, 200, 0.93)"
+          fill="rgba(168, 178, 192, 0.94)"
           mask="url(#kingdom-fog-mask)"
         />
         <Rect
@@ -72,21 +77,9 @@ export default function FogOverlay({ mapSize, progress }: FogOverlayProps) {
           y={0}
           width={mapSize}
           height={mapSize}
-          fill="rgba(228, 234, 240, 0.58)"
+          fill="rgba(226, 232, 238, 0.5)"
           mask="url(#kingdom-fog-mask)"
         />
-        {MAP_FOG_DRIFTS.map((drift) => (
-          <Ellipse
-            key={drift.id}
-            cx={drift.cx * mapSize}
-            cy={drift.cy * mapSize}
-            rx={drift.rx * mapSize}
-            ry={drift.ry * mapSize}
-            fill="rgba(228, 234, 240, 0.55)"
-            opacity={0.45 + drift.density * 0.4}
-            mask="url(#kingdom-fog-mask)"
-          />
-        ))}
       </Svg>
     </View>
   );
