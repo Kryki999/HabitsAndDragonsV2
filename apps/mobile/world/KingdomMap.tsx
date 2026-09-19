@@ -6,10 +6,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Colors from '@/constants/colors';
 
+import FogLayer from './FogLayer';
+import IconRail, { type IconRailItem } from './IconRail';
 import MapPinMarker from './MapPinMarker';
 import OverlayHud from './OverlayHud';
-import { KINGDOM_PINS, WORLD_ART } from './layout';
+import { KINGDOM_MAP, MAP_PIN_LOCATIONS, getLocation, isLocationUnlocked } from './content';
+import { NAV_ICONS } from './icons';
 import { useWorldStore } from './store';
+import type { WorldFlags } from './types';
 
 /** Cover scale: square of max(viewport) fills the long side. No empty bands. */
 const MIN_SCALE = 1;
@@ -45,9 +49,23 @@ function clampOffsets(
 
 type Viewport = { width: number; height: number };
 
+function focusTarget(flags: WorldFlags): { x: number; y: number; scale: number } {
+  const home = getLocation('crownhaven').mapPin;
+  const teeth = getLocation('smugglers-teeth');
+  if (home && isLocationUnlocked(teeth, flags) && teeth.mapPin) {
+    return {
+      x: (home.x + teeth.mapPin.x) / 2,
+      y: (home.y + teeth.mapPin.y) / 2,
+      scale: 1.35,
+    };
+  }
+  return { x: home?.x ?? 0.5, y: home?.y ?? 0.4, scale: START_SCALE };
+}
+
 export default function KingdomMap() {
   const insets = useSafeAreaInsets();
-  const openHub = useWorldStore((s) => s.openHub);
+  const openLocation = useWorldStore((s) => s.openLocation);
+  const flags = useWorldStore((s) => s.flags);
 
   const [viewport, setViewport] = useState<Viewport>({ width: 0, height: 0 });
   const [fogHint, setFogHint] = useState<string | null>(null);
@@ -64,13 +82,12 @@ export default function KingdomMap() {
   const vh = useSharedValue(0);
   const content = useSharedValue(0);
 
-  const focusCrownhaven = useCallback(
-    (size: number, view: Viewport) => {
-      const home = KINGDOM_PINS.find((p) => p.id === 'crownhaven');
+  const applyFocus = useCallback(
+    (size: number, view: Viewport, x: number, y: number, nextScale: number) => {
       const next = clampOffsets(
-        START_SCALE,
-        view.width / 2 - (home?.x ?? 0.52) * size * START_SCALE,
-        view.height / 2 - (home?.y ?? 0.35) * size * START_SCALE,
+        nextScale,
+        view.width / 2 - x * size * nextScale,
+        view.height / 2 - y * size * nextScale,
         size,
         view.width,
         view.height,
@@ -90,8 +107,14 @@ export default function KingdomMap() {
 
   useEffect(() => {
     if (mapSize <= 0 || viewport.width <= 0) return;
-    focusCrownhaven(mapSize, viewport);
-  }, [focusCrownhaven, mapSize, viewport]);
+    const target = focusTarget(flags);
+    applyFocus(mapSize, viewport, target.x, target.y, target.scale);
+  }, [applyFocus, flags, mapSize, viewport]);
+
+  const showKingdom = () => {
+    if (mapSize <= 0 || viewport.width <= 0) return;
+    applyFocus(mapSize, viewport, 0.5, 0.48, MIN_SCALE);
+  };
 
   const pan = Gesture.Pan()
     .minDistance(10)
@@ -159,15 +182,14 @@ export default function KingdomMap() {
     setViewport((prev) => (prev.width === width && prev.height === height ? prev : { width, height }));
   };
 
-  const onPin = (id: string) => {
-    const pin = KINGDOM_PINS.find((p) => p.id === id);
-    if (!pin) return;
-    if (pin.kind === 'locked') {
-      setFogHint(`${pin.label} is still in the fog.`);
+  const onPin = (id: (typeof MAP_PIN_LOCATIONS)[number]['id']) => {
+    const loc = getLocation(id);
+    if (!isLocationUnlocked(loc, flags)) {
+      setFogHint(`${loc.displayName} is still in the fog.`);
       return;
     }
     setFogHint(null);
-    if (pin.opens === 'hub') openHub();
+    openLocation(id);
   };
 
   return (
@@ -179,23 +201,42 @@ export default function KingdomMap() {
               style={[styles.mapLayer, { width: mapSize, height: mapSize }, animatedStyle]}
               pointerEvents="box-none"
             >
-              <Image source={WORLD_ART.map} style={{ width: mapSize, height: mapSize }} resizeMode="stretch" />
-              {KINGDOM_PINS.map((pin) => (
-                <MapPinMarker
-                  key={pin.id}
-                  accessibilityLabel={pin.label}
-                  kind={pin.kind}
-                  left={pin.x * mapSize}
-                  top={pin.y * mapSize}
-                  onPress={() => onPin(pin.id)}
-                />
-              ))}
+              <Image source={KINGDOM_MAP.asset} style={{ width: mapSize, height: mapSize }} resizeMode="stretch" />
+              <FogLayer mapSize={mapSize} flags={flags} />
+              {MAP_PIN_LOCATIONS.map((loc) => {
+                const unlocked = isLocationUnlocked(loc, flags);
+                return (
+                  <MapPinMarker
+                    key={loc.id}
+                    accessibilityLabel={loc.displayName}
+                    locked={!unlocked}
+                    icon={loc.mapPin.icon}
+                    left={loc.mapPin.x * mapSize}
+                    top={loc.mapPin.y * mapSize}
+                    zIndex={loc.kind === 'hub' ? 5 : unlocked ? 4 : 3}
+                    onPress={() => onPin(loc.id)}
+                  />
+                );
+              })}
             </Animated.View>
           ) : null}
         </Animated.View>
       </GestureDetector>
 
       <OverlayHud insets={insets} kicker="Kingdom" title="Map" />
+      <IconRail
+        insets={insets}
+        items={
+          [
+            {
+              key: 'expand',
+              icon: NAV_ICONS.expand,
+              accessibilityLabel: 'Show whole kingdom',
+              onPress: showKingdom,
+            },
+          ] satisfies IconRailItem[]
+        }
+      />
 
       {fogHint ? (
         <View pointerEvents="none" style={styles.fogWrap}>

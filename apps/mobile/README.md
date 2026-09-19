@@ -16,12 +16,12 @@ Typecheck: `npm run typecheck`
 - 5 tabów: Questy · **World** · **Hero** · Społeczność · Mentor
 - Tab **Questy** = V1 Castle UI 1:1 (HomeScenePanel, HabitCard + overlay, calendar, chronicles, sort, add quest)
 - Tab **Hero** = V1 Hero UI 1:1 (sheet + hex radar, equipment/backpack shell, timeline, heatmap) on a thin `hero/` store
-- Tab **World** = playground: kingdom map first → Crownhaven hub → tavern → Gutterjack cellar, on a thin `world/` store
-- Zustand **habits/** + **hero/** + **world/** (hub|map|location, discovered flags, gutterjackCleared)
+- Tab **World** = kingdom map (fog + icon pins) → Crownhaven hub → tavern floors (Parter → Gutterjack), on a thin `world/` store
+- Zustand **habits/** + **hero/** + **world/** (location graph, progress flags, `gutterjackCleared`)
 
 **Nie:** god-store, Groq / Oracle, smoki, klasy, tab D&D, `profiles.game_state`.
 Gold/XP na kartach Questy są **wizualne** (stub). Hero gold / XP ring / hex are a demo slice — not the full RPG economy. Loot trajectory and the real level curve are not ported.
 
-V1 raster assets were gitignored (`assets/` in V1). Hero slots use Lucide glyphs. World stills live in `apps/mobile/assets/images/world/` (`map-kingdom.jpg`, `hub-crownhaven.jpg`, `dungeon-gutterjack.jpg`). Pin coordinates: `world/layout.ts`.
+V1 raster assets were gitignored (`assets/` in V1). Hero slots use Lucide glyphs. World stills: Act 1 PNGs in `apps/mobile/assets/images/` (wired in `world/content.ts`). To add a location, append a row there — see the file header.
 
 V1 is the UX source to copy, not the architecture anchor.

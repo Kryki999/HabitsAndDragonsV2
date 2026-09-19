@@ -1,19 +1,44 @@
-export type WorldView = 'hub' | 'map' | 'location';
+export type LocationKind = 'hub' | 'side' | 'main' | 'dungeon';
 
-/** Playground locations. Hub cellar only — not a fog-map pin. */
-export type WorldLocationId = 'gutterjack';
+export type LocationId =
+  | 'crownhaven'
+  | 'crownhaven-tavern'
+  | 'gutterjack'
+  | 'smugglers-teeth'
+  | 'crown-approaches'
+  | 'anvil-glade'
+  | 'closed-way'
+  | 'pallglass-spire'
+  | 'long-amen'
+  | 'tideglass-isle'
+  | 'ravenhold'
+  | 'alsah-dunes'
+  | 'ananiel-tower';
+
+/** Thin client progress — expand later (level, active days, ★ clears). */
+export type WorldFlag = 'gutterjackCleared';
+
+export type WorldFlags = Record<WorldFlag, boolean>;
+
+export type UnlockRule =
+  | { type: 'start' }
+  | { type: 'flag'; flag: WorldFlag }
+  /** Content is in the table; stays fogged until a later slice. */
+  | { type: 'locked'; note?: string };
+
+export type LocationView = 'hub' | 'still' | 'gutterjack';
 
 export type WorldState = {
-  currentScreen: WorldView;
-  currentLocationId: WorldLocationId | null;
-  /** Location ids the player has seen. Crownhaven starts discovered. */
+  /** `null` = kingdom map. */
+  currentLocationId: LocationId | null;
   discoveredLocationIds: string[];
-  gutterjackCleared: boolean;
+  flags: WorldFlags;
 };
 
 export type WorldActions = {
-  openHub: () => void;
   openMap: () => void;
-  openLocation: (id: WorldLocationId) => void;
+  openHub: () => void;
+  openLocation: (id: LocationId) => void;
+  goBack: () => boolean;
   markGutterjackCleared: () => void;
 };

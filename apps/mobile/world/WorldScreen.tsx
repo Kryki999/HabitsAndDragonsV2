@@ -4,36 +4,28 @@ import { BackHandler, StyleSheet, View } from 'react-native';
 import GutterjackLocation from './GutterjackLocation';
 import HubCrownhaven from './HubCrownhaven';
 import KingdomMap from './KingdomMap';
+import LocationStill from './LocationStill';
+import { getLocation } from './content';
 import { useWorldStore } from './store';
 
 export default function WorldScreen() {
-  const screen = useWorldStore((s) => s.currentScreen);
   const locationId = useWorldStore((s) => s.currentLocationId);
-  const openHub = useWorldStore((s) => s.openHub);
-  const openMap = useWorldStore((s) => s.openMap);
+  const goBack = useWorldStore((s) => s.goBack);
 
   useEffect(() => {
-    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
-      const current = useWorldStore.getState().currentScreen;
-      if (current === 'map') return false;
-      if (current === 'location') {
-        openHub();
-        return true;
-      }
-      openMap();
-      return true;
-    });
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => goBack());
     return () => sub.remove();
-  }, [openHub, openMap]);
+  }, [goBack]);
+
+  const loc = locationId ? getLocation(locationId) : null;
 
   return (
     <View style={styles.root}>
       <View style={styles.stage}>
-        {screen === 'map' ? <KingdomMap /> : null}
-        {screen === 'location' && locationId === 'gutterjack' ? <GutterjackLocation /> : null}
-        {screen === 'hub' || (screen === 'location' && locationId !== 'gutterjack') ? (
-          <HubCrownhaven />
-        ) : null}
+        {!loc ? <KingdomMap /> : null}
+        {loc?.view === 'hub' ? <HubCrownhaven /> : null}
+        {loc?.view === 'gutterjack' ? <GutterjackLocation /> : null}
+        {loc?.view === 'still' && locationId ? <LocationStill locationId={locationId} /> : null}
       </View>
     </View>
   );

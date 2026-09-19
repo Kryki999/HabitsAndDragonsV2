@@ -13,12 +13,14 @@ When you have real art, drop it here:
 
 Camp / castle stills already in this folder are for **Questy** (`HomeScenePanel`), not Hero.
 
-**World tab** stills (owner art):
+**World tab** stills live in the Act 1 content table: `apps/mobile/world/content.ts`.
 
 | File | Use |
 |------|-----|
-| `world/map-kingdom.jpg` | Kingdom orbit map (pan/zoom + pins) |
-| `world/hub-crownhaven.jpg` | Crownhaven close-up hub |
-| `world/dungeon-gutterjack.jpg` | Gutterjack cellar |
+| `world-map.png` | Kingdom orbit map (pan/zoom + fog + pins) |
+| `crownhaven.png` | Crownhaven close-up hub |
+| `tavernsage.png` | Tavern ground floor (Parter) |
+| `mietek.png` | Gutterjack cellar |
+| Other Act 1 PNGs | Close-ups / encounter stills on location rows |
 
-Pin / hotspot fractions: `apps/mobile/world/layout.ts`.
+Older JPEGs in `world/` are unused fallbacks. Pin / hotspot fractions and unlock stubs: `world/content.ts`.
