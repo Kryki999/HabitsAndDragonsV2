@@ -139,13 +139,13 @@ export type MapFogDriftDef = {
 };
 
 export const MAP_FOG_DRIFTS: MapFogDriftDef[] = [
-  { id: 'alsah-dunes', cx: 0.2, cy: 0.16, rx: 0.3, ry: 0.22, density: 0.42, phase: 0.2 },
-  { id: 'north-keep', cx: 0.8, cy: 0.13, rx: 0.26, ry: 0.2, density: 0.36, phase: 1.1 },
-  { id: 'east-spire', cx: 0.84, cy: 0.4, rx: 0.2, ry: 0.22, density: 0.3, phase: 2.4 },
-  { id: 'still-water', cx: 0.22, cy: 0.42, rx: 0.18, ry: 0.16, density: 0.22, phase: 3.6 },
-  { id: 'south-vines', cx: 0.56, cy: 0.9, rx: 0.26, ry: 0.16, density: 0.28, phase: 4.5 },
-  { id: 'salt-reach', cx: 0.16, cy: 0.88, rx: 0.28, ry: 0.2, density: 0.34, phase: 5.2 },
-  { id: 'east-wood', cx: 0.74, cy: 0.62, rx: 0.2, ry: 0.18, density: 0.26, phase: 0.8 },
+  { id: 'alsah-dunes', cx: 0.2, cy: 0.16, rx: 0.3, ry: 0.22, density: 0.62, phase: 0.2 },
+  { id: 'north-keep', cx: 0.8, cy: 0.13, rx: 0.26, ry: 0.2, density: 0.58, phase: 1.1 },
+  { id: 'east-spire', cx: 0.84, cy: 0.4, rx: 0.2, ry: 0.22, density: 0.55, phase: 2.4 },
+  { id: 'still-water', cx: 0.22, cy: 0.42, rx: 0.18, ry: 0.16, density: 0.4, phase: 3.6 },
+  { id: 'south-vines', cx: 0.56, cy: 0.9, rx: 0.26, ry: 0.16, density: 0.5, phase: 4.5 },
+  { id: 'salt-reach', cx: 0.16, cy: 0.88, rx: 0.28, ry: 0.2, density: 0.6, phase: 5.2 },
+  { id: 'east-wood', cx: 0.74, cy: 0.62, rx: 0.2, ry: 0.18, density: 0.48, phase: 0.8 },
 ];
 
 export function isFogRegionRevealed(id: string, discoveredRegionIds: string[]): boolean {

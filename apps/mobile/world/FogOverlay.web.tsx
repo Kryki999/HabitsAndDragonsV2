@@ -43,8 +43,8 @@ export default function FogOverlay({ mapSize, progress }: FogOverlayProps) {
                 <React.Fragment key={region.id}>
                   <RadialGradient id={gid} cx="50%" cy="50%" rx="50%" ry="50%">
                     <Stop offset="0%" stopColor="#000" stopOpacity={p} />
-                    <Stop offset="52%" stopColor="#000" stopOpacity={p} />
-                    <Stop offset="80%" stopColor="#888" stopOpacity={p * 0.45} />
+                    <Stop offset="58%" stopColor="#000" stopOpacity={p} />
+                    <Stop offset="82%" stopColor="#888" stopOpacity={p * 0.4} />
                     <Stop offset="100%" stopColor="#fff" stopOpacity={0} />
                   </RadialGradient>
                   <Ellipse
@@ -64,7 +64,15 @@ export default function FogOverlay({ mapSize, progress }: FogOverlayProps) {
           y={0}
           width={mapSize}
           height={mapSize}
-          fill="rgba(176, 188, 204, 0.74)"
+          fill="rgba(176, 186, 200, 0.93)"
+          mask="url(#kingdom-fog-mask)"
+        />
+        <Rect
+          x={0}
+          y={0}
+          width={mapSize}
+          height={mapSize}
+          fill="rgba(228, 234, 240, 0.58)"
           mask="url(#kingdom-fog-mask)"
         />
         {MAP_FOG_DRIFTS.map((drift) => (
@@ -74,7 +82,7 @@ export default function FogOverlay({ mapSize, progress }: FogOverlayProps) {
             cy={drift.cy * mapSize}
             rx={drift.rx * mapSize}
             ry={drift.ry * mapSize}
-            fill="rgba(236, 240, 246, 0.28)"
+            fill="rgba(228, 234, 240, 0.55)"
             opacity={0.45 + drift.density * 0.4}
             mask="url(#kingdom-fog-mask)"
           />

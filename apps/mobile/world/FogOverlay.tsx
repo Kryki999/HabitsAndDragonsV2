@@ -27,6 +27,10 @@ import {
   type MapFogRegionDef,
 } from './layout';
 
+/** Unknown land must be unreadable. Grain sits on the veil, not instead of it. */
+const VEIL_BASE = 'rgba(176, 186, 200, 0.93)';
+const VEIL_MILK = 'rgba(228, 234, 240, 0.58)';
+
 export type FogOverlayProps = {
   mapSize: number;
   progress: Record<string, SharedValue<number>>;
@@ -54,14 +58,15 @@ export default function FogOverlay({ mapSize, progress }: FogOverlayProps) {
   return (
     <Canvas pointerEvents="none" style={{ width: mapSize, height: mapSize }}>
       <Group layer>
-        <Fill color="rgba(186, 196, 210, 0.5)" />
+        <Fill color={VEIL_BASE} />
+        <Fill color={VEIL_MILK} />
         <Group transform={noiseTransform}>
           <Rect
             x={-90}
             y={-90}
             width={mapSize + 180}
             height={mapSize + 180}
-            opacity={0.42}
+            opacity={0.28}
             blendMode="softLight"
           >
             <FractalNoise freqX={0.0046} freqY={0.0046} octaves={4} seed={3} />
@@ -71,7 +76,7 @@ export default function FogOverlay({ mapSize, progress }: FogOverlayProps) {
             y={-90}
             width={mapSize + 180}
             height={mapSize + 180}
-            opacity={0.2}
+            opacity={0.16}
             blendMode="overlay"
           >
             <Turbulence freqX={0.011} freqY={0.008} octaves={3} seed={11} />
@@ -100,7 +105,7 @@ function FogDrift({
   mapSize: number;
 }) {
   const opacity = useDerivedValue(
-    () => 0.5 + drift.density * (0.7 + 0.3 * Math.sin(clock.value + drift.phase)),
+    () => 0.72 + drift.density * (0.22 + 0.08 * Math.sin(clock.value + drift.phase)),
   );
   const cx = drift.cx * mapSize;
   const cy = drift.cy * mapSize;
@@ -112,7 +117,7 @@ function FogDrift({
       <RadialGradient
         c={vec(cx, cy)}
         r={Math.max(rx, ry)}
-        colors={['rgba(236, 240, 246, 0.5)', 'rgba(204, 214, 226, 0.18)', 'transparent']}
+        colors={['rgba(236, 240, 246, 0.78)', 'rgba(204, 214, 226, 0.4)', 'transparent']}
         positions={[0, 0.48, 1]}
       />
     </Oval>
@@ -157,8 +162,8 @@ function FogClearing({
       <RadialGradient
         c={vec(cx, cy)}
         r={Math.max(rx, ry)}
-        colors={['white', 'white', 'rgba(255,255,255,0.42)', 'transparent']}
-        positions={[0, 0.52, 0.8, 1]}
+        colors={['white', 'white', 'rgba(255,255,255,0.55)', 'transparent']}
+        positions={[0, 0.58, 0.82, 1]}
       />
     </Oval>
   );
