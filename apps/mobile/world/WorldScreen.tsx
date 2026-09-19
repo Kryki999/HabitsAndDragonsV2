@@ -1,49 +1,53 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect } from 'react';
+import { BackHandler, StyleSheet, View } from 'react-native';
 
-import { colors } from '@/theme/colors';
+import GutterjackLocation from './GutterjackLocation';
+import HubCrownhaven from './HubCrownhaven';
+import KingdomMap from './KingdomMap';
+import { useWorldStore } from './store';
 
 export default function WorldScreen() {
+  const screen = useWorldStore((s) => s.currentScreen);
+  const locationId = useWorldStore((s) => s.currentLocationId);
+  const openHub = useWorldStore((s) => s.openHub);
+  const openMap = useWorldStore((s) => s.openMap);
+
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      const current = useWorldStore.getState().currentScreen;
+      if (current === 'map') return false;
+      if (current === 'location') {
+        openHub();
+        return true;
+      }
+      openMap();
+      return true;
+    });
+    return () => sub.remove();
+  }, [openHub, openMap]);
+
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
-      <View style={styles.pad}>
-        <Text style={styles.kicker}>Mapa królestwa</Text>
-        <Text style={styles.title}>Świat</Text>
-        <View style={styles.playground}>
-          <Text style={styles.soon}>Wkrótce</Text>
-          <Text style={styles.body}>
-            Tu będzie mapa w mgle → close-up lokacji. Nie karty D&D, nie smoki w nawigacji.
-            Playground pusty celowo — nie budujemy mapy w tym plasterku.
-          </Text>
-        </View>
+    <View style={styles.root}>
+      <View style={styles.stage}>
+        {screen === 'map' ? <KingdomMap /> : null}
+        {screen === 'location' && locationId === 'gutterjack' ? <GutterjackLocation /> : null}
+        {screen === 'hub' || (screen === 'location' && locationId !== 'gutterjack') ? (
+          <HubCrownhaven />
+        ) : null}
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  pad: { paddingHorizontal: 20, paddingTop: 8 },
-  kicker: {
-    color: colors.gold,
-    fontSize: 12,
-    fontWeight: '800',
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-    marginBottom: 6,
+  root: {
+    flex: 1,
+    backgroundColor: '#070510',
+    alignItems: 'center',
   },
-  title: { color: colors.text, fontSize: 28, fontWeight: '800' },
-  playground: {
-    marginTop: 24,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderStyle: 'dashed',
-    backgroundColor: colors.surface,
-    padding: 20,
-    minHeight: 220,
-    justifyContent: 'center',
+  stage: {
+    flex: 1,
+    width: '100%',
+    maxWidth: 430,
   },
-  soon: { color: colors.gold, fontWeight: '800', fontSize: 13, marginBottom: 8 },
-  body: { color: colors.textSecondary, fontSize: 15, lineHeight: 22 },
 });
