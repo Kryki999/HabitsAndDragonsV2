@@ -11,18 +11,19 @@ import {
   Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { X } from "lucide-react-native";
+import { X, Ban } from "lucide-react-native";
 import { LootGlyph } from "@/lib/lootGlyph";
 import { impactAsync, ImpactFeedbackStyle } from "@/lib/hapticsGate";
 import Colors from "@/constants/colors";
 import { LOOT_RARITY_COLOR } from "@/constants/lootRarity";
 import { sellPriceForRarity } from "@/lib/inventoryEconomy";
 import { useHeroStore } from "@/hero/store";
-import type { LootGoldEntry, LootIconId, LootItemEntry, LootRarity } from "@/types/dungeonLoot";
+import type { LootEmptyEntry, LootGoldEntry, LootIconId, LootItemEntry, LootRarity } from "@/types/dungeonLoot";
 
 export type LootModalPayload =
   | { type: "item"; entry: LootItemEntry }
-  | { type: "gold"; entry: LootGoldEntry };
+  | { type: "gold"; entry: LootGoldEntry }
+  | { type: "empty"; entry: LootEmptyEntry };
 
 const RARITY_LABEL: Record<LootRarity, string> = {
   common: "Common",
@@ -80,7 +81,8 @@ export default function LootDetailModal({
 
   const rarity = payload.entry.rarity;
   const rColor = RARITY_COLOR[rarity];
-  const icon: LootIconId = payload.type === "item" ? payload.entry.icon : "coins";
+  const icon: LootIconId | "empty" =
+    payload.type === "item" ? payload.entry.icon : payload.type === "gold" ? "coins" : "empty";
 
   const backpackMode =
     payload.type === "item" && typeof itemInventoryIndex === "number" && itemInventoryIndex >= 0;
@@ -166,7 +168,11 @@ export default function LootDetailModal({
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
-                <LootGlyph icon={icon} size={40} color={payload.type === "gold" ? Colors.dark.gold : accentHint ?? rColor} />
+                {icon === "empty" ? (
+                  <Ban size={40} color={Colors.dark.textMuted} />
+                ) : (
+                  <LootGlyph icon={icon} size={40} color={payload.type === "gold" ? Colors.dark.gold : accentHint ?? rColor} />
+                )}
               </LinearGradient>
             </View>
 
@@ -178,7 +184,13 @@ export default function LootDetailModal({
 
             {payload.type === "item" ? (
               <View style={styles.itemMetaRow}>
-                <Text style={styles.cosmeticTag}>Cosmetic — no combat stats</Text>
+                <Text style={styles.cosmeticTag}>
+                  {payload.entry.combatHint
+                    ? payload.entry.combatHint
+                    : payload.entry.consumable
+                      ? "Consumable"
+                      : "Cosmetic — no combat stats"}
+                </Text>
                 <View
                   style={[
                     styles.slotPill,
@@ -189,12 +201,18 @@ export default function LootDetailModal({
                   ]}
                 >
                   <Text style={[styles.slotPillText, { color: rColor }]}>
-                    {payload.entry.itemSlot === "outfit" ? "Outfit" : "Relic"}
+                    {payload.entry.consumable
+                      ? "Consumable"
+                      : payload.entry.itemSlot === "outfit"
+                        ? "Outfit"
+                        : "Relic"}
                   </Text>
                 </View>
               </View>
-            ) : (
+            ) : payload.type === "gold" ? (
               <Text style={styles.cosmeticTag}>Gold pool — currency, not gear</Text>
+            ) : (
+              <Text style={styles.cosmeticTag}>Empty roll — farm can miss</Text>
             )}
 
             <Text style={styles.body}>
