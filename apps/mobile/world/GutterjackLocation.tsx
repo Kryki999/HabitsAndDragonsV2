@@ -6,18 +6,33 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Colors from '@/constants/colors';
 import { impactAsync, ImpactFeedbackStyle, notificationAsync, NotificationFeedbackType } from '@/lib/hapticsGate';
 
+import { LocationNav } from './IconRail';
 import OverlayHud from './OverlayHud';
 import StillFrame from './StillFrame';
-import { GUTTERJACK_COPY, GUTTERJACK_INTRINSIC, WORLD_ART } from './layout';
+import WorldHotspot from './WorldHotspot';
+import { getLocation } from './content';
 import { useWorldStore } from './store';
+
+const COPY = {
+  kicker: 'Common · Tutorial',
+  blurb:
+    'The sot who took the wine vault. Once a family restaurant. Now he sits a barrel-throne with a smashed-bottle tulip and will not give the cellar back.',
+  enter: 'Enter',
+  fightKicker: 'Tutorial fight · 100% win',
+  fightBlurb: 'No combat engine yet. Tap victory — Gutterjack always falls the first time.',
+  victory: 'Victory (tutorial)',
+  clearedKicker: 'Cleared',
+  clearedBlurb: 'The cellar is yours. The tavern can breathe again — for now. Common farm comes later.',
+} as const;
 
 type Phase = 'brief' | 'fight' | 'victory';
 
 export default function GutterjackLocation() {
   const insets = useSafeAreaInsets();
-  const openHub = useWorldStore((s) => s.openHub);
+  const openLocation = useWorldStore((s) => s.openLocation);
   const markGutterjackCleared = useWorldStore((s) => s.markGutterjackCleared);
-  const alreadyCleared = useWorldStore((s) => s.gutterjackCleared);
+  const alreadyCleared = useWorldStore((s) => s.flags.gutterjackCleared);
+  const loc = getLocation('gutterjack');
   const [phase, setPhase] = useState<Phase>(alreadyCleared ? 'victory' : 'brief');
 
   const onEnter = () => {
@@ -34,73 +49,74 @@ export default function GutterjackLocation() {
   const panel =
     phase === 'brief'
       ? {
-          kicker: alreadyCleared ? GUTTERJACK_COPY.clearedKicker : GUTTERJACK_COPY.kicker,
-          title: GUTTERJACK_COPY.title,
-          body: GUTTERJACK_COPY.blurb,
-          primary: GUTTERJACK_COPY.enter,
+          kicker: alreadyCleared ? COPY.clearedKicker : COPY.kicker,
+          body: COPY.blurb,
+          primary: COPY.enter,
           onPrimary: onEnter,
         }
       : phase === 'fight'
         ? {
-            kicker: GUTTERJACK_COPY.fightKicker,
-            title: GUTTERJACK_COPY.title,
-            body: GUTTERJACK_COPY.fightBlurb,
-            primary: GUTTERJACK_COPY.victory,
+            kicker: COPY.fightKicker,
+            body: COPY.fightBlurb,
+            primary: COPY.victory,
             onPrimary: onVictory,
           }
         : {
-            kicker: GUTTERJACK_COPY.clearedKicker,
-            title: GUTTERJACK_COPY.title,
-            body: GUTTERJACK_COPY.clearedBlurb,
-            primary: GUTTERJACK_COPY.backToHub,
-            onPrimary: openHub,
+            kicker: COPY.clearedKicker,
+            body: COPY.clearedBlurb,
+            primary: null,
+            onPrimary: undefined,
           };
 
   return (
     <View style={styles.root}>
       <StillFrame
-        source={WORLD_ART.gutterjack}
-        intrinsicWidth={GUTTERJACK_INTRINSIC.width}
-        intrinsicHeight={GUTTERJACK_INTRINSIC.height}
-      />
+        source={loc.asset}
+        intrinsicWidth={loc.intrinsic.width}
+        intrinsicHeight={loc.intrinsic.height}
+      >
+        {(box) => (
+          <>
+            {(loc.hotspots ?? []).map((spot) =>
+              spot.targetId ? (
+                <WorldHotspot
+                  key={spot.id}
+                  x={spot.x}
+                  y={spot.y}
+                  width={box.width}
+                  height={box.height}
+                  icon={spot.icon}
+                  accessibilityLabel={spot.label}
+                  accent="emerald"
+                  onPress={() => openLocation(spot.targetId!)}
+                />
+              ) : null,
+            )}
+          </>
+        )}
+      </StillFrame>
 
-      <OverlayHud
-        insets={insets}
-        kicker="Dungeon"
-        title="Gutterjack"
-        left={{ label: GUTTERJACK_COPY.back, onPress: openHub }}
-      />
+      <OverlayHud insets={insets} kicker={loc.kicker} title={loc.displayName} />
+      <LocationNav locationId="gutterjack" />
 
       <View pointerEvents="box-none" style={[styles.sheetWrap, { paddingBottom: 12 + insets.bottom }]}>
         <LinearGradient colors={['transparent', 'rgba(7,5,16,0.72)', 'rgba(7,5,16,0.94)']} style={styles.fade} />
         <View style={styles.sheet}>
           <Text style={styles.kicker}>{panel.kicker}</Text>
-          <Text style={styles.title}>{panel.title}</Text>
+          <Text style={styles.title}>{loc.displayName}</Text>
           <Text style={styles.body}>{panel.body}</Text>
-          <View style={styles.actions}>
-            {phase !== 'victory' ? (
-              <Pressable
-                onPress={() => {
-                  impactAsync(ImpactFeedbackStyle.Light);
-                  openHub();
-                }}
-                style={({ pressed }) => [styles.secondary, pressed && styles.pressed]}
-              >
-                <Text style={styles.secondaryText}>{GUTTERJACK_COPY.back}</Text>
-              </Pressable>
-            ) : null}
+          {panel.primary && panel.onPrimary ? (
             <Pressable
               onPress={panel.onPrimary}
               style={({ pressed }) => [
                 styles.primary,
                 phase === 'fight' && styles.primaryFight,
-                phase === 'victory' && styles.primaryWon,
                 pressed && styles.pressed,
               ]}
             >
               <Text style={styles.primaryText}>{panel.primary}</Text>
             </Pressable>
-          </View>
+          ) : null}
         </View>
       </View>
     </View>
@@ -150,26 +166,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
-  actions: {
-    marginTop: 14,
-    flexDirection: 'row',
-    gap: 10,
-  },
-  secondary: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
-    alignItems: 'center',
-  },
-  secondaryText: {
-    color: Colors.dark.textSecondary,
-    fontSize: 14,
-    fontWeight: '800',
-  },
   primary: {
-    flex: 1.4,
+    marginTop: 14,
     paddingVertical: 12,
     borderRadius: 12,
     backgroundColor: Colors.dark.gold,
@@ -177,9 +175,6 @@ const styles = StyleSheet.create({
   },
   primaryFight: {
     backgroundColor: Colors.dark.emerald,
-  },
-  primaryWon: {
-    backgroundColor: Colors.dark.gold,
   },
   primaryText: {
     color: '#1a1220',

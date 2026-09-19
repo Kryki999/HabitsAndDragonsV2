@@ -20,6 +20,6 @@ npx expo start
 
 Typecheck: `npm run typecheck` w `apps/mobile`.
 
-Pięć tabów: **Questy · World · Hero · Społeczność · Mentor**. Questy = V1 Castle UI na store `habits`. Hero = V1 Hero UI na cienkim store `hero` (EN). World = playground mapa → Crownhaven → Gutterjack (store `world`). Społeczność / Mentor = placeholdery.
+Pięć tabów: **Questy · World · Hero · Społeczność · Mentor**. Questy = V1 Castle UI na store `habits`. Hero = V1 Hero UI na cienkim store `hero` (EN). World = mapa + Crownhaven + Gutterjack (`world/content.ts`). Społeczność / Mentor = placeholdery.
 
 Pełna mapa filarów: [`docs/README.md`](docs/README.md).

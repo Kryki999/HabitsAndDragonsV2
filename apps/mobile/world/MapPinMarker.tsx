@@ -1,19 +1,19 @@
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { Castle, Lock } from 'lucide-react-native';
 
 import Colors from '@/constants/colors';
 import { impactAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
 
-import type { MapPinKind } from './layout';
+import { PIN_ICONS, type PinIconName } from './icons';
 
 type Props = {
-  /** Spoken name only — overview map shows the icon, not a text label. */
   accessibilityLabel: string;
-  kind: MapPinKind;
+  locked: boolean;
+  icon: PinIconName;
   /** Image-space pixels (unscaled). Anchor = pin tip. */
   left: number;
   top: number;
+  zIndex?: number;
   onPress: () => void;
 };
 
@@ -21,10 +21,17 @@ const HEAD = 32;
 const STEM = 10;
 const WRAP = 44;
 
-export default function MapPinMarker({ accessibilityLabel, kind, left, top, onPress }: Props) {
-  const locked = kind === 'locked';
+export default function MapPinMarker({
+  accessibilityLabel,
+  locked,
+  icon,
+  left,
+  top,
+  zIndex = 3,
+  onPress,
+}: Props) {
   const accent = locked ? Colors.dark.textMuted : Colors.dark.gold;
-  const zIndex = kind === 'home' ? 5 : 3;
+  const Icon = locked ? PIN_ICONS.lock : PIN_ICONS[icon];
 
   return (
     <View
@@ -42,11 +49,7 @@ export default function MapPinMarker({ accessibilityLabel, kind, left, top, onPr
         style={({ pressed }) => [styles.headHit, pressed && styles.pressed]}
       >
         <View style={[styles.head, { borderColor: accent, backgroundColor: locked ? '#1a1524ee' : '#120c1cee' }]}>
-          {kind === 'home' ? (
-            <Castle size={16} color={accent} strokeWidth={2.4} />
-          ) : (
-            <Lock size={16} color={accent} strokeWidth={2.4} />
-          )}
+          <Icon size={16} color={accent} strokeWidth={2.4} />
         </View>
         <View style={[styles.stem, { backgroundColor: accent }]} />
       </Pressable>
