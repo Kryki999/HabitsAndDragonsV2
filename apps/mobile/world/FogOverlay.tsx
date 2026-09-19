@@ -27,12 +27,12 @@ import {
   type MapFogRegionDef,
 } from './layout';
 
-type Props = {
+export type FogOverlayProps = {
   mapSize: number;
   progress: Record<string, SharedValue<number>>;
 };
 
-export default function FogOverlay({ mapSize, progress }: Props) {
+export default function FogOverlay({ mapSize, progress }: FogOverlayProps) {
   const clock = useSharedValue(0);
 
   useEffect(() => {

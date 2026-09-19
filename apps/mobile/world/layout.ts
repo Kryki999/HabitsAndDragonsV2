@@ -98,11 +98,11 @@ export type MapFogRegionDef = {
 export const MAP_FOG_REGIONS: MapFogRegionDef[] = [
   {
     id: 'crownhaven',
-    cx: 0.49,
-    cy: 0.4,
-    rx: 0.22,
-    ry: 0.2,
-    feather: 0.12,
+    cx: 0.485,
+    cy: 0.418,
+    rx: 0.145,
+    ry: 0.132,
+    feather: 0.085,
     revealedByDefault: true,
   },
   {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { EdgeInsets } from 'react-native-safe-area-context';
@@ -35,9 +35,7 @@ export default function OverlayHud({ insets, kicker, title, left, right, onTitle
           </View>
           <View style={styles.center}>
             {onTitleLongPress ? (
-              <Pressable onLongPress={onTitleLongPress} delayLongPress={520} hitSlop={10}>
-                <HudTitle kicker={kicker} title={title} />
-              </Pressable>
+              <DevTitle kicker={kicker} title={title} onUnveil={onTitleLongPress} />
             ) : (
               <HudTitle kicker={kicker} title={title} />
             )}
@@ -48,6 +46,44 @@ export default function OverlayHud({ insets, kicker, title, left, right, onTitle
         </View>
       </LinearGradient>
     </View>
+  );
+}
+
+function DevTitle({
+  kicker,
+  title,
+  onUnveil,
+}: {
+  kicker?: string;
+  title: string;
+  onUnveil: () => void;
+}) {
+  const taps = useRef(0);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const onPress = () => {
+    taps.current += 1;
+    if (timer.current) clearTimeout(timer.current);
+    if (taps.current >= 3) {
+      taps.current = 0;
+      onUnveil();
+      return;
+    }
+    timer.current = setTimeout(() => {
+      taps.current = 0;
+    }, 420);
+  };
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      onLongPress={onUnveil}
+      delayLongPress={400}
+      hitSlop={12}
+    >
+      <HudTitle kicker={kicker} title={title} />
+    </Pressable>
   );
 }
 
