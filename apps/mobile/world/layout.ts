@@ -1,79 +1,46 @@
-import type { ImageSourcePropType } from 'react-native';
-
 /**
  * World playground layout — pin / hotspot coordinates.
  *
  * All positions are **normalized 0–1** over the still (x = left→right, y = top→bottom).
  * Map pins: icon only (no name labels). Anchor = stem tip on the landmark.
- * Hub hotspots: (x, y) is below the icon. Tune this file only.
+ * Hub hotspots: (x, y) is below the icon. Tune this file + `catalog.ts` pins only.
  *
  * How to retune
  * -------------
- * 1. Replace the JPEG in `apps/mobile/assets/images/world/` (keep the filename).
- * 2. Update `MAP_INTRINSIC` / `HUB_INTRINSIC` if the pixel size changed.
- * 3. Nudge `x` / `y` below. 0.01 ≈ 1% of the still.
- *
- * Art ingest
- * ----------
- * Cursor chat PNG attachments cap at **768KB** (exactly 786432 bytes) and arrive
- * truncated (full IHDR, black lower canvas, no IEND). Ship **JPEG/WebP under
- * ~700KB** so the whole frame lands. Current stills are complete JPEGs
- * (~213–410KB, live bottoms, 1254² map / 941×1672 hub & cellar).
+ * 1. Replace the still (keep the filename — `world map.png` has a space).
+ * 2. Update `MAP_INTRINSIC` / `STILL_9_16` in `art.ts` if the pixel size changed.
+ * 3. Nudge `x` / `y` in `catalog.ts` (map) or `HUB_HOTSPOTS` below. 0.01 ≈ 1% of the still.
  */
 
-export const WORLD_ART = {
-  map: require('@/assets/images/world/map-kingdom.jpg') as ImageSourcePropType,
-  hub: require('@/assets/images/world/hub-crownhaven.jpg') as ImageSourcePropType,
-  gutterjack: require('@/assets/images/world/dungeon-gutterjack.jpg') as ImageSourcePropType,
-};
+import { MAP_PIN_LOCATIONS } from './catalog';
+import type { LucideIcon } from 'lucide-react-native';
 
-export const MAP_INTRINSIC = { width: 1254, height: 1254 } as const;
-export const HUB_INTRINSIC = { width: 941, height: 1672 } as const;
-export const GUTTERJACK_INTRINSIC = { width: 941, height: 1672 } as const;
+export { MAP_INTRINSIC, STILL_9_16 as HUB_INTRINSIC, STILL_9_16 as GUTTERJACK_INTRINSIC, WORLD_ART } from './art';
+export { GUTTERJACK_COPY } from './catalog';
 
-export type MapPinKind = 'home' | 'locked';
+export type MapPinKind = 'home' | 'open' | 'locked';
 
 export type MapPinDef = {
   id: string;
-  /** Spoken / fog-hint name. Not drawn on the overview map. */
   label: string;
   x: number;
   y: number;
-  kind: MapPinKind;
-  /** Crownhaven is the only map pin that opens a hub. */
-  opens?: 'hub';
+  icon: LucideIcon;
+  unlockLevel: number;
+  fogHint: string;
+  opens: 'hub' | 'location';
 };
 
-/**
- * Kingdom orbit pins (square map, Crownhaven in the middle).
- *
- * Only Crownhaven is interactive. Side pins stay locked. Gutterjack is a
- * tavern hotspot on the hub — not a kingdom-map pin.
- */
-export const KINGDOM_PINS: MapPinDef[] = [
-  {
-    id: 'crownhaven',
-    label: 'Crownhaven',
-    x: 0.52,
-    y: 0.35,
-    kind: 'home',
-    opens: 'hub',
-  },
-  {
-    id: 'smugglers-teeth',
-    label: "Smuggler's Teeth",
-    x: 0.22,
-    y: 0.7,
-    kind: 'locked',
-  },
-  {
-    id: 'crown-approaches',
-    label: 'Crown Approaches',
-    x: 0.54,
-    y: 0.63,
-    kind: 'locked',
-  },
-];
+export const KINGDOM_PINS: MapPinDef[] = MAP_PIN_LOCATIONS.map((loc) => ({
+  id: loc.id,
+  label: loc.name,
+  x: loc.pin!.x,
+  y: loc.pin!.y,
+  icon: loc.pin!.icon,
+  unlockLevel: loc.unlockLevel,
+  fogHint: loc.fogHint,
+  opens: loc.id === 'crownhaven' ? 'hub' : 'location',
+}));
 
 export type HubHotspotAction = 'gutterjack' | 'comingSoon';
 
@@ -118,18 +85,3 @@ export const HUB_HOTSPOTS: HubHotspotDef[] = [
     action: 'comingSoon',
   },
 ];
-
-export const GUTTERJACK_COPY = {
-  kicker: 'Common · Tutorial',
-  title: 'Gutterjack',
-  blurb:
-    'The sot who took the wine vault. Once a family restaurant. Now he sits a barrel-throne with a smashed-bottle tulip and will not give the cellar back.',
-  enter: 'Enter',
-  back: 'Back',
-  fightKicker: 'Tutorial fight · 100% win',
-  fightBlurb: 'No combat engine in this playground. Tap victory — Gutterjack always falls the first time.',
-  victory: 'Victory (tutorial)',
-  clearedKicker: 'Cleared',
-  clearedBlurb: 'The cellar is yours. The tavern can breathe again — for now. Common farm comes later.',
-  backToHub: 'Back to Crownhaven',
-} as const;

@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Castle, Map as MapIcon, Store, Swords, Wine } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Castle, Store, Wine } from 'lucide-react-native';
 
 import Colors from '@/constants/colors';
 import { impactAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
 
 import OverlayHud from './OverlayHud';
 import StillFrame from './StillFrame';
-import { HUB_HOTSPOTS, HUB_INTRINSIC, WORLD_ART, type HubHotspotDef } from './layout';
+import WindowDock from './WindowDock';
+import { LOCATION_BY_ID, windowById } from './catalog';
+import { HUB_HOTSPOTS, type HubHotspotDef } from './layout';
 import { useWorldStore } from './store';
 
 const COMING_SOON: Record<'market' | 'castle', { title: string; body: string }> = {
@@ -27,8 +29,14 @@ export default function HubCrownhaven() {
   const insets = useSafeAreaInsets();
   const openMap = useWorldStore((s) => s.openMap);
   const openLocation = useWorldStore((s) => s.openLocation);
+  const setWindow = useWorldStore((s) => s.setWindow);
+  const currentWindowId = useWorldStore((s) => s.currentWindowId);
   const gutterjackCleared = useWorldStore((s) => s.gutterjackCleared);
   const [soon, setSoon] = useState<'market' | 'castle' | null>(null);
+
+  const loc = LOCATION_BY_ID.crownhaven;
+  const window = windowById(loc, currentWindowId) ?? loc.windows[0]!;
+  const showHotspots = window.id === 'approach';
 
   const onHotspot = (spot: HubHotspotDef) => {
     impactAsync(ImpactFeedbackStyle.Medium);
@@ -43,58 +51,81 @@ export default function HubCrownhaven() {
   return (
     <View style={styles.root}>
       <StillFrame
-        source={WORLD_ART.hub}
-        intrinsicWidth={HUB_INTRINSIC.width}
-        intrinsicHeight={HUB_INTRINSIC.height}
+        source={window.source}
+        intrinsicWidth={window.intrinsicWidth}
+        intrinsicHeight={window.intrinsicHeight}
       >
-        {(box) => (
-          <>
-            {HUB_HOTSPOTS.map((spot) => (
-              <Pressable
-                key={spot.id}
-                onPress={() => onHotspot(spot)}
-                hitSlop={12}
-                style={({ pressed }) => [
-                  styles.hotspot,
-                  {
-                    left: spot.x * box.width - 44,
-                    top: spot.y * box.height - 56,
-                  },
-                  pressed && styles.hotspotPressed,
-                ]}
-              >
-                <View
-                  style={[
-                    styles.hotspotDot,
-                    spot.id === 'tavern' && styles.hotspotDotTavern,
-                    spot.id === 'castle' && styles.hotspotDotCastle,
+        {(box) =>
+          showHotspots ? (
+            <>
+              {HUB_HOTSPOTS.map((spot) => (
+                <Pressable
+                  key={spot.id}
+                  onPress={() => onHotspot(spot)}
+                  hitSlop={12}
+                  style={({ pressed }) => [
+                    styles.hotspot,
+                    {
+                      left: spot.x * box.width - 44,
+                      top: spot.y * box.height - 56,
+                    },
+                    pressed && styles.hotspotPressed,
                   ]}
                 >
-                  {spot.id === 'tavern' ? (
-                    <Wine size={15} color={Colors.dark.gold} strokeWidth={2.4} />
-                  ) : spot.id === 'castle' ? (
-                    <Castle size={15} color={Colors.dark.textMuted} strokeWidth={2.4} />
-                  ) : (
-                    <Store size={15} color={Colors.dark.gold} strokeWidth={2.4} />
-                  )}
-                </View>
-                <View style={styles.hotspotLabel}>
-                  <Text style={styles.hotspotName}>{spot.label}</Text>
-                  <Text style={styles.hotspotHint}>
-                    {spot.id === 'tavern' && gutterjackCleared ? 'Cleared' : spot.hint}
-                  </Text>
-                </View>
-              </Pressable>
-            ))}
-          </>
-        )}
+                  <View
+                    style={[
+                      styles.hotspotDot,
+                      spot.id === 'tavern' && styles.hotspotDotTavern,
+                      spot.id === 'castle' && styles.hotspotDotCastle,
+                    ]}
+                  >
+                    {spot.id === 'tavern' ? (
+                      <Wine size={15} color={Colors.dark.gold} strokeWidth={2.4} />
+                    ) : spot.id === 'castle' ? (
+                      <Castle size={15} color={Colors.dark.textMuted} strokeWidth={2.4} />
+                    ) : (
+                      <Store size={15} color={Colors.dark.gold} strokeWidth={2.4} />
+                    )}
+                  </View>
+                  <View style={styles.hotspotLabel}>
+                    <Text style={styles.hotspotName}>{spot.label}</Text>
+                    <Text style={styles.hotspotHint}>
+                      {spot.id === 'tavern' && gutterjackCleared ? 'Cleared' : spot.hint}
+                    </Text>
+                  </View>
+                </Pressable>
+              ))}
+            </>
+          ) : null
+        }
       </StillFrame>
 
       <OverlayHud
         insets={insets}
-        kicker="Capital"
-        title="Crownhaven"
-        left={{ label: 'Map', onPress: openMap }}
+        kicker={window.id === 'tavern' ? 'Tavern' : loc.kicker}
+        title={window.id === 'tavern' ? 'The Tap' : loc.name}
+        left={{ icon: MapIcon, accessibilityLabel: 'Kingdom map', onPress: openMap }}
+      />
+
+      <WindowDock
+        windows={loc.windows}
+        currentWindowId={window.id}
+        onSelectWindow={(id) => {
+          setSoon(null);
+          setWindow(id);
+        }}
+        onMap={openMap}
+        extra={[
+          {
+            id: 'gutterjack',
+            label: 'Cellar',
+            icon: Swords,
+            onPress: () => {
+              setSoon(null);
+              openLocation('gutterjack');
+            },
+          },
+        ]}
       />
 
       {soon ? (
@@ -176,7 +207,7 @@ const styles = StyleSheet.create({
   bannerWrap: {
     position: 'absolute',
     left: 0,
-    right: 0,
+    right: 64,
     bottom: 0,
   },
   bannerFade: {
