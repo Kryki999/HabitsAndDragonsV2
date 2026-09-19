@@ -19,7 +19,7 @@ const MIN_SCALE = 1;
 const MAX_SCALE = 2.8;
 /** Closer than cover so Crownhaven fills the phone; pan to the rest. */
 const START_SCALE = 1.85;
-const FOG_SIZE_FRAC = 0.2;
+const FOG_SIZE_FRAC = 0.24;
 
 function clamp(n: number, min: number, max: number): number {
   'worklet';

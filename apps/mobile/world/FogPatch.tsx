@@ -25,7 +25,7 @@ export default function FogPatch({ left, top, size }: Props) {
             borderRadius: outer / 2,
             marginLeft: -outer / 2,
             marginTop: -outer / 2,
-            backgroundColor: 'rgba(186, 198, 214, 0.42)',
+            backgroundColor: 'rgba(18, 22, 38, 0.5)',
           },
         ]}
       />
@@ -38,7 +38,7 @@ export default function FogPatch({ left, top, size }: Props) {
             borderRadius: mid / 2,
             marginLeft: -mid / 2,
             marginTop: -mid / 2,
-            backgroundColor: 'rgba(210, 218, 230, 0.34)',
+            backgroundColor: 'rgba(168, 182, 204, 0.4)',
           },
         ]}
       />
@@ -51,7 +51,7 @@ export default function FogPatch({ left, top, size }: Props) {
             borderRadius: inner / 2,
             marginLeft: -inner / 2,
             marginTop: -inner / 2,
-            backgroundColor: 'rgba(232, 236, 244, 0.28)',
+            backgroundColor: 'rgba(226, 232, 242, 0.32)',
           },
         ]}
       />

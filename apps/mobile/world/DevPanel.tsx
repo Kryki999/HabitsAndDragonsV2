@@ -143,7 +143,7 @@ export default function DevPanel() {
 const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
-    left: 10,
+    right: 10,
     bottom: 12,
     zIndex: 20,
     width: 44,
