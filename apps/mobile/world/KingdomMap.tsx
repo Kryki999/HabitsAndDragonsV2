@@ -7,10 +7,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Colors from '@/constants/colors';
 
 import FogLayer from './FogLayer';
+import IconRail, { type IconRailItem } from './IconRail';
 import MapPinMarker from './MapPinMarker';
 import OverlayHud from './OverlayHud';
 import { KINGDOM_MAP, MAP_PIN_LOCATIONS, getLocation, isLocationUnlocked } from './content';
+import { NAV_ICONS } from './icons';
 import { useWorldStore } from './store';
+import type { WorldFlags } from './types';
 
 /** Cover scale: square of max(viewport) fills the long side. No empty bands. */
 const MIN_SCALE = 1;
@@ -46,6 +49,19 @@ function clampOffsets(
 
 type Viewport = { width: number; height: number };
 
+function focusTarget(flags: WorldFlags): { x: number; y: number; scale: number } {
+  const home = getLocation('crownhaven').mapPin;
+  const teeth = getLocation('smugglers-teeth');
+  if (home && isLocationUnlocked(teeth, flags) && teeth.mapPin) {
+    return {
+      x: (home.x + teeth.mapPin.x) / 2,
+      y: (home.y + teeth.mapPin.y) / 2,
+      scale: 1.35,
+    };
+  }
+  return { x: home?.x ?? 0.5, y: home?.y ?? 0.4, scale: START_SCALE };
+}
+
 export default function KingdomMap() {
   const insets = useSafeAreaInsets();
   const openLocation = useWorldStore((s) => s.openLocation);
@@ -66,13 +82,12 @@ export default function KingdomMap() {
   const vh = useSharedValue(0);
   const content = useSharedValue(0);
 
-  const focusCrownhaven = useCallback(
-    (size: number, view: Viewport) => {
-      const home = getLocation('crownhaven').mapPin;
+  const applyFocus = useCallback(
+    (size: number, view: Viewport, x: number, y: number, nextScale: number) => {
       const next = clampOffsets(
-        START_SCALE,
-        view.width / 2 - (home?.x ?? 0.5) * size * START_SCALE,
-        view.height / 2 - (home?.y ?? 0.4) * size * START_SCALE,
+        nextScale,
+        view.width / 2 - x * size * nextScale,
+        view.height / 2 - y * size * nextScale,
         size,
         view.width,
         view.height,
@@ -92,8 +107,14 @@ export default function KingdomMap() {
 
   useEffect(() => {
     if (mapSize <= 0 || viewport.width <= 0) return;
-    focusCrownhaven(mapSize, viewport);
-  }, [focusCrownhaven, mapSize, viewport]);
+    const target = focusTarget(flags);
+    applyFocus(mapSize, viewport, target.x, target.y, target.scale);
+  }, [applyFocus, flags, mapSize, viewport]);
+
+  const showKingdom = () => {
+    if (mapSize <= 0 || viewport.width <= 0) return;
+    applyFocus(mapSize, viewport, 0.5, 0.48, MIN_SCALE);
+  };
 
   const pan = Gesture.Pan()
     .minDistance(10)
@@ -203,6 +224,19 @@ export default function KingdomMap() {
       </GestureDetector>
 
       <OverlayHud insets={insets} kicker="Kingdom" title="Map" />
+      <IconRail
+        insets={insets}
+        items={
+          [
+            {
+              key: 'expand',
+              icon: NAV_ICONS.expand,
+              accessibilityLabel: 'Show whole kingdom',
+              onPress: showKingdom,
+            },
+          ] satisfies IconRailItem[]
+        }
+      />
 
       {fogHint ? (
         <View pointerEvents="none" style={styles.fogWrap}>

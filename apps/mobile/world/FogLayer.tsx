@@ -1,6 +1,5 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
-import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
+import { StyleSheet, View } from 'react-native';
 
 import { MAP_PIN_LOCATIONS, isLocationUnlocked, type LocationDef, type MapPinDef } from './content';
 import type { WorldFlags } from './types';
@@ -13,8 +12,9 @@ type Props = {
 };
 
 /**
- * Fog of war: locked map pins sit under a mist blob.
+ * Fog of war: locked map pins sit under stacked mist discs.
  * Unlocked pins (Crownhaven from start; first side after Gutterjack) stay clear.
+ * Views instead of SVG gradients — those vanish on RN-web.
  */
 export default function FogLayer({ mapSize, flags }: Props) {
   if (mapSize <= 0) return null;
@@ -32,34 +32,59 @@ export default function FogLayer({ mapSize, flags }: Props) {
 
 function FogBlob({ loc, mapSize }: { loc: PinLoc; mapSize: number }) {
   const radius = (loc.mapPin.fogRadius ?? 0.12) * mapSize;
-  const left = loc.mapPin.x * mapSize - radius;
-  const top = loc.mapPin.y * mapSize - radius;
-  const size = radius * 2;
-  const gid = `fog-${loc.id}`;
+  const cx = loc.mapPin.x * mapSize;
+  const cy = loc.mapPin.y * mapSize;
 
   return (
-    <Svg
-      pointerEvents="none"
-      width={size}
-      height={size}
-      style={[styles.blob, { left, top }]}
-    >
-      <Defs>
-        <RadialGradient id={gid} cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#141628" stopOpacity={0.88} />
-          <Stop offset="42%" stopColor="#1a1c32" stopOpacity={0.72} />
-          <Stop offset="78%" stopColor="#22243c" stopOpacity={0.38} />
-          <Stop offset="100%" stopColor="#22243c" stopOpacity={0} />
-        </RadialGradient>
-      </Defs>
-      <Circle cx={radius} cy={radius} r={radius} fill={`url(#${gid})`} />
-    </Svg>
+    <View pointerEvents="none" style={[styles.layer, { zIndex: 2 }]}>
+      <View
+        style={[
+          styles.disc,
+          {
+            left: cx - radius * 1.15,
+            top: cy - radius * 1.15,
+            width: radius * 2.3,
+            height: radius * 2.3,
+            borderRadius: radius * 1.15,
+            backgroundColor: 'rgba(12, 14, 32, 0.42)',
+          },
+        ]}
+      />
+      <View
+        style={[
+          styles.disc,
+          {
+            left: cx - radius,
+            top: cy - radius,
+            width: radius * 2,
+            height: radius * 2,
+            borderRadius: radius,
+            backgroundColor: 'rgba(10, 12, 28, 0.62)',
+          },
+        ]}
+      />
+      <View
+        style={[
+          styles.disc,
+          {
+            left: cx - radius * 0.55,
+            top: cy - radius * 0.55,
+            width: radius * 1.1,
+            height: radius * 1.1,
+            borderRadius: radius * 0.55,
+            backgroundColor: 'rgba(8, 10, 24, 0.78)',
+          },
+        ]}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  blob: {
+  layer: {
+    ...StyleSheet.absoluteFill,
+  },
+  disc: {
     position: 'absolute',
-    zIndex: 2,
   },
 });

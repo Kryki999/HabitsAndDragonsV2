@@ -7,6 +7,7 @@ import {
   ChevronsUp,
   Church,
   Hammer,
+  Expand,
   Landmark,
   Lock,
   Map,
@@ -53,4 +54,5 @@ export const NAV_ICONS = {
   stairsDown: ChevronsDown,
   stairsUp: ChevronsUp,
   close: X,
+  expand: Expand,
 } as const;
