@@ -34,4 +34,9 @@ export type HeroActions = {
   equipItemById: (itemId: string) => void;
   unequipLoadoutSlot: (slot: ItemLoadoutSlot) => void;
   sellInventoryItemAtIndex: (index: number) => void;
+  addGold: (amount: number) => void;
+  grantInventoryItem: (itemId: string) => void;
+  /** Removes one stacked copy. Returns false if none owned. */
+  consumeOwnedItem: (itemId: string) => boolean;
+  recordBossWin: () => void;
 };
