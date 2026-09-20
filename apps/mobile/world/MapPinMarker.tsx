@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { Castle, Lock } from 'lucide-react-native';
+import { Castle, MapPin } from 'lucide-react-native';
 
 import Colors from '@/constants/colors';
 import { impactAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
@@ -21,7 +21,13 @@ const HEAD = 32;
 const STEM = 10;
 const WRAP = 44;
 
-export default function MapPinMarker({ accessibilityLabel, kind, left, top, onPress }: Props) {
+export default function MapPinMarker({
+  accessibilityLabel,
+  kind,
+  left,
+  top,
+  onPress,
+}: Props) {
   const locked = kind === 'locked';
   const accent = locked ? Colors.dark.textMuted : Colors.dark.gold;
   const zIndex = kind === 'home' ? 5 : 3;
@@ -33,7 +39,9 @@ export default function MapPinMarker({ accessibilityLabel, kind, left, top, onPr
     >
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={locked ? `${accessibilityLabel}, locked` : accessibilityLabel}
+        accessibilityLabel={
+          locked ? `${accessibilityLabel}, hidden` : accessibilityLabel
+        }
         onPress={() => {
           impactAsync(locked ? ImpactFeedbackStyle.Light : ImpactFeedbackStyle.Medium);
           onPress();
@@ -45,7 +53,7 @@ export default function MapPinMarker({ accessibilityLabel, kind, left, top, onPr
           {kind === 'home' ? (
             <Castle size={16} color={accent} strokeWidth={2.4} />
           ) : (
-            <Lock size={16} color={accent} strokeWidth={2.4} />
+            <MapPin size={16} color={accent} strokeWidth={2.4} />
           )}
         </View>
         <View style={[styles.stem, { backgroundColor: accent }]} />
