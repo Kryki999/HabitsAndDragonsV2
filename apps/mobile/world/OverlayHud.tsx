@@ -1,14 +1,17 @@
 import React, { useRef } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { ChevronLeft } from 'lucide-react-native';
 import type { EdgeInsets } from 'react-native-safe-area-context';
 
 import Colors from '@/constants/colors';
 import { impactAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
 
 type HudAction = {
-  label: string;
+  label?: string;
+  icon?: 'back';
   onPress: () => void;
+  accessibilityLabel?: string;
 };
 
 type Props = {
@@ -16,10 +19,16 @@ type Props = {
   kicker?: string;
   title: string;
   left?: HudAction;
-  right?: HudAction;
+  right?: HudAction | React.ReactNode;
   /** Dev-only. Production titles stay inert. */
   onTitleLongPress?: () => void;
 };
+
+function isHudAction(value: HudAction | React.ReactNode | undefined): value is HudAction {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const v = value as HudAction;
+  return typeof v.onPress === 'function' && (v.icon === 'back' || typeof v.label === 'string');
+}
 
 export default function OverlayHud({ insets, kicker, title, left, right, onTitleLongPress }: Props) {
   return (
@@ -30,9 +39,7 @@ export default function OverlayHud({ insets, kicker, title, left, right, onTitle
         pointerEvents="box-none"
       >
         <View style={styles.row}>
-          <View style={styles.side}>
-            {left ? <HudButton {...left} /> : null}
-          </View>
+          <View style={styles.side}>{left ? <HudButton {...left} /> : null}</View>
           <View style={styles.center}>
             {onTitleLongPress ? (
               <DevTitle kicker={kicker} title={title} onUnveil={onTitleLongPress} />
@@ -41,7 +48,7 @@ export default function OverlayHud({ insets, kicker, title, left, right, onTitle
             )}
           </View>
           <View style={[styles.side, styles.sideRight]}>
-            {right ? <HudButton {...right} /> : null}
+            {right ? isHudAction(right) ? <HudButton {...right} /> : right : null}
           </View>
         </View>
       </LinearGradient>
@@ -98,7 +105,7 @@ function HudTitle({ kicker, title }: { kicker?: string; title: string }) {
   );
 }
 
-function HudButton({ label, onPress }: HudAction) {
+function HudButton({ label, icon, onPress, accessibilityLabel }: HudAction) {
   return (
     <Pressable
       onPress={() => {
@@ -106,9 +113,14 @@ function HudButton({ label, onPress }: HudAction) {
         onPress();
       }}
       hitSlop={8}
-      style={({ pressed }) => [styles.btn, pressed && styles.btnPressed]}
+      accessibilityLabel={accessibilityLabel ?? label ?? (icon === 'back' ? 'Back' : undefined)}
+      style={({ pressed }) => [icon === 'back' ? styles.iconBtn : styles.btn, pressed && styles.btnPressed]}
     >
-      <Text style={styles.btnLabel}>{label}</Text>
+      {icon === 'back' ? (
+        <ChevronLeft size={22} color={Colors.dark.gold} strokeWidth={2.6} />
+      ) : (
+        <Text style={styles.btnLabel}>{label}</Text>
+      )}
     </Pressable>
   );
 }
@@ -124,7 +136,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   side: {
-    width: 88,
+    minWidth: 96,
   },
   sideRight: {
     alignItems: 'flex-end',
@@ -154,6 +166,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.dark.gold + '66',
     backgroundColor: 'rgba(13, 10, 20, 0.72)',
+  },
+  iconBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.dark.gold + '66',
+    backgroundColor: 'rgba(13, 10, 20, 0.72)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   btnPressed: {
     opacity: 0.8,

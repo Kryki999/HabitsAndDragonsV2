@@ -1,108 +1,218 @@
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { DoorOpen, HelpCircle } from 'lucide-react-native';
 
 import Colors from '@/constants/colors';
-import { impactAsync, ImpactFeedbackStyle, notificationAsync, NotificationFeedbackType } from '@/lib/hapticsGate';
+import LootDetailModal, { type LootModalPayload } from '@/components/LootDetailModal';
+import { impactAsync, selectionAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
+import { useHeroStore } from '@/hero/store';
+import BattleSimulationModal from '@/combat/BattleSimulationModal';
+import BossVictoryLootModal from '@/combat/BossVictoryLootModal';
+import FightLootTray from '@/combat/FightLootTray';
+import WinChanceBreakdownModal from '@/combat/WinChanceBreakdownModal';
+import {
+  computeGutterjackWinChance,
+  resolveFight,
+  wineInPack,
+  GUTTERJACK_WINE_ID,
+} from '@/combat/engine';
+import { winChanceColor } from '@/combat/winChanceColor';
+import type { FightLootPrize, FightPhase, FightResolution, WinChanceBreakdown } from '@/combat/types';
 
 import OverlayHud from './OverlayHud';
 import StillFrame from './StillFrame';
-import { GUTTERJACK_COPY, GUTTERJACK_INTRINSIC, WORLD_ART } from './layout';
+import {
+  GUTTERJACK_ART,
+  GUTTERJACK_ART_INTRINSIC,
+  GUTTERJACK_CHALLENGE,
+  GUTTERJACK_LOOT_TABLE,
+} from './content';
 import { useWorldStore } from './store';
+import type { DungeonLootEntry } from '@/types/dungeonLoot';
 
-type Phase = 'brief' | 'fight' | 'victory';
+function payloadFromEntry(entry: DungeonLootEntry): LootModalPayload {
+  if (entry.kind === 'gold') return { type: 'gold', entry };
+  if (entry.kind === 'empty') return { type: 'empty', entry };
+  return { type: 'item', entry };
+}
+
+function grantPrize(
+  prize: FightLootPrize,
+  grantInventoryItem: (id: string) => void,
+  addGold: (n: number) => void,
+) {
+  if (prize.kind === 'gold') addGold(prize.amount);
+  if (prize.kind === 'item') grantInventoryItem(prize.item.id);
+  if (prize.kind === 'items') {
+    for (const item of prize.items) grantInventoryItem(item.id);
+  }
+}
 
 export default function GutterjackLocation() {
   const insets = useSafeAreaInsets();
   const openHub = useWorldStore((s) => s.openHub);
   const markGutterjackCleared = useWorldStore((s) => s.markGutterjackCleared);
   const alreadyCleared = useWorldStore((s) => s.gutterjackCleared);
-  const [phase, setPhase] = useState<Phase>(alreadyCleared ? 'victory' : 'brief');
 
-  const onEnter = () => {
+  const playerLevel = useHeroStore((s) => s.playerLevel);
+  const equippedRelicId = useHeroStore((s) => s.equippedRelicId);
+  const ownedItemIds = useHeroStore((s) => s.ownedItemIds);
+  const consumeOwnedItem = useHeroStore((s) => s.consumeOwnedItem);
+  const grantInventoryItem = useHeroStore((s) => s.grantInventoryItem);
+  const addGold = useHeroStore((s) => s.addGold);
+  const recordBossWin = useHeroStore((s) => s.recordBossWin);
+
+  const [phase, setPhase] = useState<FightPhase>('approach');
+  const [resolution, setResolution] = useState<FightResolution | null>(null);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [inspect, setInspect] = useState<LootModalPayload | null>(null);
+
+  const isFirstClear = !alreadyCleared;
+  const hasWine = wineInPack(ownedItemIds);
+  const willSipWine = hasWine && !isFirstClear;
+
+  const breakdown: WinChanceBreakdown = useMemo(
+    () =>
+      computeGutterjackWinChance({
+        isFirstClear,
+        playerLevel,
+        equippedRelicId,
+        ownedItemIds,
+        willSipWine,
+      }),
+    [isFirstClear, playerLevel, equippedRelicId, ownedItemIds, willSipWine],
+  );
+
+  const chanceColor = winChanceColor(breakdown.displayPct);
+
+  const onBack = useCallback(() => {
+    if (phase === 'clash' || phase === 'loot') return;
+    impactAsync(ImpactFeedbackStyle.Light);
+    openHub();
+  }, [openHub, phase]);
+
+  const onFight = useCallback(() => {
+    selectionAsync();
     impactAsync(ImpactFeedbackStyle.Medium);
-    setPhase('fight');
-  };
+    const sipped = willSipWine ? consumeOwnedItem(GUTTERJACK_WINE_ID) : false;
+    const next = resolveFight({
+      breakdown,
+      isFirstClear,
+      sippedWine: sipped,
+    });
+    if (!next.won) addGold(next.consolationGold);
+    setResolution(next);
+    setPhase('clash');
+  }, [addGold, breakdown, consumeOwnedItem, isFirstClear, willSipWine]);
 
-  const onVictory = () => {
-    notificationAsync(NotificationFeedbackType.Success);
-    markGutterjackCleared();
-    setPhase('victory');
-  };
+  const onOpenChest = useCallback(() => {
+    if (!resolution?.won) return;
+    grantPrize(resolution.loot, grantInventoryItem, addGold);
+    recordBossWin();
+    if (isFirstClear) markGutterjackCleared();
+    setPhase('loot');
+  }, [addGold, grantInventoryItem, isFirstClear, markGutterjackCleared, recordBossWin, resolution]);
 
-  const panel =
-    phase === 'brief'
-      ? {
-          kicker: alreadyCleared ? GUTTERJACK_COPY.clearedKicker : GUTTERJACK_COPY.kicker,
-          title: GUTTERJACK_COPY.title,
-          body: GUTTERJACK_COPY.blurb,
-          primary: GUTTERJACK_COPY.enter,
-          onPrimary: onEnter,
-        }
-      : phase === 'fight'
-        ? {
-            kicker: GUTTERJACK_COPY.fightKicker,
-            title: GUTTERJACK_COPY.title,
-            body: GUTTERJACK_COPY.fightBlurb,
-            primary: GUTTERJACK_COPY.victory,
-            onPrimary: onVictory,
-          }
-        : {
-            kicker: GUTTERJACK_COPY.clearedKicker,
-            title: GUTTERJACK_COPY.title,
-            body: GUTTERJACK_COPY.clearedBlurb,
-            primary: GUTTERJACK_COPY.backToHub,
-            onPrimary: openHub,
-          };
+  const onRematch = useCallback(() => {
+    setResolution(null);
+    setPhase('approach');
+  }, []);
+
+  const onCollectLoot = useCallback(() => {
+    setResolution(null);
+    setPhase('approach');
+  }, []);
+
+  const showApproachChrome = phase === 'approach';
 
   return (
     <View style={styles.root}>
       <StillFrame
-        source={WORLD_ART.gutterjack}
-        intrinsicWidth={GUTTERJACK_INTRINSIC.width}
-        intrinsicHeight={GUTTERJACK_INTRINSIC.height}
+        source={GUTTERJACK_ART.fight}
+        intrinsicWidth={GUTTERJACK_ART_INTRINSIC.width}
+        intrinsicHeight={GUTTERJACK_ART_INTRINSIC.height}
       />
 
-      <OverlayHud
-        insets={insets}
-        kicker="Dungeon"
-        title="Gutterjack"
-        left={{ label: GUTTERJACK_COPY.back, onPress: openHub }}
-      />
-
-      <View pointerEvents="box-none" style={[styles.sheetWrap, { paddingBottom: 12 + insets.bottom }]}>
-        <LinearGradient colors={['transparent', 'rgba(7,5,16,0.72)', 'rgba(7,5,16,0.94)']} style={styles.fade} />
-        <View style={styles.sheet}>
-          <Text style={styles.kicker}>{panel.kicker}</Text>
-          <Text style={styles.title}>{panel.title}</Text>
-          <Text style={styles.body}>{panel.body}</Text>
-          <View style={styles.actions}>
-            {phase !== 'victory' ? (
+      {showApproachChrome ? (
+        <>
+          <OverlayHud
+            insets={insets}
+            kicker={GUTTERJACK_CHALLENGE.dungeonName}
+            title={GUTTERJACK_CHALLENGE.bossName}
+            left={{ icon: 'back', onPress: onBack, accessibilityLabel: 'Back' }}
+            right={
               <Pressable
+                testID="win-chance"
                 onPress={() => {
                   impactAsync(ImpactFeedbackStyle.Light);
-                  openHub();
+                  setHelpOpen(true);
                 }}
-                style={({ pressed }) => [styles.secondary, pressed && styles.pressed]}
+                hitSlop={8}
+                style={({ pressed }) => [styles.winBadge, pressed && styles.pressed]}
               >
-                <Text style={styles.secondaryText}>{GUTTERJACK_COPY.back}</Text>
+                <Text style={[styles.winPct, { color: chanceColor }]}>{breakdown.displayPct}%</Text>
+                <View style={styles.helpDot}>
+                  <HelpCircle size={15} color={Colors.dark.cyan} strokeWidth={2.4} />
+                </View>
               </Pressable>
-            ) : null}
-            <Pressable
-              onPress={panel.onPrimary}
-              style={({ pressed }) => [
-                styles.primary,
-                phase === 'fight' && styles.primaryFight,
-                phase === 'victory' && styles.primaryWon,
-                pressed && styles.pressed,
-              ]}
-            >
-              <Text style={styles.primaryText}>{panel.primary}</Text>
-            </Pressable>
+            }
+          />
+
+          <View pointerEvents="box-none" style={[styles.sheetWrap, { paddingBottom: 12 + insets.bottom }]}>
+            <LinearGradient colors={['transparent', 'rgba(0,0,0,0.5)', 'rgba(0,0,0,0.94)']} style={styles.fade} />
+            <View style={styles.bottom}>
+              <FightLootTray table={GUTTERJACK_LOOT_TABLE} onInspect={(entry) => setInspect(payloadFromEntry(entry))} />
+              <Pressable
+                testID="fight-button"
+                onPress={onFight}
+                style={({ pressed }) => [styles.fightOuter, pressed && styles.fightPressed]}
+              >
+                <LinearGradient
+                  colors={[...Colors.gradients.gold]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.fightGradient}
+                >
+                  <DoorOpen size={18} color="#1a1228" />
+                  <Text style={styles.fightLabel}>Fight</Text>
+                </LinearGradient>
+              </Pressable>
+            </View>
           </View>
-        </View>
-      </View>
+        </>
+      ) : null}
+
+      <BattleSimulationModal
+        visible={phase === 'clash' || phase === 'outcome'}
+        dungeonName={GUTTERJACK_CHALLENGE.dungeonName}
+        bossName={GUTTERJACK_CHALLENGE.bossName}
+        resolution={resolution}
+        onOpenChest={onOpenChest}
+        onRematch={onRematch}
+      />
+
+      <BossVictoryLootModal
+        visible={phase === 'loot' && resolution?.won === true}
+        bossName={GUTTERJACK_CHALLENGE.bossName}
+        dungeonName={GUTTERJACK_CHALLENGE.dungeonName}
+        accentColor={GUTTERJACK_CHALLENGE.accentColor}
+        lootTable={GUTTERJACK_LOOT_TABLE}
+        prize={resolution?.won ? resolution.loot : null}
+        onCollect={onCollectLoot}
+      />
+
+      <WinChanceBreakdownModal visible={helpOpen} breakdown={breakdown} onClose={() => setHelpOpen(false)} />
+
+      <LootDetailModal
+        visible={inspect != null}
+        onClose={() => setInspect(null)}
+        payload={inspect}
+        accentHint={
+          inspect?.type === 'item' ? undefined : inspect?.type === 'gold' ? Colors.dark.gold : undefined
+        }
+      />
     </View>
   );
 }
@@ -112,6 +222,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#070510',
   },
+  winBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.14)',
+    backgroundColor: 'rgba(0,0,0,0.45)',
+  },
+  winPct: {
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.2,
+  },
+  helpDot: {
+    padding: 1,
+  },
   sheetWrap: {
     position: 'absolute',
     left: 0,
@@ -119,75 +248,35 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   fade: {
-    height: 48,
+    height: 56,
   },
-  sheet: {
-    marginHorizontal: 14,
-    paddingHorizontal: 16,
-    paddingTop: 14,
-    paddingBottom: 14,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: Colors.dark.border + 'cc',
-    backgroundColor: 'rgba(18, 12, 28, 0.94)',
+  bottom: {
+    paddingHorizontal: 12,
+    paddingBottom: 12,
   },
-  kicker: {
-    color: Colors.dark.gold,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 1.3,
-    textTransform: 'uppercase',
-    marginBottom: 4,
+  fightOuter: {
+    borderRadius: 14,
+    overflow: 'hidden',
+    alignSelf: 'stretch',
   },
-  title: {
-    color: Colors.dark.text,
-    fontSize: 22,
-    fontWeight: '800',
+  fightPressed: {
+    opacity: 0.92,
+    transform: [{ scale: 0.98 }],
   },
-  body: {
-    marginTop: 8,
-    color: Colors.dark.textSecondary,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  actions: {
-    marginTop: 14,
+  fightGradient: {
     flexDirection: 'row',
-    gap: 10,
-  },
-  secondary: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
   },
-  secondaryText: {
-    color: Colors.dark.textSecondary,
+  fightLabel: {
     fontSize: 14,
     fontWeight: '800',
-  },
-  primary: {
-    flex: 1.4,
-    paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: Colors.dark.gold,
-    alignItems: 'center',
-  },
-  primaryFight: {
-    backgroundColor: Colors.dark.emerald,
-  },
-  primaryWon: {
-    backgroundColor: Colors.dark.gold,
-  },
-  primaryText: {
-    color: '#1a1220',
-    fontSize: 14,
-    fontWeight: '900',
-    letterSpacing: 0.3,
+    color: '#1a1228',
   },
   pressed: {
-    opacity: 0.86,
+    opacity: 0.8,
   },
 });

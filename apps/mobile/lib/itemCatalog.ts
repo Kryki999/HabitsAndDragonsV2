@@ -1,9 +1,9 @@
+import { GUTTERJACK_ITEMS } from '@/world/content';
 import type { LootItemEntry } from '@/types/dungeonLoot';
 
 /**
- * Slim cosmetic catalog for the Hero equipment shell.
- * Not the V1 dungeon loot tables. Owner can later swap IDs / drop real art
- * (V1 raster assets were gitignored; slots use Lucide glyphs).
+ * Hero catalog: demo stand-ins + Gutterjack drop items.
+ * V1 raster art was gitignored; slots use Lucide glyphs.
  */
 const DEMO_ITEMS: LootItemEntry[] = [
   {
@@ -26,7 +26,10 @@ const DEMO_ITEMS: LootItemEntry[] = [
   },
 ];
 
-const byId = new Map<string, LootItemEntry>(DEMO_ITEMS.map((item) => [item.id, item]));
+const byId = new Map<string, LootItemEntry>([
+  ...DEMO_ITEMS.map((item) => [item.id, item] as const),
+  ...GUTTERJACK_ITEMS.map((item) => [item.id, item] as const),
+]);
 
 export function resolveLootItemById(itemId: string): LootItemEntry | null {
   return byId.get(itemId) ?? null;

@@ -103,6 +103,37 @@ export const useHeroStore = create<HeroStore>()(
           };
         });
       },
+
+      addGold: (amount) => {
+        if (amount <= 0) return;
+        set((state) => ({ gold: state.gold + amount }));
+      },
+
+      grantInventoryItem: (itemId) => {
+        if (!resolveLootItemById(itemId)) return;
+        set((state) => ({ ownedItemIds: [...state.ownedItemIds, itemId] }));
+      },
+
+      consumeOwnedItem: (itemId) => {
+        let consumed = false;
+        set((state) => {
+          const owned = [...state.ownedItemIds];
+          const index = owned.lastIndexOf(itemId);
+          if (index < 0) return state;
+          consumed = true;
+          owned.splice(index, 1);
+          let equippedOutfitId = state.equippedOutfitId;
+          let equippedRelicId = state.equippedRelicId;
+          if (equippedOutfitId === itemId && !owned.includes(itemId)) equippedOutfitId = null;
+          if (equippedRelicId === itemId && !owned.includes(itemId)) equippedRelicId = null;
+          return { ownedItemIds: owned, equippedOutfitId, equippedRelicId };
+        });
+        return consumed;
+      },
+
+      recordBossWin: () => {
+        set((state) => ({ bossesDefeated: state.bossesDefeated + 1 }));
+      },
     }),
     {
       name: 'hnd-hero-local',
