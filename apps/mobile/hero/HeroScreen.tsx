@@ -323,7 +323,7 @@ export default function HeroScreen() {
       start={{ x: 0.5, y: 0 }}
       end={{ x: 0.5, y: 1 }}
     >
-      <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
+      <SafeAreaView style={styles.safe} edges={["left", "right"]}>
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}

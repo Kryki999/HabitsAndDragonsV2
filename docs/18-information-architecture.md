@@ -68,7 +68,7 @@ Jak gracz chodzi po Świecie **w apce teraz** (nie nowy tab, nie lista wyjść):
 2. **Hub Crownhaven** — pełny still do tab bara. HUD: Capital / Crownhaven. Wejścia = hotspoty na grafice. **Back** → mapa. Zero listy lokacji pod obrazkiem.
 3. **Tawerna** — HUD: kicker hubu (`Crownhaven`) + tytuł miejsca (`Tavern`). Góra-prawo: **winda z etykietami** (Upper later / Ground / Cellar). Aktywne piętro podświetlone; tap = skok. Jedna decyzja na ekran: Back opuszcza miejsce (→ hub), winda zmienia piętro.
 4. **Cellar / Gutterjack** — walka bez przebudowy (tray rarity + Fight CTA, win% góra-prawo). Winda w tym samym stacku, nad win%.
-5. **Account HUD** — górne brzegi World: **Lv** (lewo) + **gold / keys** (prawo). Środek stilla wolny. Liczby z `hero` store (klucze startują od 0). Display-only; bez mail/settings/DEV panelu.
+5. **Account HUD** — globalny pasek **nad tabami** (jak V1 nad Castle): avatar + pierścień XP, nick, **Lv**, **gold**, **keys**. Layout, nie overlay na stillu World. Liczby z `hero`. `__DEV__`: badge **DEV** otwiera panel (long-press na staty zostaje skrótem). Production: bez badge/panelu. Mail/settings PARK.
 
 Hotspot schodów na stillu jest **opcjonalny** i woła to samo `setFloor` co winda — nie drugie menu. Structure windy jest gotowa na trzecie piętro (Upper = locked placeholder).
 

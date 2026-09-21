@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -14,26 +15,35 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Colors from '@/constants/colors';
 import { useHeroStore } from '@/hero/store';
 import { impactAsync, ImpactFeedbackStyle, notificationAsync, NotificationFeedbackType } from '@/lib/hapticsGate';
-
-import { ACCOUNT_BAR_RESERVE } from './accountBarLayout';
-import { nextHiddenFogRegionId } from './layout';
-import { useWorldStore } from './store';
+import { nextHiddenFogRegionId } from '@/world/layout';
+import { useWorldStore } from '@/world/store';
 
 type Props = {
+  visible: boolean;
   onClose: () => void;
 };
 
 /**
  * DEV-only overlay. Production never mounts this — AccountBar gates on `__DEV__`.
- * Mutates `hero` + `world` stores so the account bar chips update live.
+ * Mutates `hero` + `world` stores so the account bar updates live.
  */
-export default function DevToolsPanel({ onClose }: Props) {
+export default function DevToolsPanel({ visible, onClose }: Props) {
   if (!__DEV__) return null;
 
-  return <DevToolsBody onClose={onClose} />;
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      statusBarTranslucent
+      onRequestClose={onClose}
+    >
+      <DevToolsBody onClose={onClose} />
+    </Modal>
+  );
 }
 
-function DevToolsBody({ onClose }: Props) {
+function DevToolsBody({ onClose }: { onClose: () => void }) {
   const insets = useSafeAreaInsets();
   const gold = useHeroStore((s) => s.gold);
   const dungeonKeys = useHeroStore((s) => s.dungeonKeys ?? 0);
@@ -115,10 +125,7 @@ function DevToolsBody({ onClose }: Props) {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         pointerEvents="box-none"
-        style={[
-          styles.sheetWrap,
-          { paddingTop: Math.max(insets.top, 10) + ACCOUNT_BAR_RESERVE + 8 },
-        ]}
+        style={[styles.sheetWrap, { paddingTop: Math.max(insets.top, 10) + 12 }]}
       >
         <View style={styles.card}>
           <View style={styles.header}>
@@ -127,7 +134,7 @@ function DevToolsBody({ onClose }: Props) {
               <Text style={styles.close}>Close</Text>
             </Pressable>
           </View>
-          <Text style={styles.title}>World tools</Text>
+          <Text style={styles.title}>DEV tools</Text>
           <Text style={styles.readout}>
             Lv.{playerLevel} · {gold} gold · {dungeonKeys} keys
           </Text>
@@ -236,8 +243,7 @@ function ToolButton({
 
 const styles = StyleSheet.create({
   root: {
-    ...StyleSheet.absoluteFill,
-    zIndex: 1,
+    flex: 1,
   },
   backdrop: {
     ...StyleSheet.absoluteFill,
