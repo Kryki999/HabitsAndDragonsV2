@@ -28,12 +28,18 @@ export function fitContain(
   };
 }
 
-/** Cover the box; crop overflow. Art fills to the tab bar — no letterbox strip. */
+export type CoverAnchor = 'center' | 'top' | 'bottom';
+
+/**
+ * Cover the box; crop overflow. Art fills to the tab bar — no letterbox strip.
+ * `bottom` keeps the floor in frame (fight chrome sits on top of it).
+ */
 export function fitCover(
   imageWidth: number,
   imageHeight: number,
   boxWidth: number,
   boxHeight: number,
+  anchor: CoverAnchor = 'center',
 ): FittedBox {
   if (boxWidth <= 0 || boxHeight <= 0 || imageWidth <= 0 || imageHeight <= 0) {
     return { width: 0, height: 0, left: 0, top: 0 };
@@ -41,11 +47,14 @@ export function fitCover(
   const scale = Math.max(boxWidth / imageWidth, boxHeight / imageHeight);
   const width = imageWidth * scale;
   const height = imageHeight * scale;
+  let top = (boxHeight - height) / 2;
+  if (anchor === 'top') top = 0;
+  if (anchor === 'bottom') top = boxHeight - height;
   return {
     width,
     height,
     left: (boxWidth - width) / 2,
-    top: (boxHeight - height) / 2,
+    top,
   };
 }
 
@@ -53,16 +62,24 @@ type Props = {
   source: ImageSourcePropType;
   intrinsicWidth: number;
   intrinsicHeight: number;
+  /** Where to pin the still when cover crops height. Default center. */
+  anchor?: CoverAnchor;
   children?: (box: FittedBox) => React.ReactNode;
 };
 
 /** Cover-fit still. Children layout in image space. */
-export default function StillFrame({ source, intrinsicWidth, intrinsicHeight, children }: Props) {
+export default function StillFrame({
+  source,
+  intrinsicWidth,
+  intrinsicHeight,
+  anchor = 'center',
+  children,
+}: Props) {
   const [viewport, setViewport] = useState({ width: 0, height: 0 });
 
   const fitted = useMemo(
-    () => fitCover(intrinsicWidth, intrinsicHeight, viewport.width, viewport.height),
-    [intrinsicWidth, intrinsicHeight, viewport.height, viewport.width],
+    () => fitCover(intrinsicWidth, intrinsicHeight, viewport.width, viewport.height, anchor),
+    [anchor, intrinsicHeight, intrinsicWidth, viewport.height, viewport.width],
   );
 
   const onLayout = (event: LayoutChangeEvent) => {
