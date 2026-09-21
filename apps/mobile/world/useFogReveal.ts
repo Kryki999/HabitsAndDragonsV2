@@ -29,12 +29,18 @@ export function useFogReveal() {
     const sync = (animateNew: boolean) => {
       const ids = useWorldStore.getState().discoveredRegionIds;
       for (const region of MAP_FOG_REGIONS) {
-        if (!isOpen(region.id, ids)) continue;
         const value = progress[region.id];
-        if (!value || value.value >= 0.999) continue;
-        value.value = animateNew
-          ? withTiming(1, { duration: REVEAL_MS, easing: Easing.bezier(0.16, 1, 0.3, 1) })
-          : 1;
+        if (!value) continue;
+        if (isOpen(region.id, ids)) {
+          if (value.value >= 0.999) continue;
+          value.value = animateNew
+            ? withTiming(1, { duration: REVEAL_MS, easing: Easing.bezier(0.16, 1, 0.3, 1) })
+            : 1;
+          continue;
+        }
+        if (!region.revealedByDefault && value.value !== 0) {
+          value.value = 0;
+        }
       }
     };
 

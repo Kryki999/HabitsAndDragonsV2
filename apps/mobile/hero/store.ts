@@ -115,6 +115,11 @@ export const useHeroStore = create<HeroStore>()(
         set((state) => ({ dungeonKeys: Math.max(0, (state.dungeonKeys ?? 0) + amount) }));
       },
 
+      setPlayerLevel: (level) => {
+        if (!Number.isFinite(level)) return;
+        set({ playerLevel: Math.max(1, Math.min(99, Math.floor(level))) });
+      },
+
       grantInventoryItem: (itemId) => {
         if (!resolveLootItemById(itemId)) return;
         set((state) => ({ ownedItemIds: [...state.ownedItemIds, itemId] }));
