@@ -1,4 +1,17 @@
-import type { DungeonLootEntry, LootItemEntry } from '@/types/dungeonLoot';
+import type { CombatSynergyTier, DungeonLootEntry, LootItemEntry } from '@/types/dungeonLoot';
+
+/** Shared fight identity — Gutterjack and playground map bosses. */
+export type CombatChallenge = {
+  id: string;
+  dungeonName: string;
+  bossId: string;
+  bossName: string;
+  accentColor: string;
+  tier: CombatSynergyTier;
+  bossLevel: number;
+  baseWinChance: number;
+  failureConsolationGoldRange: readonly [number, number];
+};
 
 export type FightPhase = 'approach' | 'clash' | 'outcome' | 'loot';
 
@@ -13,6 +26,8 @@ export type WinChanceBreakdown = {
   chance: number;
   displayPct: number;
   tutorialLock: boolean;
+  /** Shown under the % when the first fight is locked. */
+  tutorialNote?: string;
   lines: WinChanceLine[];
   howToImprove: string[];
 };

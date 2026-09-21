@@ -7,10 +7,20 @@ import {
   GUTTERJACK_TULIP_ID,
   GUTTERJACK_WINE_ID,
   GUTTER_CORK_ID,
+  PLAYGROUND_EMPTY,
+  PLAYGROUND_FARM_WEIGHTS,
+  PLAYGROUND_GOLD,
+  PLAYGROUND_GOLD_ID,
 } from '@/world/content';
 import type { LootItemEntry } from '@/types/dungeonLoot';
 
-import type { FightLootPrize, FightResolution, WinChanceBreakdown, WinChanceLine } from './types';
+import type {
+  CombatChallenge,
+  FightLootPrize,
+  FightResolution,
+  WinChanceBreakdown,
+  WinChanceLine,
+} from './types';
 
 /** V1 `BATTLE_SIMULATION_MS` — sword clash hold. */
 export const BATTLE_CLASH_MS = 2800;
@@ -32,13 +42,16 @@ function itemById(id: string): LootItemEntry | null {
   return GUTTERJACK_ITEMS.find((i) => i.id === id) ?? null;
 }
 
-function equippedCommonBonus(equippedRelicId: string | null): { bonus: number; name: string | null } {
+function equippedBonus(
+  equippedRelicId: string | null,
+  challenge: CombatChallenge,
+): { bonus: number; name: string | null } {
   if (!equippedRelicId) return { bonus: 0, name: null };
   const item = itemById(equippedRelicId);
   if (!item || item.consumable) return { bonus: 0, name: null };
-  const vsCommon = item.synergyTier === 'common';
-  const vsBoss = item.synergyBossId === GUTTERJACK_CHALLENGE.bossId;
-  if (!vsCommon && !vsBoss) return { bonus: 0, name: null };
+  const vsTier = item.synergyTier === challenge.tier;
+  const vsBoss = item.synergyBossId === challenge.bossId;
+  if (!vsTier && !vsBoss) return { bonus: 0, name: null };
   return { bonus: item.synergyWinChanceBonus ?? 0, name: item.name };
 }
 
@@ -57,45 +70,50 @@ export type WinChanceInput = {
 
 /**
  * V2 Bible combat (Act 1): level Δ + equipped affixes + one pot.
- * No hex, no class, no dragons. First Gutterjack = 100% tutorial lock.
+ * No hex, no class, no dragons. First fight = 100% tutorial lock.
  */
-export function computeGutterjackWinChance(input: WinChanceInput): WinChanceBreakdown {
-  const c = GUTTERJACK_CHALLENGE;
-  const levelDelta = input.playerLevel - c.bossLevel;
+export function computeWinChance(
+  challenge: CombatChallenge,
+  input: WinChanceInput,
+  opts?: { sipWine?: boolean },
+): WinChanceBreakdown {
+  const sipWine = opts?.sipWine === true;
+  const levelDelta = input.playerLevel - challenge.bossLevel;
   const levelBonus = levelDelta * LEVEL_STEP;
-  const gear = equippedCommonBonus(input.equippedRelicId);
-  const hasWine = wineInPack(input.ownedItemIds);
-  const potionBonus = input.willSipWine && hasWine ? 0.05 : 0;
+  const gear = equippedBonus(input.equippedRelicId, challenge);
+  const hasWine = sipWine && wineInPack(input.ownedItemIds);
+  const potionBonus = sipWine && input.willSipWine && hasWine ? 0.05 : 0;
 
-  const raw = c.baseWinChance + levelBonus + gear.bonus + potionBonus;
+  const raw = challenge.baseWinChance + levelBonus + gear.bonus + potionBonus;
   const farm = clamp01(Math.min(CHANCE_CEIL, Math.max(CHANCE_FLOOR, raw)));
   const tutorialLock = input.isFirstClear;
   const chance = tutorialLock ? 1 : farm;
 
-  const pct = (x: number) => `${x >= 0 ? '+' : ''}${Math.round(x * 100)}%`;
-
   const lines: WinChanceLine[] = [
-    { label: 'Base chance', pct: Math.round(c.baseWinChance * 100) },
+    { label: 'Base chance', pct: Math.round(challenge.baseWinChance * 100) },
     {
       label: `Level difference (${levelDelta >= 0 ? '+' : ''}${levelDelta})`,
       pct: Math.round(levelBonus * 100),
     },
     {
       label: gear.bonus > 0 ? `${gear.name} (equipped)` : 'Gear affix',
-      detail: gear.bonus > 0 ? '+10% vs Common' : 'None equipped',
+      detail: gear.bonus > 0 ? `+${Math.round(gear.bonus * 100)}% vs ${challenge.tier}` : 'None equipped',
       pct: Math.round(gear.bonus * 100),
     },
-    {
+  ];
+
+  if (sipWine) {
+    lines.push({
       label: potionBonus > 0 ? "Gutterjack's Wine (sip)" : "Gutterjack's Wine",
       detail: potionBonus > 0 ? 'Sipped on Fight' : hasWine ? 'In pack — Fight sips it' : 'Not in pack',
       pct: Math.round(potionBonus * 100),
-    },
-  ];
+    });
+  }
 
   if (tutorialLock) {
     lines.push({
       label: 'Tutorial lock',
-      detail: 'First Gutterjack always falls',
+      detail: `First ${challenge.bossName} always falls`,
       pct: 100,
     });
   } else if (Math.abs(raw - farm) > 1e-6) {
@@ -108,37 +126,54 @@ export function computeGutterjackWinChance(input: WinChanceInput): WinChanceBrea
 
   const howToImprove: string[] = [];
   if (gear.bonus <= 0) {
-    howToImprove.push("Equip Gutterjack's Tulip — +10% vs Common.");
+    howToImprove.push(
+      sipWine ? "Equip Gutterjack's Tulip — +10% vs Common." : 'Equip a Common-synergy relic for a win bump.',
+    );
   }
-  if (!hasWine) {
+  if (sipWine && !hasWine) {
     howToImprove.push("Keep Gutterjack's Wine in your pack — Fight sips it for +5%.");
-  } else if (!input.willSipWine) {
-    howToImprove.push("Wine stays for later — this tutorial fight is already 100%.");
+  } else if (sipWine && !input.willSipWine) {
+    howToImprove.push('Wine stays for later — this tutorial fight is already 100%.');
   }
   if (levelDelta < 3) {
     howToImprove.push('Raise hero level — +2% win per level over the boss.');
   }
   if (howToImprove.length === 0) {
-    howToImprove.push('This cellar is as stacked as it gets. Farm for the Tulip flex, or move on.');
+    howToImprove.push(
+      sipWine
+        ? 'This cellar is as stacked as it gets. Farm for the Tulip flex, or move on.'
+        : 'This fight is as stacked as it gets. Farm, or move on.',
+    );
   }
 
   return {
     chance,
     displayPct: Math.round(chance * 100),
     tutorialLock,
+    tutorialNote: tutorialLock
+      ? 'First fight — tutorial lock. Later fights use the sum below.'
+      : undefined,
     lines,
     howToImprove,
   };
 }
 
-function pickFarmRow(): string {
-  const total = GUTTERJACK_FARM_WEIGHTS.reduce((s, r) => s + r.weight, 0);
+export function computeGutterjackWinChance(input: WinChanceInput): WinChanceBreakdown {
+  return computeWinChance(GUTTERJACK_CHALLENGE, input, { sipWine: true });
+}
+
+function pickWeightedRow(rows: { id: string; weight: number }[]): string {
+  const total = rows.reduce((s, r) => s + r.weight, 0);
   let u = Math.random() * total;
-  for (const row of GUTTERJACK_FARM_WEIGHTS) {
+  for (const row of rows) {
     if (u < row.weight) return row.id;
     u -= row.weight;
   }
-  return GUTTERJACK_EMPTY.id;
+  return rows[rows.length - 1]?.id ?? PLAYGROUND_EMPTY.id;
+}
+
+function pickFarmRow(): string {
+  return pickWeightedRow(GUTTERJACK_FARM_WEIGHTS);
 }
 
 function prizeFromRow(id: string): FightLootPrize {
@@ -171,6 +206,18 @@ export function rollGutterjackLoot(isFirstClear: boolean): FightLootPrize {
   return prizeFromRow(pickFarmRow());
 }
 
+/** Playground map bosses: gold on first clear, gold/empty on farm. No unique items yet. */
+export function rollPlaygroundLoot(isFirstClear: boolean): FightLootPrize {
+  if (isFirstClear || pickWeightedRow(PLAYGROUND_FARM_WEIGHTS) === PLAYGROUND_GOLD_ID) {
+    return {
+      kind: 'gold',
+      amount: randomInt(PLAYGROUND_GOLD.goldMin, PLAYGROUND_GOLD.goldMax),
+      entry: PLAYGROUND_GOLD,
+    };
+  }
+  return { kind: 'empty', entry: PLAYGROUND_EMPTY };
+}
+
 export function headlineLootId(prize: FightLootPrize): string {
   if (prize.kind === 'empty') return prize.entry.id;
   if (prize.kind === 'gold') return prize.entry.id;
@@ -182,17 +229,21 @@ export function resolveFight(opts: {
   breakdown: WinChanceBreakdown;
   isFirstClear: boolean;
   sippedWine: boolean;
+  challenge?: CombatChallenge;
+  rollLoot?: (isFirstClear: boolean) => FightLootPrize;
 }): FightResolution {
+  const challenge = opts.challenge ?? GUTTERJACK_CHALLENGE;
   const won = opts.breakdown.tutorialLock || Math.random() < opts.breakdown.chance;
   if (won) {
+    const roll = opts.rollLoot ?? rollGutterjackLoot;
     return {
       won: true,
       chance: opts.breakdown.chance,
-      loot: rollGutterjackLoot(opts.isFirstClear),
+      loot: roll(opts.isFirstClear),
       sippedWine: opts.sippedWine,
     };
   }
-  const [lo, hi] = GUTTERJACK_CHALLENGE.failureConsolationGoldRange;
+  const [lo, hi] = challenge.failureConsolationGoldRange;
   return {
     won: false,
     chance: opts.breakdown.chance,

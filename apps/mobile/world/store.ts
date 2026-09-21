@@ -4,7 +4,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { INTERIORS, floorById, isFloorOpen, resolveFloorId, type InteriorFloorId } from './interiors';
 import { DEFAULT_REVEALED_REGION_IDS, MAP_FOG_REGIONS } from './layout';
-import type { WorldActions, WorldInteriorId, WorldState } from './types';
+import type { MapLocationId, WorldActions, WorldInteriorId, WorldState } from './types';
 
 const ALWAYS_DISCOVERED = ['crownhaven'] as const;
 const REGION_IDS = new Set(MAP_FOG_REGIONS.map((region) => region.id));
@@ -25,19 +25,42 @@ function asRegionIds(ids: string[] | undefined): string[] {
   return withCapital([...DEFAULT_REVEALED_REGION_IDS, ...fromSave]);
 }
 
+function asClearedEncounterIds(
+  ids: string[] | undefined,
+  gutterjackCleared: boolean | undefined,
+): string[] {
+  const next = [...(ids ?? [])];
+  if (gutterjackCleared) return uniquePush(next, 'gutterjack');
+  return next;
+}
+
 export const useWorldStore = create<WorldStore>()(
   persist(
     (set) => ({
       currentScreen: 'map',
       currentInteriorId: null,
       currentFloorId: null,
+      currentLocationId: null,
       discoveredLocationIds: [...ALWAYS_DISCOVERED],
       discoveredRegionIds: [...DEFAULT_REVEALED_REGION_IDS],
+      clearedEncounterIds: [],
       gutterjackCleared: false,
 
-      openHub: () => set({ currentScreen: 'hub', currentInteriorId: null, currentFloorId: null }),
+      openHub: () =>
+        set({
+          currentScreen: 'hub',
+          currentInteriorId: null,
+          currentFloorId: null,
+          currentLocationId: null,
+        }),
 
-      openMap: () => set({ currentScreen: 'map', currentInteriorId: null, currentFloorId: null }),
+      openMap: () =>
+        set({
+          currentScreen: 'map',
+          currentInteriorId: null,
+          currentFloorId: null,
+          currentLocationId: null,
+        }),
 
       openInterior: (id: WorldInteriorId, floorId?: InteriorFloorId) =>
         set((state) => {
@@ -49,6 +72,7 @@ export const useWorldStore = create<WorldStore>()(
             currentScreen: 'interior',
             currentInteriorId: id,
             currentFloorId: nextFloor,
+            currentLocationId: null,
             discoveredLocationIds: discovered,
           };
         }),
@@ -65,10 +89,41 @@ export const useWorldStore = create<WorldStore>()(
           return { currentFloorId: floor.id, discoveredLocationIds: discovered };
         }),
 
+      openLocation: (id: MapLocationId) =>
+        set((state) => ({
+          currentScreen: 'location',
+          currentLocationId: id,
+          currentInteriorId: null,
+          currentFloorId: null,
+          discoveredLocationIds: uniquePush(state.discoveredLocationIds, id),
+        })),
+
+      openEncounter: (id: MapLocationId) =>
+        set((state) => ({
+          currentScreen: 'encounter',
+          currentLocationId: id,
+          currentInteriorId: null,
+          currentFloorId: null,
+          discoveredLocationIds: uniquePush(state.discoveredLocationIds, id),
+        })),
+
+      closeEncounter: () =>
+        set((state) => ({
+          currentScreen: 'location',
+          currentLocationId: state.currentLocationId,
+        })),
+
       markGutterjackCleared: () =>
         set((state) => ({
           gutterjackCleared: true,
+          clearedEncounterIds: uniquePush(state.clearedEncounterIds, 'gutterjack'),
           discoveredLocationIds: uniquePush(state.discoveredLocationIds, 'gutterjack'),
+        })),
+
+      markEncounterCleared: (id: string) =>
+        set((state) => ({
+          clearedEncounterIds: uniquePush(state.clearedEncounterIds, id),
+          gutterjackCleared: id === 'gutterjack' ? true : state.gutterjackCleared,
         })),
 
       discoverRegion: (id: string) =>
@@ -79,19 +134,25 @@ export const useWorldStore = create<WorldStore>()(
     }),
     {
       name: 'hnd-world-local',
-      version: 3,
+      version: 4,
       storage: createJSONStorage(() => AsyncStorage),
       migrate: (persisted) => {
         const prev = persisted as Partial<WorldState> | undefined;
+        const clearedEncounterIds = asClearedEncounterIds(
+          prev?.clearedEncounterIds,
+          prev?.gutterjackCleared,
+        );
         return {
           discoveredLocationIds: prev?.discoveredLocationIds ?? [...ALWAYS_DISCOVERED],
           discoveredRegionIds: asRegionIds(prev?.discoveredRegionIds ?? prev?.discoveredLocationIds),
-          gutterjackCleared: prev?.gutterjackCleared ?? false,
+          clearedEncounterIds,
+          gutterjackCleared: prev?.gutterjackCleared ?? clearedEncounterIds.includes('gutterjack'),
         };
       },
       partialize: (state) => ({
         discoveredLocationIds: state.discoveredLocationIds,
         discoveredRegionIds: state.discoveredRegionIds,
+        clearedEncounterIds: state.clearedEncounterIds,
         gutterjackCleared: state.gutterjackCleared,
       }),
     },

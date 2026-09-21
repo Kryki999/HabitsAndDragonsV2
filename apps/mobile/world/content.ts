@@ -9,8 +9,8 @@ import type {
 } from '@/types/dungeonLoot';
 
 /**
- * Thin Act 1 world/content — Gutterjack only this slice.
- * Drop table LOCK: docs/23-act1-location-brainstorm.md §B2c.
+ * Act 1 world content. Gutterjack drop table LOCK: docs/23 §B2c.
+ * Map stills / bosses: `locations.ts` (existing assets only).
  */
 
 export const GUTTERJACK_BOSS_ID = 'gutterjack' as const;
@@ -116,3 +116,32 @@ export const GUTTERJACK_CHALLENGE = {
   baseWinChance: 0.72,
   failureConsolationGoldRange: [8, 16] as [number, number],
 } as const;
+
+/** Shared playground tray for map bosses — unique drop tables are a later PR. */
+export const PLAYGROUND_GOLD_ID = 'playground_gold';
+export const PLAYGROUND_EMPTY_ID = 'playground_empty';
+
+export const PLAYGROUND_GOLD: LootGoldEntry = {
+  id: PLAYGROUND_GOLD_ID,
+  kind: 'gold',
+  name: 'Pocket coins',
+  rarity: 'common',
+  description: 'A handful of coins from the road. Placeholder loot until this dungeon has a table.',
+  goldMin: 18,
+  goldMax: 32,
+};
+
+export const PLAYGROUND_EMPTY: LootEmptyEntry = {
+  id: PLAYGROUND_EMPTY_ID,
+  kind: 'empty',
+  name: 'Nothing',
+  rarity: 'common',
+  description: 'The pockets were already empty. Farm wins can roll blank.',
+};
+
+export const PLAYGROUND_LOOT_TABLE: DungeonLootEntry[] = [PLAYGROUND_EMPTY, PLAYGROUND_GOLD];
+
+export const PLAYGROUND_FARM_WEIGHTS: { id: string; weight: number }[] = [
+  { id: PLAYGROUND_EMPTY_ID, weight: 40 },
+  { id: PLAYGROUND_GOLD_ID, weight: 60 },
+];
