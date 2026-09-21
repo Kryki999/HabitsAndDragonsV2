@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { BackHandler, StyleSheet, View } from 'react-native';
 
-import AccountBar from './AccountBar';
 import GutterjackLocation from './GutterjackLocation';
 import HubCrownhaven from './HubCrownhaven';
 import KingdomMap from './KingdomMap';
@@ -65,7 +64,6 @@ export default function WorldScreen() {
         {mapLocation && locationId ? <LocationStill locationId={locationId} /> : null}
         {encounterKind === 'boss' && locationId ? <MapBossApproach locationId={locationId} /> : null}
         {encounterKind === 'npc' && locationId ? <NpcStill locationId={locationId} /> : null}
-        <AccountBar />
       </View>
     </View>
   );

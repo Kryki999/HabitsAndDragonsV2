@@ -23,7 +23,6 @@ import { winChanceColor } from '@/combat/winChanceColor';
 import type { CombatChallenge, FightLootPrize, FightPhase, FightResolution, WinChanceBreakdown } from '@/combat/types';
 import type { DungeonLootEntry } from '@/types/dungeonLoot';
 
-import { ACCOUNT_BAR_RESERVE } from './AccountBar';
 import OverlayHud from './OverlayHud';
 import StillFrame, { type CoverAnchor } from './StillFrame';
 
@@ -243,7 +242,7 @@ export default function BossApproach({
       <WinChanceBreakdownModal visible={helpOpen} breakdown={breakdown} onClose={() => setHelpOpen(false)} />
 
       {whisper ? (
-        <View pointerEvents="none" style={[styles.whisperWrap, { top: Math.max(insets.top, 10) + ACCOUNT_BAR_RESERVE + 132 }]}>
+        <View pointerEvents="none" style={[styles.whisperWrap, { top: 56 }]}>
           <Text style={styles.whisper}>{whisper}</Text>
         </View>
       ) : null}

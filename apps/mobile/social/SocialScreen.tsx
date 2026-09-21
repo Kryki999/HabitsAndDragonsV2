@@ -5,7 +5,7 @@ import { colors } from '@/theme/colors';
 
 export default function SocialScreen() {
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={styles.safe} edges={[]}>
       <View style={styles.pad}>
         <Text style={styles.kicker}>Królestwo ludzi</Text>
         <Text style={styles.title}>Społeczność</Text>

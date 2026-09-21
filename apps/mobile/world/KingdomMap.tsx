@@ -270,7 +270,6 @@ export default function KingdomMap() {
         insets={insets}
         kicker="Kingdom"
         title="Map"
-        // DEV: title long-press still unveils the next fog hole. Full toolkit: long-press account chips.
         onTitleLongPress={__DEV__ ? onDevUnveilNext : undefined}
       />
 

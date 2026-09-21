@@ -25,9 +25,7 @@ import TaskSortBottomSheet from '@/components/TaskSortBottomSheet';
 import { getCastleTier } from '@/constants/kingdomTiers';
 import { orderDueHabitsForCastle } from '@/lib/castleQuestOrder';
 import { applyPlanningOrderForDate } from '@/lib/planningDayOrder';
-
-/** Visual demo only — RPG level curve is not ported. */
-const DEMO_PLAYER_LEVEL = 1;
+import { useHeroStore } from '@/hero/store';
 
 export default function QuestsScreen() {
   const profileCreatedAtDateKey = useHabitsStore((s) => s.accountCreatedAtDateKey);
@@ -63,7 +61,7 @@ export default function QuestsScreen() {
   const [editTaskType, setEditTaskType] = useState<Habit['taskType']>('daily');
   const [rescheduleDateInput, setRescheduleDateInput] = useState('');
 
-  const playerLevel = DEMO_PLAYER_LEVEL;
+  const playerLevel = useHeroStore((s) => s.playerLevel);
   const castleTier = getCastleTier(playerLevel);
 
   useEffect(() => {

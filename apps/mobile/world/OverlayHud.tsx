@@ -7,8 +7,6 @@ import type { EdgeInsets } from 'react-native-safe-area-context';
 import Colors from '@/constants/colors';
 import { impactAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
 
-import { ACCOUNT_BAR_RESERVE } from './AccountBar';
-
 type HudAction = {
   label?: string;
   icon?: 'back';
@@ -17,7 +15,8 @@ type HudAction = {
 };
 
 type Props = {
-  insets: EdgeInsets;
+  /** Kept so World screens can pass safe-area; the global account bar already ate the top inset. */
+  insets?: EdgeInsets;
   kicker?: string;
   title: string;
   left?: HudAction;
@@ -32,12 +31,12 @@ function isHudAction(value: HudAction | React.ReactNode | undefined): value is H
   return typeof v.onPress === 'function' && (v.icon === 'back' || typeof v.label === 'string');
 }
 
-export default function OverlayHud({ insets, kicker, title, left, right, onTitleLongPress }: Props) {
+export default function OverlayHud({ kicker, title, left, right, onTitleLongPress }: Props) {
   return (
     <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
       <LinearGradient
         colors={['rgba(7,5,16,0.82)', 'rgba(7,5,16,0.28)', 'transparent']}
-        style={[styles.topFade, { paddingTop: Math.max(insets.top, 10) + ACCOUNT_BAR_RESERVE }]}
+        style={[styles.topFade, { paddingTop: 8 }]}
         pointerEvents="box-none"
       >
         <View style={styles.row}>
