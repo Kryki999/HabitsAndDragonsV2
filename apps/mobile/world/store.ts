@@ -2,8 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import { INTERIORS, floorById, isFloorOpen, resolveFloorId, type InteriorFloorId } from './interiors';
 import { DEFAULT_REVEALED_REGION_IDS, MAP_FOG_REGIONS } from './layout';
-import type { WorldActions, WorldLocationId, WorldState } from './types';
+import type { WorldActions, WorldInteriorId, WorldState } from './types';
 
 const ALWAYS_DISCOVERED = ['crownhaven'] as const;
 const REGION_IDS = new Set(MAP_FOG_REGIONS.map((region) => region.id));
@@ -28,21 +29,41 @@ export const useWorldStore = create<WorldStore>()(
   persist(
     (set) => ({
       currentScreen: 'map',
-      currentLocationId: null,
+      currentInteriorId: null,
+      currentFloorId: null,
       discoveredLocationIds: [...ALWAYS_DISCOVERED],
       discoveredRegionIds: [...DEFAULT_REVEALED_REGION_IDS],
       gutterjackCleared: false,
 
-      openHub: () => set({ currentScreen: 'hub', currentLocationId: null }),
+      openHub: () => set({ currentScreen: 'hub', currentInteriorId: null, currentFloorId: null }),
 
-      openMap: () => set({ currentScreen: 'map', currentLocationId: null }),
+      openMap: () => set({ currentScreen: 'map', currentInteriorId: null, currentFloorId: null }),
 
-      openLocation: (id: WorldLocationId) =>
-        set((state) => ({
-          currentScreen: 'location',
-          currentLocationId: id,
-          discoveredLocationIds: uniquePush(state.discoveredLocationIds, id),
-        })),
+      openInterior: (id: WorldInteriorId, floorId?: InteriorFloorId) =>
+        set((state) => {
+          const interior = INTERIORS[id];
+          const nextFloor = resolveFloorId(interior, floorId);
+          let discovered = uniquePush(state.discoveredLocationIds, id);
+          if (nextFloor === 'cellar') discovered = uniquePush(discovered, 'gutterjack');
+          return {
+            currentScreen: 'interior',
+            currentInteriorId: id,
+            currentFloorId: nextFloor,
+            discoveredLocationIds: discovered,
+          };
+        }),
+
+      setFloor: (id: InteriorFloorId) =>
+        set((state) => {
+          if (state.currentScreen !== 'interior' || !state.currentInteriorId) return state;
+          const interior = INTERIORS[state.currentInteriorId];
+          const floor = floorById(interior, id);
+          if (!floor || !isFloorOpen(floor)) return state;
+          if (floor.id === state.currentFloorId) return state;
+          let discovered = state.discoveredLocationIds;
+          if (floor.id === 'cellar') discovered = uniquePush(discovered, 'gutterjack');
+          return { currentFloorId: floor.id, discoveredLocationIds: discovered };
+        }),
 
       markGutterjackCleared: () =>
         set((state) => ({
