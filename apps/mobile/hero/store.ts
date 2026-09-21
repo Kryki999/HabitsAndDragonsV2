@@ -24,6 +24,7 @@ export const useHeroStore = create<HeroStore>()(
       unlockedTitleIds: [],
       createdAt: null,
       gold: 0,
+      dungeonKeys: 0,
       playerLevel: 1,
       currentLevelXP: 0,
       xpForNextLevel: 100,
@@ -109,6 +110,11 @@ export const useHeroStore = create<HeroStore>()(
         set((state) => ({ gold: state.gold + amount }));
       },
 
+      addDungeonKeys: (amount) => {
+        if (amount === 0) return;
+        set((state) => ({ dungeonKeys: Math.max(0, (state.dungeonKeys ?? 0) + amount) }));
+      },
+
       grantInventoryItem: (itemId) => {
         if (!resolveLootItemById(itemId)) return;
         set((state) => ({ ownedItemIds: [...state.ownedItemIds, itemId] }));
@@ -137,13 +143,21 @@ export const useHeroStore = create<HeroStore>()(
     }),
     {
       name: 'hnd-hero-local',
-      version: 1,
+      version: 2,
       storage: createJSONStorage(() => AsyncStorage),
+      migrate: (persisted) => {
+        const prev = persisted as Partial<HeroState> | undefined;
+        return {
+          ...prev,
+          dungeonKeys: prev?.dungeonKeys ?? 0,
+        };
+      },
       partialize: (state) => ({
         heroDisplayName: state.heroDisplayName,
         unlockedTitleIds: state.unlockedTitleIds,
         createdAt: state.createdAt,
         gold: state.gold,
+        dungeonKeys: state.dungeonKeys,
         playerLevel: state.playerLevel,
         currentLevelXP: state.currentLevelXP,
         xpForNextLevel: state.xpForNextLevel,
