@@ -2,9 +2,10 @@ import React, { useState, type ComponentType } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Coins, KeyRound } from 'lucide-react-native';
+import { Coins, KeyRound, Mail, Settings as SettingsIcon } from 'lucide-react-native';
 
 import CircularProgress from '@/components/CircularProgress';
+import SettingsModal from '@/components/SettingsModal';
 import Colors from '@/constants/colors';
 import { useHeroStore } from '@/hero/store';
 import { impactAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
@@ -17,8 +18,8 @@ const DevToolsPanel: ComponentType<DevToolsPanelProps> | null = __DEV__
   : null;
 
 /**
- * Global account HUD — V1 tab-shell layout (avatar XP ring, name, Lv, gold, keys).
- * Lives above Questy / World / Hero (and the other tabs), not over the World still.
+ * Global account HUD — V1 `TabsWithTopBar` layout over every tab.
+ * Pills: gold + keys (ui-upgrade variant). Mail is a disabled stub.
  */
 export default function AccountBar() {
   const insets = useSafeAreaInsets();
@@ -30,6 +31,7 @@ export default function AccountBar() {
   const xpForNextLevel = useHeroStore((s) => s.xpForNextLevel);
   const heroDisplayName = useHeroStore((s) => s.heroDisplayName);
   const [devOpen, setDevOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const xpProgress = xpForNextLevel > 0 ? currentLevelXP / xpForNextLevel : 0;
   const hudPlayerName = (heroDisplayName?.trim() || 'Wayfarer').slice(0, 48);
@@ -48,6 +50,7 @@ export default function AccountBar() {
       style={[styles.topBar, { paddingTop: Math.max(insets.top, 10) }]}
     >
       {DevToolsPanel ? <DevToolsPanel visible={devOpen} onClose={() => setDevOpen(false)} /> : null}
+      <SettingsModal visible={settingsOpen} onClose={() => setSettingsOpen(false)} />
 
       <View style={styles.topBarRow}>
         <Pressable
@@ -60,7 +63,7 @@ export default function AccountBar() {
           }}
           onLongPress={openDev}
           delayLongPress={450}
-          style={({ pressed }) => [styles.hudLeft, pressed && styles.hudLeftPressed]}
+          style={({ pressed }) => [styles.hudLeft, pressed && styles.pressed]}
         >
           <CircularProgress
             progress={xpProgress}
@@ -81,23 +84,23 @@ export default function AccountBar() {
           </View>
         </Pressable>
 
-        <View style={styles.hudStatsCluster}>
-          <StatItem
+        <View style={styles.pillBadgesContainer}>
+          <StatPill
             testID="account-gold"
             accessibilityLabel={`${gold} gold`}
             onLongPress={openDev}
           >
-            <Coins color={Colors.dark.gold} size={15} strokeWidth={2.2} />
-            <Text style={styles.hudStatValueGold}>{gold}</Text>
-          </StatItem>
-          <StatItem
+            <Coins color={Colors.dark.gold} size={14} />
+            <Text style={styles.pillValueGold}>{gold}</Text>
+          </StatPill>
+          <StatPill
             testID="account-keys"
             accessibilityLabel={`${dungeonKeys} keys`}
             onLongPress={openDev}
           >
-            <KeyRound color={Colors.dark.cyan} size={15} strokeWidth={2.2} />
-            <Text style={styles.hudStatValueKeys}>{dungeonKeys}</Text>
-          </StatItem>
+            <KeyRound color={Colors.dark.cyan} size={14} />
+            <Text style={styles.pillValueKeys}>{dungeonKeys}</Text>
+          </StatPill>
         </View>
 
         <View style={styles.hudRight}>
@@ -107,19 +110,43 @@ export default function AccountBar() {
               accessibilityRole="button"
               accessibilityLabel="Open DEV tools"
               onPress={openDev}
-              hitSlop={8}
-              style={({ pressed }) => [styles.devBadge, pressed && styles.hudLeftPressed]}
+              hitSlop={6}
+              style={({ pressed }) => [styles.devBadge, pressed && styles.pressed]}
             >
               <Text style={styles.devBadgeLabel}>DEV</Text>
             </Pressable>
           ) : null}
+
+          <Pressable
+            testID="account-mail"
+            accessibilityRole="button"
+            accessibilityState={{ disabled: true }}
+            accessibilityLabel="Mail, coming soon"
+            disabled
+            style={[styles.iconButton, styles.iconButtonDisabled]}
+          >
+            <Mail color={Colors.dark.textMuted} size={20} />
+          </Pressable>
+
+          <Pressable
+            testID="account-settings"
+            accessibilityRole="button"
+            accessibilityLabel="Settings"
+            onPress={() => {
+              impactAsync(ImpactFeedbackStyle.Light);
+              setSettingsOpen(true);
+            }}
+            style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
+          >
+            <SettingsIcon color={Colors.dark.text} size={20} />
+          </Pressable>
         </View>
       </View>
     </View>
   );
 }
 
-function StatItem({
+function StatPill({
   children,
   testID,
   accessibilityLabel,
@@ -136,7 +163,7 @@ function StatItem({
         testID={testID}
         accessibilityRole="text"
         accessibilityLabel={accessibilityLabel}
-        style={styles.hudStatItem}
+        style={styles.pillBadge}
       >
         {children}
       </View>
@@ -150,7 +177,7 @@ function StatItem({
       accessibilityLabel={`${accessibilityLabel}. Long press for DEV tools`}
       onLongPress={onLongPress}
       delayLongPress={450}
-      style={styles.hudStatItem}
+      style={styles.pillBadge}
     >
       {children}
     </Pressable>
@@ -178,7 +205,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
   },
-  hudLeftPressed: {
+  pressed: {
     opacity: 0.9,
   },
   avatarInner: {
@@ -208,26 +235,31 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
   },
-  hudStatsCluster: {
+  pillBadgesContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+    flexShrink: 0,
+  },
+  pillBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 14,
-    flexShrink: 0,
-    paddingHorizontal: 4,
+    gap: 4,
+    backgroundColor: Colors.dark.surface,
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
   },
-  hudStatItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-  },
-  hudStatValueGold: {
+  pillValueGold: {
     fontSize: 13,
     fontWeight: '800',
     color: Colors.dark.gold,
     fontVariant: ['tabular-nums'],
   },
-  hudStatValueKeys: {
+  pillValueKeys: {
     fontSize: 13,
     fontWeight: '800',
     color: Colors.dark.cyan,
@@ -237,8 +269,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    flexShrink: 0,
-    minWidth: 36,
+    gap: 10,
+    flex: 1,
+  },
+  iconButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.dark.surfaceLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
+  },
+  iconButtonDisabled: {
+    opacity: 0.42,
   },
   devBadge: {
     paddingHorizontal: 8,

@@ -62,7 +62,7 @@ Gold **nie** odblokowuje fabuły. Model: [`06`](06-economy-loot.md).
 
 ## Gdzie jest kod (V2)
 
-Cienki scaffold: `apps/mobile` (Expo Router, 5 tabów z `18`). Tab **Questy** = V1 Castle UI na domain store `habits`. Tab **Hero** = V1 Hero UI (EN) na domain store `hero` (hex demo + equipment shell). Tab **World** = playground mapa królestwa (piny + fog) → Crownhaven / tawerna (Ground + winda) → Cellar / Gutterjack, oraz close-upy lokacji Akt 1 ze stilli w `assets` (boss approach = ten sam combat flow). Globalny pasek konta (avatar / Lv / gold / keys) z store `hero`, nad tabami jak V1. Social / Mentor = later. V1 nie jest kotwicą architektury — [`reference/v1-to-v2-architecture-audit.md`](reference/v1-to-v2-architecture-audit.md).
+Cienki scaffold: `apps/mobile` (Expo Router, 5 tabów z `18`). Tab **Questy** = V1 Castle UI na domain store `habits`. Tab **Hero** = V1 Hero UI (EN) na domain store `hero` (hex demo + equipment shell). Tab **World** = playground mapa królestwa (piny + fog) → Crownhaven / tawerna (Ground + winda) → Cellar / Gutterjack, oraz close-upy lokacji Akt 1 ze stilli w `assets` (boss approach = ten sam combat flow). Globalny pasek konta V1 (avatar / Lv / gold+keys pills / mail stub / settings) z store `hero`, nad wszystkimi tabami. Social / Mentor = later. V1 nie jest kotwicą architektury — [`reference/v1-to-v2-architecture-audit.md`](reference/v1-to-v2-architecture-audit.md).
 
 ## Na czym stoi (tech) — kierunki
 
