@@ -26,15 +26,15 @@ const COMING_SOON: Record<'market' | 'castle', { title: string; body: string }> 
 export default function HubCrownhaven() {
   const insets = useSafeAreaInsets();
   const openMap = useWorldStore((s) => s.openMap);
-  const openLocation = useWorldStore((s) => s.openLocation);
+  const openInterior = useWorldStore((s) => s.openInterior);
   const gutterjackCleared = useWorldStore((s) => s.gutterjackCleared);
   const [soon, setSoon] = useState<'market' | 'castle' | null>(null);
 
   const onHotspot = (spot: HubHotspotDef) => {
     impactAsync(ImpactFeedbackStyle.Medium);
-    if (spot.action === 'gutterjack') {
+    if (spot.action === 'tavern') {
       setSoon(null);
-      openLocation('gutterjack');
+      openInterior('tavern', 'ground');
       return;
     }
     setSoon(spot.id === 'castle' ? 'castle' : 'market');
@@ -94,7 +94,7 @@ export default function HubCrownhaven() {
         insets={insets}
         kicker="Capital"
         title="Crownhaven"
-        left={{ label: 'Map', onPress: openMap }}
+        left={{ icon: 'back', onPress: openMap, accessibilityLabel: 'Back' }}
       />
 
       {soon ? (

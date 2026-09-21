@@ -21,5 +21,6 @@ Camp / castle stills already in this folder are for **Questy** (`HomeScenePanel`
 | `world/hub-crownhaven.jpg` | Crownhaven close-up hub |
 | `world/dungeon-gutterjack.jpg` | Unused cellar still (fight uses `mietek.png`) |
 | `mietek.png` | Gutterjack fight approach still |
+| `tavernsage.png` | Tavern Ground stand-in (Mentor hall; cover-crops on phone) |
 
-Pin / hotspot fractions: `apps/mobile/world/layout.ts`.
+Pin / hotspot fractions: `apps/mobile/world/layout.ts`. Tavern floors: `apps/mobile/world/interiors.ts`.

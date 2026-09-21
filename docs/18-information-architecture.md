@@ -60,6 +60,19 @@ Zwoje teleportu = natychmiastowy fokus / skip timera (później).
 
 ---
 
+## Playground lock — drill Crownhaven (2026-09-21)
+
+Jak gracz chodzi po Świecie **w apce teraz** (nie nowy tab, nie lista wyjść):
+
+1. **Mapa królestwa** — piny bez nazw; nazwa w HUD / szept po tapie. Bez zmian w tym locku.
+2. **Hub Crownhaven** — pełny still do tab bara. HUD: Capital / Crownhaven. Wejścia = hotspoty na grafice. **Back** → mapa. Zero listy lokacji pod obrazkiem.
+3. **Tawerna** — HUD: kicker hubu (`Crownhaven`) + tytuł miejsca (`Tavern`). Góra-prawo: **winda z etykietami** (Upper later / Ground / Cellar). Aktywne piętro podświetlone; tap = skok. Jedna decyzja na ekran: Back opuszcza miejsce (→ hub), winda zmienia piętro.
+4. **Cellar / Gutterjack** — walka bez przebudowy (tray rarity + Fight CTA, win% góra-prawo). Winda w tym samym stacku, nad win%.
+
+Hotspot schodów na stillu jest **opcjonalny** i woła to samo `setFloor` co winda — nie drugie menu. Structure windy jest gotowa na trzecie piętro (Upper = locked placeholder).
+
+---
+
 ## Proponowany główny HUD (5 tabów)
 
 | # | Tab | Job | Co widać |
@@ -98,6 +111,7 @@ Warunek: Mentor jako **HUD icon** zamiast taba → wracamy do 5.
 | Smoki w HUD | **PARK** |
 | Questy = czysta lista IRL + dom stolicy | **PROPOSE KEEP** |
 | Świat = mapa + drill lokacji | **PROPOSE KEEP** |
+| Crownhaven hub / tawerna / winda | **LOCK playground** (2026-09-21) — hotspoty + labeled lift, nie lista wyjść |
 | Bohater / Społeczność / Mentor | **PROPOSE KEEP** |
 | Obecność twarda vs soft focus | **Czeka na Twój werdykt** (rekomendacja: soft focus A3) |
 | Day 0–7 | Po potwierdzeniu HUD |

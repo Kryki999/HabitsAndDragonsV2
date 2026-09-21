@@ -1,11 +1,13 @@
-export type WorldView = 'hub' | 'map' | 'location';
+import type { InteriorFloorId } from './interiors';
 
-/** Playground locations. Hub cellar only — not a fog-map pin. */
-export type WorldLocationId = 'gutterjack';
+export type WorldView = 'hub' | 'map' | 'interior';
+
+export type WorldInteriorId = 'tavern';
 
 export type WorldState = {
   currentScreen: WorldView;
-  currentLocationId: WorldLocationId | null;
+  currentInteriorId: WorldInteriorId | null;
+  currentFloorId: InteriorFloorId | null;
   /** Location ids the player has seen. Crownhaven starts discovered. */
   discoveredLocationIds: string[];
   /** Kingdom-map fog holes that have opened. Crownhaven starts clear. */
@@ -16,7 +18,8 @@ export type WorldState = {
 export type WorldActions = {
   openHub: () => void;
   openMap: () => void;
-  openLocation: (id: WorldLocationId) => void;
+  openInterior: (id: WorldInteriorId, floorId?: InteriorFloorId) => void;
+  setFloor: (id: InteriorFloorId) => void;
   markGutterjackCleared: () => void;
   discoverRegion: (id: string) => void;
 };

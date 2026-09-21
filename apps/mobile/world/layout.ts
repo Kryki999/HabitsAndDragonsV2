@@ -10,7 +10,7 @@ import type { ImageSourcePropType } from 'react-native';
  * How to retune
  * -------------
  * 1. Replace the JPEG in `apps/mobile/assets/images/world/` (keep the filename).
- * 2. Update `MAP_INTRINSIC` / `HUB_INTRINSIC` if the pixel size changed.
+ * 2. Update `MAP_INTRINSIC` / `HUB_INTRINSIC` / tavern ground size if the pixel size changed.
  * 3. Nudge pin `x` / `y` and fog seeds below. 0.01 ≈ 1% of the still.
  *    Fog is one runtime veil — never paint it into the JPEG. Seeds are
  *    influence, not drawn circles: they merge into a single clearing.
@@ -27,10 +27,16 @@ import type { ImageSourcePropType } from 'react-native';
 export const WORLD_ART = {
   map: require('@/assets/images/world/map-kingdom.jpg') as ImageSourcePropType,
   hub: require('@/assets/images/world/hub-crownhaven.jpg') as ImageSourcePropType,
+  /**
+   * Tavern Ground stand-in: Mentor hall still (landscape). Cover-crops to the
+   * wizard on a phone until we have a dedicated 9:16 ground floor.
+   */
+  tavernGround: require('@/assets/images/tavernsage.png') as ImageSourcePropType,
 };
 
 export const MAP_INTRINSIC = { width: 1254, height: 1254 } as const;
 export const HUB_INTRINSIC = { width: 941, height: 1672 } as const;
+export const TAVERN_GROUND_INTRINSIC = { width: 1678, height: 937 } as const;
 
 export type MapPinKind = 'home' | 'locked' | 'landmark';
 
@@ -49,8 +55,8 @@ export type MapPinDef = {
  * Kingdom orbit pins (square map, Crownhaven in the middle).
  *
  * Crownhaven is the only hub pin. Side pins start locked and become landmarks
- * once their fog region is revealed. Gutterjack is a tavern hotspot on the
- * hub — not a kingdom-map pin.
+ * once their fog region is revealed. Gutterjack is the tavern cellar — not a
+ * kingdom-map pin. Hub tavern hotspot opens the Ground hall + floor lift.
  */
 export const KINGDOM_PINS: MapPinDef[] = [
   {
@@ -135,7 +141,7 @@ export function nextHiddenFogRegionId(discoveredRegionIds: string[]): string | n
   return hidden?.id ?? null;
 }
 
-export type HubHotspotAction = 'gutterjack' | 'comingSoon';
+export type HubHotspotAction = 'tavern' | 'comingSoon';
 
 export type HubHotspotDef = {
   id: 'tavern' | 'market' | 'castle';
@@ -150,7 +156,8 @@ export type HubHotspotDef = {
  * Crownhaven close-up (9:16): palace on the hill, stall left, tavern/chalice right.
  *
  * Palace = gold-trimmed entrance doors up the stairs. Tavern = arched doors of
- * the chalice-sign building (right) → Gutterjack cellar. Market = veg crates.
+ * the chalice-sign building (right) → Ground hall (elevator to Cellar / Gutterjack).
+ * Market = veg crates.
  */
 export const HUB_HOTSPOTS: HubHotspotDef[] = [
   {
@@ -159,7 +166,7 @@ export const HUB_HOTSPOTS: HubHotspotDef[] = [
     hint: 'Gutterjack',
     x: 0.88,
     y: 0.78,
-    action: 'gutterjack',
+    action: 'tavern',
   },
   {
     id: 'market',

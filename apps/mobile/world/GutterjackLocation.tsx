@@ -22,6 +22,7 @@ import { winChanceColor } from '@/combat/winChanceColor';
 import type { FightLootPrize, FightPhase, FightResolution, WinChanceBreakdown } from '@/combat/types';
 
 import OverlayHud from './OverlayHud';
+import FloorLift from './FloorLift';
 import StillFrame from './StillFrame';
 import {
   GUTTERJACK_ART,
@@ -29,6 +30,8 @@ import {
   GUTTERJACK_CHALLENGE,
   GUTTERJACK_LOOT_TABLE,
 } from './content';
+import { TAVERN_INTERIOR } from './interiors';
+import { useTavernLift } from './useTavernLift';
 import { useWorldStore } from './store';
 import type { DungeonLootEntry } from '@/types/dungeonLoot';
 
@@ -55,6 +58,7 @@ export default function GutterjackLocation() {
   const openHub = useWorldStore((s) => s.openHub);
   const markGutterjackCleared = useWorldStore((s) => s.markGutterjackCleared);
   const alreadyCleared = useWorldStore((s) => s.gutterjackCleared);
+  const { floorId, onPickFloor, whisper } = useTavernLift();
 
   const playerLevel = useHeroStore((s) => s.playerLevel);
   const equippedRelicId = useHeroStore((s) => s.equippedRelicId);
@@ -143,20 +147,23 @@ export default function GutterjackLocation() {
             title={GUTTERJACK_CHALLENGE.bossName}
             left={{ icon: 'back', onPress: onBack, accessibilityLabel: 'Back' }}
             right={
-              <Pressable
-                testID="win-chance"
-                onPress={() => {
-                  impactAsync(ImpactFeedbackStyle.Light);
-                  setHelpOpen(true);
-                }}
-                hitSlop={8}
-                style={({ pressed }) => [styles.winBadge, pressed && styles.pressed]}
-              >
-                <Text style={[styles.winPct, { color: chanceColor }]}>{breakdown.displayPct}%</Text>
-                <View style={styles.helpDot}>
-                  <HelpCircle size={15} color={Colors.dark.cyan} strokeWidth={2.4} />
-                </View>
-              </Pressable>
+              <View style={styles.rightStack}>
+                <FloorLift floors={TAVERN_INTERIOR.floors} currentId={floorId} onSelect={onPickFloor} />
+                <Pressable
+                  testID="win-chance"
+                  onPress={() => {
+                    impactAsync(ImpactFeedbackStyle.Light);
+                    setHelpOpen(true);
+                  }}
+                  hitSlop={8}
+                  style={({ pressed }) => [styles.winBadge, pressed && styles.pressed]}
+                >
+                  <Text style={[styles.winPct, { color: chanceColor }]}>{breakdown.displayPct}%</Text>
+                  <View style={styles.helpDot}>
+                    <HelpCircle size={15} color={Colors.dark.cyan} strokeWidth={2.4} />
+                  </View>
+                </Pressable>
+              </View>
             }
           />
 
@@ -205,6 +212,12 @@ export default function GutterjackLocation() {
 
       <WinChanceBreakdownModal visible={helpOpen} breakdown={breakdown} onClose={() => setHelpOpen(false)} />
 
+      {whisper ? (
+        <View pointerEvents="none" style={[styles.whisperWrap, { top: Math.max(insets.top, 10) + 132 }]}>
+          <Text style={styles.whisper}>{whisper}</Text>
+        </View>
+      ) : null}
+
       <LootDetailModal
         visible={inspect != null}
         onClose={() => setInspect(null)}
@@ -221,6 +234,10 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: '#070510',
+  },
+  rightStack: {
+    alignItems: 'flex-end',
+    gap: 8,
   },
   winBadge: {
     flexDirection: 'row',
@@ -278,5 +295,19 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.8,
+  },
+  whisperWrap: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    alignItems: 'center',
+  },
+  whisper: {
+    color: Colors.dark.gold,
+    fontSize: 12,
+    fontWeight: '700',
+    textAlign: 'center',
+    textShadowColor: 'rgba(0,0,0,0.85)',
+    textShadowRadius: 6,
   },
 });
