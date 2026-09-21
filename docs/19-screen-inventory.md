@@ -19,7 +19,7 @@
 | S04 | Lista questów / nawyków | P1 | tab/panel | Odhaczam dzień | Y |
 | S05 | Feedback nagrody (XP/gold) | global | modal | Satysfakcja | Y |
 | S06 | Mapa królestwa (fog + 1 lokacja) | P3 | tab | Obietnica świata | Y |
-| S07 | Widok lokacji (NPC i/lub loch) | P3 | drill | RPG atom. Playground: hub still + tawerna Ground / winda / Cellar | Y |
+| S07 | Widok lokacji (NPC i/lub loch) | P3 | drill | RPG atom. Playground: hub still + tawerna Ground / winda / Cellar; mapa → still lokacji Akt 1 | Y |
 | S08 | Loch — run / wynik | P3 | flow | Boss/loot | Y |
 | S09 | Start wyprawy + timer | P3 | modal | Wyjazd | Y |
 | S10 | Powrót wyprawy (wieczór) | P3 | modal | Finch check | Y |

@@ -1,26 +1,23 @@
+import { MAP_FOG_SEED_SLOTS } from './layout';
+
 /**
  * One continuous kingdom veil. Clearings are a smooth-min field warped by
  * noise — not destOut ellipses. Keep SKSL conservative (unrolled, no arrays).
+ * Slot count matches `MAP_FOG_SEED_SLOTS` — extra slots sit idle at p=0.
  */
-export const FOG_SKSL = `
+function buildFogSksl(slotCount: number): string {
+  const seedUniforms = Array.from({ length: slotCount }, (_, i) => `uniform float4 s${i};`).join('\n');
+  const progressUniforms = Array.from({ length: slotCount }, (_, i) => `uniform float p${i};`).join('\n');
+  const fields = Array.from(
+    { length: slotCount },
+    (_, i) => `  field = smin(field, seedField(xy, s${i}, p${i}), 0.38);`,
+  ).join('\n');
+
+  return `
 uniform float2 res;
 uniform float clock;
-uniform float4 s0;
-uniform float4 s1;
-uniform float4 s2;
-uniform float4 s3;
-uniform float4 s4;
-uniform float4 s5;
-uniform float4 s6;
-uniform float4 s7;
-uniform float p0;
-uniform float p1;
-uniform float p2;
-uniform float p3;
-uniform float p4;
-uniform float p5;
-uniform float p6;
-uniform float p7;
+${seedUniforms}
+${progressUniforms}
 
 float hash(float2 p) {
   return fract(sin(dot(p, float2(127.1, 311.7))) * 43758.5453);
@@ -67,14 +64,7 @@ float seedField(float2 p, float4 s, float prog) {
 half4 main(float2 xy) {
   float2 uv = xy / res;
   float field = 80.0;
-  field = smin(field, seedField(xy, s0, p0), 0.38);
-  field = smin(field, seedField(xy, s1, p1), 0.38);
-  field = smin(field, seedField(xy, s2, p2), 0.38);
-  field = smin(field, seedField(xy, s3, p3), 0.38);
-  field = smin(field, seedField(xy, s4, p4), 0.38);
-  field = smin(field, seedField(xy, s5, p5), 0.38);
-  field = smin(field, seedField(xy, s6, p6), 0.38);
-  field = smin(field, seedField(xy, s7, p7), 0.38);
+${fields}
 
   float warp = fbm(uv * 5.4) - 0.5;
   field += warp * 0.46;
@@ -90,3 +80,6 @@ half4 main(float2 xy) {
   return half4(col, alpha);
 }
 `;
+}
+
+export const FOG_SKSL = buildFogSksl(MAP_FOG_SEED_SLOTS);

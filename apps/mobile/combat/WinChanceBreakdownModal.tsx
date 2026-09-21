@@ -37,7 +37,9 @@ export default function WinChanceBreakdownModal({ visible, breakdown, onClose }:
             <Text style={styles.kicker}>Win chance</Text>
             <Text style={[styles.pct, { color }]}>{breakdown.displayPct}%</Text>
             {breakdown.tutorialLock ? (
-              <Text style={styles.lockNote}>First cellar — tutorial lock. Later fights use the sum below.</Text>
+              <Text style={styles.lockNote}>
+                {breakdown.tutorialNote ?? 'First fight — tutorial lock. Later fights use the sum below.'}
+              </Text>
             ) : null}
 
             <View style={styles.lines}>

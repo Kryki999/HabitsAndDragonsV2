@@ -11,6 +11,7 @@ import FogOverlay from './FogOverlay';
 import MapPinMarker from './MapPinMarker';
 import OverlayHud from './OverlayHud';
 import { isFogRegionRevealed, KINGDOM_PINS, WORLD_ART, type MapPinKind } from './layout';
+import { isMapLocationId } from './locations';
 import { useFogReveal } from './useFogReveal';
 import { useWorldStore } from './store';
 
@@ -56,6 +57,7 @@ function pinKindFor(id: string, designKind: MapPinKind, discoveredRegionIds: str
 export default function KingdomMap() {
   const insets = useSafeAreaInsets();
   const openHub = useWorldStore((s) => s.openHub);
+  const openLocation = useWorldStore((s) => s.openLocation);
   const { progress, discoveredRegionIds, discoverRegion, unveilNextRegion } = useFogReveal();
 
   const [viewport, setViewport] = useState<Viewport>({ width: 0, height: 0 });
@@ -202,6 +204,11 @@ export default function KingdomMap() {
     if (pin.opens === 'hub') {
       whisper(null);
       openHub();
+      return;
+    }
+    if (pin.opens === 'location' && isMapLocationId(pin.id)) {
+      whisper(null);
+      openLocation(pin.id);
       return;
     }
     whisper(pin.label);

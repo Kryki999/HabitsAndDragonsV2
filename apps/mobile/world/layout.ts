@@ -47,8 +47,8 @@ export type MapPinDef = {
   x: number;
   y: number;
   kind: MapPinKind;
-  /** Crownhaven is the only map pin that opens a hub. */
-  opens?: 'hub';
+  /** Crownhaven opens the hub. Other pins open a location still. */
+  opens?: 'hub' | 'location';
 };
 
 /**
@@ -73,6 +73,7 @@ export const KINGDOM_PINS: MapPinDef[] = [
     x: 0.22,
     y: 0.7,
     kind: 'locked',
+    opens: 'location',
   },
   {
     id: 'crown-approaches',
@@ -80,6 +81,71 @@ export const KINGDOM_PINS: MapPinDef[] = [
     x: 0.54,
     y: 0.63,
     kind: 'locked',
+    opens: 'location',
+  },
+  {
+    id: 'anvil-glade',
+    label: 'Anvil Glade',
+    x: 0.8,
+    y: 0.7,
+    kind: 'locked',
+    opens: 'location',
+  },
+  {
+    id: 'closed-way',
+    label: 'The Closed Way',
+    x: 0.63,
+    y: 0.23,
+    kind: 'locked',
+    opens: 'location',
+  },
+  {
+    id: 'raven-castle',
+    label: 'Raven Castle',
+    x: 0.8,
+    y: 0.11,
+    kind: 'locked',
+    opens: 'location',
+  },
+  {
+    id: 'pallglass',
+    label: 'Pallglass Spire',
+    x: 0.88,
+    y: 0.39,
+    kind: 'locked',
+    opens: 'location',
+  },
+  {
+    id: 'vampire-house',
+    label: 'Vampire House',
+    x: 0.36,
+    y: 0.78,
+    kind: 'locked',
+    opens: 'location',
+  },
+  {
+    id: 'water-temple',
+    label: 'Water Temple',
+    x: 0.18,
+    y: 0.46,
+    kind: 'locked',
+    opens: 'location',
+  },
+  {
+    id: 'pyramid',
+    label: "Osiris' Pyramid",
+    x: 0.24,
+    y: 0.15,
+    kind: 'locked',
+    opens: 'location',
+  },
+  {
+    id: 'ananiel',
+    label: "Ananiel's Spire",
+    x: 0.1,
+    y: 0.13,
+    kind: 'locked',
+    opens: 'location',
   },
 ];
 
@@ -96,6 +162,14 @@ export const MAP_FOG_REGIONS: MapFogRegionDef[] = [
   { id: 'crownhaven', revealedByDefault: true },
   { id: 'crown-approaches' },
   { id: 'smugglers-teeth' },
+  { id: 'anvil-glade' },
+  { id: 'closed-way' },
+  { id: 'pallglass' },
+  { id: 'raven-castle' },
+  { id: 'vampire-house' },
+  { id: 'water-temple' },
+  { id: 'pyramid' },
+  { id: 'ananiel' },
 ];
 
 export const DEFAULT_REVEALED_REGION_IDS: string[] = MAP_FOG_REGIONS.filter(
@@ -124,9 +198,19 @@ export const MAP_FOG_SEEDS: MapFogSeedDef[] = [
   { id: 'ca-south', regionId: 'crown-approaches', cx: 0.545, cy: 0.73, rx: 0.1, ry: 0.085 },
   { id: 'st-cliffs', regionId: 'smugglers-teeth', cx: 0.2, cy: 0.68, rx: 0.125, ry: 0.1 },
   { id: 'st-wreck', regionId: 'smugglers-teeth', cx: 0.22, cy: 0.78, rx: 0.14, ry: 0.11 },
+  { id: 'ag-smithy', regionId: 'anvil-glade', cx: 0.8, cy: 0.7, rx: 0.1, ry: 0.085 },
+  { id: 'cw-gate', regionId: 'closed-way', cx: 0.63, cy: 0.23, rx: 0.1, ry: 0.08 },
+  { id: 'pg-spire', regionId: 'pallglass', cx: 0.88, cy: 0.39, rx: 0.09, ry: 0.1 },
+  { id: 'rc-keep', regionId: 'raven-castle', cx: 0.8, cy: 0.12, rx: 0.1, ry: 0.085 },
+  { id: 'vh-grove', regionId: 'vampire-house', cx: 0.36, cy: 0.78, rx: 0.09, ry: 0.08 },
+  { id: 'wt-isle', regionId: 'water-temple', cx: 0.18, cy: 0.46, rx: 0.11, ry: 0.09 },
+  { id: 'wt-water', regionId: 'water-temple', cx: 0.2, cy: 0.52, rx: 0.1, ry: 0.08 },
+  { id: 'py-dune', regionId: 'pyramid', cx: 0.24, cy: 0.16, rx: 0.11, ry: 0.09 },
+  { id: 'an-tower', regionId: 'ananiel', cx: 0.1, cy: 0.13, rx: 0.1, ry: 0.09 },
 ];
 
-export const MAP_FOG_SEED_SLOTS = 8;
+/** Native Skia veil is unrolled — keep this in lockstep with `fogShader.ts`. */
+export const MAP_FOG_SEED_SLOTS = 24;
 
 export function isFogRegionRevealed(id: string, discoveredRegionIds: string[]): boolean {
   const region = MAP_FOG_REGIONS.find((entry) => entry.id === id);
