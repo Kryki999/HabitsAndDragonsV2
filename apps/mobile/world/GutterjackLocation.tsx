@@ -168,13 +168,14 @@ export default function GutterjackLocation() {
             }
           />
 
+          <LinearGradient
+            pointerEvents="none"
+            colors={['transparent', 'transparent', 'rgba(7,5,16,0.28)', 'rgba(7,5,16,0.7)']}
+            locations={[0, 0.52, 0.8, 1]}
+            style={styles.floorVeil}
+          />
+
           <View pointerEvents="box-none" style={[styles.sheetWrap, { paddingBottom: 12 + insets.bottom }]}>
-            <LinearGradient
-              pointerEvents="none"
-              colors={['transparent', 'rgba(7,5,16,0.2)', 'rgba(7,5,16,0.55)']}
-              locations={[0, 0.42, 1]}
-              style={styles.sheetVeil}
-            />
             <View style={styles.bottom}>
               <FightLootTray table={GUTTERJACK_LOOT_TABLE} onInspect={(entry) => setInspect(payloadFromEntry(entry))} />
               <Pressable
@@ -264,18 +265,18 @@ const styles = StyleSheet.create({
   helpDot: {
     padding: 1,
   },
-  sheetWrap: {
+  /** Bottom of the still/viewport — not sized to the fight chrome. */
+  floorVeil: {
     position: 'absolute',
     left: 0,
     right: 0,
     bottom: 0,
-    paddingTop: 52,
+    top: '58%',
   },
-  sheetVeil: {
+  sheetWrap: {
     position: 'absolute',
     left: 0,
     right: 0,
-    top: 0,
     bottom: 0,
   },
   bottom: {
