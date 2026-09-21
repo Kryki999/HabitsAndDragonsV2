@@ -38,11 +38,11 @@ export default function FogOverlay({ mapSize, progress }: FogOverlayProps) {
             <FeDisplacementMap
               in="SourceGraphic"
               in2="n"
-              scale={mapSize * 0.05}
+              scale={mapSize * 0.055}
               xChannelSelector="R"
               yChannelSelector="G"
             />
-            <FeGaussianBlur stdDeviation={mapSize * 0.02} />
+            <FeGaussianBlur stdDeviation={mapSize * 0.028} />
           </Filter>
           <Mask id="kingdom-fog-mask" maskUnits="userSpaceOnUse">
             <Rect x={0} y={0} width={mapSize} height={mapSize} fill="white" />
@@ -69,7 +69,7 @@ export default function FogOverlay({ mapSize, progress }: FogOverlayProps) {
           y={0}
           width={mapSize}
           height={mapSize}
-          fill="rgba(168, 178, 192, 0.94)"
+          fill="rgba(122, 136, 152, 0.986)"
           mask="url(#kingdom-fog-mask)"
         />
         <Rect
@@ -77,7 +77,7 @@ export default function FogOverlay({ mapSize, progress }: FogOverlayProps) {
           y={0}
           width={mapSize}
           height={mapSize}
-          fill="rgba(226, 232, 238, 0.5)"
+          fill="rgba(198, 208, 218, 0.78)"
           mask="url(#kingdom-fog-mask)"
         />
       </Svg>

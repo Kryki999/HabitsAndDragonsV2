@@ -1,16 +1,24 @@
 import { MAP_FOG_SEED_SLOTS } from './layout';
 
+/** Smooth-min radius (ellipse-radii units). Crownhaven↔Teeth merge when both are open. */
+const FOG_MERGE_K = 1.35;
+
 /**
  * One continuous kingdom veil. Clearings are a smooth-min field warped by
  * noise — not destOut ellipses. Keep SKSL conservative (unrolled, no arrays).
  * Slot count matches `MAP_FOG_SEED_SLOTS` — extra slots sit idle at p=0.
+ *
+ * Feel knobs (native Skia is the look):
+ * - `FOG_MERGE_K` — nearby open regions fuse into one bay (was 0.38; too local).
+ * - Veil alpha stays ~1 in undiscovered; grain tints color, it does not punch holes.
+ * - Output is premultiplied. Straight RGB at alpha 0 blooms the art (prześwietlenie).
  */
 function buildFogSksl(slotCount: number): string {
   const seedUniforms = Array.from({ length: slotCount }, (_, i) => `uniform float4 s${i};`).join('\n');
   const progressUniforms = Array.from({ length: slotCount }, (_, i) => `uniform float p${i};`).join('\n');
   const fields = Array.from(
     { length: slotCount },
-    (_, i) => `  field = smin(field, seedField(xy, s${i}, p${i}), 0.38);`,
+    (_, i) => `  field = smin(field, seedField(xy, s${i}, p${i}), kMerge);`,
   ).join('\n');
 
   return `
@@ -63,21 +71,24 @@ float seedField(float2 p, float4 s, float prog) {
 
 half4 main(float2 xy) {
   float2 uv = xy / res;
+  float kMerge = ${FOG_MERGE_K.toFixed(2)};
   float field = 80.0;
 ${fields}
 
   float warp = fbm(uv * 5.4) - 0.5;
-  field += warp * 0.46;
+  float warpAmp = 0.24 * smoothstep(-0.85, 0.18, field);
+  field += warp * warpAmp;
 
-  float clearAmt = 1.0 - smoothstep(-0.2, 0.22, field);
+  float clearAmt = 1.0 - smoothstep(-0.14, 0.18, field);
   float grain = fbm(uv * 3.1 + float2(clock * 0.035, clock * 0.028));
-  float veil = 0.93 + 0.06 * grain;
-  float alpha = clamp(veil * (1.0 - clearAmt), 0.0, 0.985);
+  float veil = mix(0.997, 1.0, clamp(grain, 0.0, 1.0));
+  float alpha = veil * (1.0 - clearAmt);
 
-  half3 cold = half3(0.66, 0.71, 0.77);
-  half3 milk = half3(0.90, 0.92, 0.95);
+  half3 cold = half3(0.50, 0.56, 0.64);
+  half3 milk = half3(0.78, 0.82, 0.88);
   half3 col = mix(cold, milk, grain);
-  return half4(col, alpha);
+  half a = half(alpha);
+  return half4(col * a, a);
 }
 `;
 }

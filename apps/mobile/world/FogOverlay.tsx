@@ -52,7 +52,11 @@ export default function FogOverlay({ mapSize, progress }: FogOverlayProps) {
   if (mapSize <= 0 || !source) return null;
 
   return (
-    <Canvas pointerEvents="none" style={{ width: mapSize, height: mapSize }}>
+    <Canvas
+      pointerEvents="none"
+      opaque={false}
+      style={{ width: mapSize, height: mapSize, backgroundColor: 'transparent' }}
+    >
       <Fill>
         <Shader source={source} uniforms={uniforms} />
       </Fill>

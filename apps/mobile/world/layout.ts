@@ -178,8 +178,10 @@ export const DEFAULT_REVEALED_REGION_IDS: string[] = MAP_FOG_REGIONS.filter(
 
 /**
  * Influence seeds for the clearance field (normalized 0–1).
- * Nearby seeds of the same (or adjacent revealed) region smooth-min into
- * one organic opening. Not drawn as ellipses.
+ * Nearby open regions smooth-min into one bay — Crownhaven SW and Teeth NE
+ * are spaced so the coastal inlet fuses when both are revealed, without
+ * leaking the wreck, lake, or Approaches from Crownhaven alone.
+ * Not drawn as ellipses.
  */
 export type MapFogSeedDef = {
   id: string;
@@ -191,13 +193,13 @@ export type MapFogSeedDef = {
 };
 
 export const MAP_FOG_SEEDS: MapFogSeedDef[] = [
-  { id: 'ch-keep', regionId: 'crownhaven', cx: 0.47, cy: 0.355, rx: 0.11, ry: 0.09 },
-  { id: 'ch-roofs', regionId: 'crownhaven', cx: 0.495, cy: 0.45, rx: 0.135, ry: 0.1 },
-  { id: 'ch-walls', regionId: 'crownhaven', cx: 0.5, cy: 0.525, rx: 0.1, ry: 0.075 },
+  { id: 'ch-keep', regionId: 'crownhaven', cx: 0.48, cy: 0.355, rx: 0.12, ry: 0.1 },
+  { id: 'ch-roofs', regionId: 'crownhaven', cx: 0.49, cy: 0.455, rx: 0.14, ry: 0.11 },
+  { id: 'ch-walls', regionId: 'crownhaven', cx: 0.46, cy: 0.54, rx: 0.13, ry: 0.1 },
   { id: 'ca-road', regionId: 'crown-approaches', cx: 0.53, cy: 0.64, rx: 0.11, ry: 0.09 },
   { id: 'ca-south', regionId: 'crown-approaches', cx: 0.545, cy: 0.73, rx: 0.1, ry: 0.085 },
-  { id: 'st-cliffs', regionId: 'smugglers-teeth', cx: 0.2, cy: 0.68, rx: 0.125, ry: 0.1 },
-  { id: 'st-wreck', regionId: 'smugglers-teeth', cx: 0.22, cy: 0.78, rx: 0.14, ry: 0.11 },
+  { id: 'st-cliffs', regionId: 'smugglers-teeth', cx: 0.22, cy: 0.67, rx: 0.14, ry: 0.11 },
+  { id: 'st-wreck', regionId: 'smugglers-teeth', cx: 0.2, cy: 0.78, rx: 0.15, ry: 0.12 },
   { id: 'ag-smithy', regionId: 'anvil-glade', cx: 0.8, cy: 0.7, rx: 0.1, ry: 0.085 },
   { id: 'cw-gate', regionId: 'closed-way', cx: 0.63, cy: 0.23, rx: 0.1, ry: 0.08 },
   { id: 'pg-spire', regionId: 'pallglass', cx: 0.88, cy: 0.39, rx: 0.09, ry: 0.1 },
