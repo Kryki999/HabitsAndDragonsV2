@@ -10,8 +10,10 @@ export type HeroState = {
   unlockedTitleIds: string[];
   /** ISO date or datetime; used for "Joined the Realm". */
   createdAt: string | null;
-  /** Visual gold only — no dungeon economy. */
+  /** Local gold — loot / sell / quests write here until server economy. */
   gold: number;
+  /** Dungeon keys. Starts at 0; DEV can bump via addDungeonKeys. */
+  dungeonKeys: number;
   /** Demo level ring. Not the V1 XP curve. */
   playerLevel: number;
   currentLevelXP: number;
@@ -35,6 +37,7 @@ export type HeroActions = {
   unequipLoadoutSlot: (slot: ItemLoadoutSlot) => void;
   sellInventoryItemAtIndex: (index: number) => void;
   addGold: (amount: number) => void;
+  addDungeonKeys: (amount: number) => void;
   grantInventoryItem: (itemId: string) => void;
   /** Removes one stacked copy. Returns false if none owned. */
   consumeOwnedItem: (itemId: string) => boolean;
