@@ -41,4 +41,8 @@ export type WorldActions = {
   markGutterjackCleared: () => void;
   markEncounterCleared: (id: string) => void;
   discoverRegion: (id: string) => void;
+  /** Opens every fog region and marks map pins discovered. */
+  revealAllMap: () => void;
+  /** Fog + location flags back to first launch. Navigation returns to the map. */
+  resetWorldDiscovery: () => void;
 };

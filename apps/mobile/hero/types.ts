@@ -38,6 +38,8 @@ export type HeroActions = {
   sellInventoryItemAtIndex: (index: number) => void;
   addGold: (amount: number) => void;
   addDungeonKeys: (amount: number) => void;
+  /** Demo / DEV. Clamps to 1–99. */
+  setPlayerLevel: (level: number) => void;
   grantInventoryItem: (itemId: string) => void;
   /** Removes one stacked copy. Returns false if none owned. */
   consumeOwnedItem: (itemId: string) => boolean;

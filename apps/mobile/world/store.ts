@@ -131,6 +131,29 @@ export const useWorldStore = create<WorldStore>()(
           if (!REGION_IDS.has(id)) return state;
           return { discoveredRegionIds: uniquePush(withCapital(state.discoveredRegionIds), id) };
         }),
+
+      revealAllMap: () =>
+        set((state) => {
+          const regionIds = [...REGION_IDS];
+          let locations = withCapital(state.discoveredLocationIds);
+          for (const id of regionIds) locations = uniquePush(locations, id);
+          return {
+            discoveredRegionIds: withCapital(regionIds),
+            discoveredLocationIds: locations,
+          };
+        }),
+
+      resetWorldDiscovery: () =>
+        set({
+          currentScreen: 'map',
+          currentInteriorId: null,
+          currentFloorId: null,
+          currentLocationId: null,
+          discoveredLocationIds: [...ALWAYS_DISCOVERED],
+          discoveredRegionIds: [...DEFAULT_REVEALED_REGION_IDS],
+          clearedEncounterIds: [],
+          gutterjackCleared: false,
+        }),
     }),
     {
       name: 'hnd-world-local',
