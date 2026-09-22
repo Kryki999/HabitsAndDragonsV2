@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
@@ -10,16 +10,18 @@ import { impactAsync, ImpactFeedbackStyle, notificationAsync, NotificationFeedba
 import FogOverlay from './FogOverlay';
 import MapPinMarker from './MapPinMarker';
 import OverlayHud from './OverlayHud';
-import { isFogRegionRevealed, KINGDOM_PINS, WORLD_ART, type MapPinKind } from './layout';
+import { isFogRegionRevealed, KINGDOM_PINS, MAP_INTRINSIC, WORLD_ART, type MapPinKind } from './layout';
 import { isMapLocationId } from './locations';
 import { useFogReveal } from './useFogReveal';
 import { useWorldStore } from './store';
 
-/** Cover scale: square of max(viewport) fills the long side. No empty bands. */
+/** Cover scale: board fills viewport; tall art pans mostly up. */
 const MIN_SCALE = 1;
 const MAX_SCALE = 2.8;
-/** Closer than cover so Crownhaven fills the phone; pan to the rest. */
+/** Closer than cover so Crownhaven fills the phone; pan up the corridor. */
 const START_SCALE = 1.85;
+
+const MAP_ASPECT = MAP_INTRINSIC.width / MAP_INTRINSIC.height;
 
 function clamp(n: number, min: number, max: number): number {
   'worklet';
@@ -30,21 +32,31 @@ function clampOffsets(
   nextScale: number,
   nextTx: number,
   nextTy: number,
-  mapSize: number,
+  mapW: number,
+  mapH: number,
   viewW: number,
   viewH: number,
 ): { scale: number; tx: number; ty: number } {
   'worklet';
   const s = clamp(nextScale, MIN_SCALE, MAX_SCALE);
-  if (mapSize <= 0 || viewW <= 0 || viewH <= 0) {
+  if (mapW <= 0 || mapH <= 0 || viewW <= 0 || viewH <= 0) {
     return { scale: s, tx: 0, ty: 0 };
   }
-  const scaled = mapSize * s;
-  const minX = viewW - scaled;
+  const scaledW = mapW * s;
+  const scaledH = mapH * s;
+  const minX = viewW - scaledW;
   const maxX = 0;
-  const minY = viewH - scaled;
+  const minY = viewH - scaledH;
   const maxY = 0;
   return { scale: s, tx: clamp(nextTx, minX, maxX), ty: clamp(nextTy, minY, maxY) };
+}
+
+/** Cover layout: both axes ≥ viewport at scale 1 (no letterbox). */
+function mapContentSize(viewW: number, viewH: number): { mapW: number; mapH: number } {
+  if (viewW <= 0 || viewH <= 0) return { mapW: 0, mapH: 0 };
+  const mapW = Math.max(viewW, viewH * MAP_ASPECT);
+  const mapH = mapW / MAP_ASPECT;
+  return { mapW, mapH };
 }
 
 type Viewport = { width: number; height: number };
@@ -64,7 +76,10 @@ export default function KingdomMap() {
   const [placeHint, setPlaceHint] = useState<string | null>(null);
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const mapSize = viewport.width > 0 ? Math.max(viewport.width, viewport.height) : 0;
+  const { mapW, mapH } = useMemo(
+    () => mapContentSize(viewport.width, viewport.height),
+    [viewport.height, viewport.width],
+  );
 
   const scale = useSharedValue(START_SCALE);
   const tx = useSharedValue(0);
@@ -74,7 +89,8 @@ export default function KingdomMap() {
   const savedTy = useSharedValue(0);
   const vw = useSharedValue(0);
   const vh = useSharedValue(0);
-  const content = useSharedValue(0);
+  const contentW = useSharedValue(0);
+  const contentH = useSharedValue(0);
 
   const whisper = useCallback((message: string | null) => {
     if (hintTimer.current) clearTimeout(hintTimer.current);
@@ -91,19 +107,21 @@ export default function KingdomMap() {
   }, []);
 
   const focusCrownhaven = useCallback(
-    (size: number, view: Viewport) => {
+    (width: number, height: number, view: Viewport) => {
       const home = KINGDOM_PINS.find((p) => p.id === 'crownhaven');
       const next = clampOffsets(
         START_SCALE,
-        view.width / 2 - (home?.x ?? 0.52) * size * START_SCALE,
-        view.height / 2 - (home?.y ?? 0.35) * size * START_SCALE,
-        size,
+        view.width / 2 - (home?.x ?? 0.5) * width * START_SCALE,
+        view.height / 2 - (home?.y ?? 0.86) * height * START_SCALE,
+        width,
+        height,
         view.width,
         view.height,
       );
       vw.value = view.width;
       vh.value = view.height;
-      content.value = size;
+      contentW.value = width;
+      contentH.value = height;
       scale.value = next.scale;
       tx.value = next.tx;
       ty.value = next.ty;
@@ -111,13 +129,13 @@ export default function KingdomMap() {
       savedTx.value = next.tx;
       savedTy.value = next.ty;
     },
-    [content, savedScale, savedTx, savedTy, scale, tx, ty, vh, vw],
+    [contentH, contentW, savedScale, savedTx, savedTy, scale, tx, ty, vh, vw],
   );
 
   useEffect(() => {
-    if (mapSize <= 0 || viewport.width <= 0) return;
-    focusCrownhaven(mapSize, viewport);
-  }, [focusCrownhaven, mapSize, viewport]);
+    if (mapW <= 0 || mapH <= 0 || viewport.width <= 0) return;
+    focusCrownhaven(mapW, mapH, viewport);
+  }, [focusCrownhaven, mapH, mapW, viewport]);
 
   const pan = Gesture.Pan()
     .minDistance(10)
@@ -130,7 +148,8 @@ export default function KingdomMap() {
         scale.value,
         savedTx.value + e.translationX,
         savedTy.value + e.translationY,
-        content.value,
+        contentW.value,
+        contentH.value,
         vw.value,
         vh.value,
       );
@@ -156,7 +175,8 @@ export default function KingdomMap() {
         nextScale,
         e.focalX - contentX * nextScale,
         e.focalY - contentY * nextScale,
-        content.value,
+        contentW.value,
+        contentH.value,
         vw.value,
         vh.value,
       );
@@ -173,7 +193,15 @@ export default function KingdomMap() {
   const composed = Gesture.Simultaneous(pan, pinch);
 
   const animatedStyle = useAnimatedStyle(() => {
-    const next = clampOffsets(scale.value, tx.value, ty.value, content.value, vw.value, vh.value);
+    const next = clampOffsets(
+      scale.value,
+      tx.value,
+      ty.value,
+      contentW.value,
+      contentH.value,
+      vw.value,
+      vh.value,
+    );
     return {
       transformOrigin: 'top left',
       transform: [{ translateX: next.tx }, { translateY: next.ty }, { scale: next.scale }],
@@ -226,15 +254,20 @@ export default function KingdomMap() {
     <View style={styles.root}>
       <GestureDetector gesture={composed}>
         <Animated.View style={styles.stage} onLayout={onLayout}>
-          {mapSize > 0 ? (
+          {mapW > 0 && mapH > 0 ? (
             <Animated.View
               collapsable={false}
-              style={[styles.mapLayer, { width: mapSize, height: mapSize }, animatedStyle]}
+              style={[styles.mapLayer, { width: mapW, height: mapH }, animatedStyle]}
               pointerEvents="box-none"
             >
-              <Image source={WORLD_ART.map} style={{ width: mapSize, height: mapSize }} resizeMode="stretch" />
+              <Image source={WORLD_ART.map} style={{ width: mapW, height: mapH }} resizeMode="stretch" />
               <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-                <FogOverlay mapSize={mapSize} progress={progress} />
+                <FogOverlay
+                  mapWidth={mapW}
+                  mapHeight={mapH}
+                  progress={progress}
+                  discoveredRegionIds={discoveredRegionIds}
+                />
               </View>
               {KINGDOM_PINS.map((pin) => {
                 const kind = pinKindFor(pin.id, pin.kind, discoveredRegionIds);
@@ -244,8 +277,8 @@ export default function KingdomMap() {
                     <DevFogMote
                       key={pin.id}
                       accessibilityLabel={pin.label}
-                      left={pin.x * mapSize}
-                      top={pin.y * mapSize}
+                      left={pin.x * mapW}
+                      top={pin.y * mapH}
                       onLongPress={() => unveil(pin.id)}
                     />
                   );
@@ -255,8 +288,8 @@ export default function KingdomMap() {
                     key={pin.id}
                     accessibilityLabel={pin.label}
                     kind={kind}
-                    left={pin.x * mapSize}
-                    top={pin.y * mapSize}
+                    left={pin.x * mapW}
+                    top={pin.y * mapH}
                     onPress={() => onPin(pin.id)}
                   />
                 );
