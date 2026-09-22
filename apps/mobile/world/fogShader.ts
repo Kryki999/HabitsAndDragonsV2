@@ -1,6 +1,6 @@
 import { MAP_FOG_SEED_SLOTS } from './layout';
 
-/** Smooth-min radius (ellipse-radii units). Crownhaven↔Teeth merge when both are open. */
+/** Smooth-min radius (ellipse-radii units). Adjacent corridor clearings fuse into one bay. */
 const FOG_MERGE_K = 1.35;
 
 /**

@@ -9,10 +9,10 @@ import type { ImageSourcePropType } from 'react-native';
  *
  * How to retune
  * -------------
- * 1. Replace the JPEG in `apps/mobile/assets/images/world/` (keep the filename).
- * 2. Update `MAP_INTRINSIC` / `HUB_INTRINSIC` / tavern ground size if the pixel size changed.
+ * 1. Replace `map_board.png` (keep the filename / WORLD_ART path).
+ * 2. Update `MAP_INTRINSIC` if the pixel size changed (portrait corridor).
  * 3. Nudge pin `x` / `y` and fog seeds below. 0.01 ≈ 1% of the still.
- *    Fog is one runtime veil — never paint it into the JPEG. Seeds are
+ *    Fog is one runtime veil — never paint it into the PNG. Seeds are
  *    influence, not drawn circles: they merge into a single clearing.
  *    When the illustration moves, only these normalized seeds need a nudge.
  *
@@ -20,12 +20,13 @@ import type { ImageSourcePropType } from 'react-native';
  * ----------
  * Cursor chat PNG attachments cap at **768KB** (exactly 786432 bytes) and arrive
  * truncated (full IHDR, black lower canvas, no IEND). Ship **JPEG/WebP under
- * ~700KB** so the whole frame lands. Current stills are complete JPEGs
- * (~213–410KB, live bottoms, 1254² map / 941×1672 hub & cellar).
+ * ~700KB** so the whole frame lands when attaching in chat. Production
+ * `map_board.png` is the live corridor board (941×1672).
  */
 
 export const WORLD_ART = {
-  map: require('@/assets/images/world/map-kingdom.jpg') as ImageSourcePropType,
+  /** Tall upward corridor travel map (Crownhaven at bottom → Ananiel at top). */
+  map: require('@/assets/images/map_board.png') as ImageSourcePropType,
   hub: require('@/assets/images/world/hub-crownhaven.jpg') as ImageSourcePropType,
   /**
    * Tavern Ground stand-in: Mentor hall still (landscape). Cover-crops to the
@@ -34,7 +35,8 @@ export const WORLD_ART = {
   tavernGround: require('@/assets/images/tavernsage.png') as ImageSourcePropType,
 };
 
-export const MAP_INTRINSIC = { width: 1254, height: 1254 } as const;
+/** Production corridor board — portrait, pans mostly up. */
+export const MAP_INTRINSIC = { width: 941, height: 1672 } as const;
 export const HUB_INTRINSIC = { width: 941, height: 1672 } as const;
 export const TAVERN_GROUND_INTRINSIC = { width: 1678, height: 937 } as const;
 
@@ -52,34 +54,37 @@ export type MapPinDef = {
 };
 
 /**
- * Kingdom orbit pins (square map, Crownhaven in the middle).
+ * Corridor pins (portrait board, Crownhaven at the bottom).
  *
  * Crownhaven is the only hub pin. Side pins start locked and become landmarks
  * once their fog region is revealed. Gutterjack is the tavern cellar — not a
  * kingdom-map pin. Hub tavern hotspot opens the Ground hall + floor lift.
+ *
+ * Spine (Main ★): Closed Way → Raven Castle → Pyramid → Ananiel.
+ * Optional sides never hard-gate Main ★.
  */
 export const KINGDOM_PINS: MapPinDef[] = [
   {
     id: 'crownhaven',
     label: 'Crownhaven',
-    x: 0.52,
-    y: 0.35,
+    x: 0.5,
+    y: 0.86,
     kind: 'home',
     opens: 'hub',
   },
   {
-    id: 'smugglers-teeth',
-    label: "Smuggler's Teeth",
-    x: 0.22,
-    y: 0.7,
+    id: 'crown-approaches',
+    label: 'Crown Approaches',
+    x: 0.51,
+    y: 0.68,
     kind: 'locked',
     opens: 'location',
   },
   {
-    id: 'crown-approaches',
-    label: 'Crown Approaches',
-    x: 0.54,
-    y: 0.63,
+    id: 'smugglers-teeth',
+    label: "Smuggler's Teeth",
+    x: 0.18,
+    y: 0.52,
     kind: 'locked',
     opens: 'location',
   },
@@ -87,63 +92,63 @@ export const KINGDOM_PINS: MapPinDef[] = [
     id: 'anvil-glade',
     label: 'Anvil Glade',
     x: 0.8,
-    y: 0.7,
+    y: 0.55,
     kind: 'locked',
     opens: 'location',
   },
   {
     id: 'closed-way',
     label: 'The Closed Way',
-    x: 0.63,
-    y: 0.23,
-    kind: 'locked',
-    opens: 'location',
-  },
-  {
-    id: 'raven-castle',
-    label: 'Raven Castle',
-    x: 0.8,
-    y: 0.11,
-    kind: 'locked',
-    opens: 'location',
-  },
-  {
-    id: 'pallglass',
-    label: 'Pallglass Spire',
-    x: 0.88,
-    y: 0.39,
-    kind: 'locked',
-    opens: 'location',
-  },
-  {
-    id: 'vampire-house',
-    label: 'Vampire House',
-    x: 0.36,
-    y: 0.78,
+    x: 0.5,
+    y: 0.455,
     kind: 'locked',
     opens: 'location',
   },
   {
     id: 'water-temple',
     label: 'Water Temple',
-    x: 0.18,
-    y: 0.46,
+    x: 0.2,
+    y: 0.375,
+    kind: 'locked',
+    opens: 'location',
+  },
+  {
+    id: 'pallglass',
+    label: 'Pallglass Spire',
+    x: 0.83,
+    y: 0.33,
+    kind: 'locked',
+    opens: 'location',
+  },
+  {
+    id: 'raven-castle',
+    label: 'Raven Castle',
+    x: 0.5,
+    y: 0.255,
+    kind: 'locked',
+    opens: 'location',
+  },
+  {
+    id: 'vampire-house',
+    label: 'Vampire House',
+    x: 0.74,
+    y: 0.175,
     kind: 'locked',
     opens: 'location',
   },
   {
     id: 'pyramid',
     label: "Osiris' Pyramid",
-    x: 0.24,
-    y: 0.15,
+    x: 0.5,
+    y: 0.125,
     kind: 'locked',
     opens: 'location',
   },
   {
     id: 'ananiel',
     label: "Ananiel's Spire",
-    x: 0.1,
-    y: 0.13,
+    x: 0.5,
+    y: 0.045,
     kind: 'locked',
     opens: 'location',
   },
@@ -152,6 +157,9 @@ export const KINGDOM_PINS: MapPinDef[] = [
 /**
  * Discoverable fog regions. Geometry lives on `MAP_FOG_SEEDS` so one region
  * can be a merged bay, not a circle around its pin.
+ *
+ * Order = DEV unveil / seed discover sequence: Approaches first, then optional
+ * R1 sides, then Main spine + later sides. Sides never hard-gate Main ★.
  */
 export type MapFogRegionDef = {
   id: string;
@@ -164,10 +172,10 @@ export const MAP_FOG_REGIONS: MapFogRegionDef[] = [
   { id: 'smugglers-teeth' },
   { id: 'anvil-glade' },
   { id: 'closed-way' },
+  { id: 'water-temple' },
   { id: 'pallglass' },
   { id: 'raven-castle' },
   { id: 'vampire-house' },
-  { id: 'water-temple' },
   { id: 'pyramid' },
   { id: 'ananiel' },
 ];
@@ -178,9 +186,8 @@ export const DEFAULT_REVEALED_REGION_IDS: string[] = MAP_FOG_REGIONS.filter(
 
 /**
  * Influence seeds for the clearance field (normalized 0–1).
- * Nearby open regions smooth-min into one bay — Crownhaven SW and Teeth NE
- * are spaced so the coastal inlet fuses when both are revealed, without
- * leaking the wreck, lake, or Approaches from Crownhaven alone.
+ * Nearby open regions smooth-min into one bay. Crownhaven alone must not
+ * leak the Approaches bridge, Teeth cove, or Anvil forge.
  * Not drawn as ellipses.
  */
 export type MapFogSeedDef = {
@@ -193,22 +200,22 @@ export type MapFogSeedDef = {
 };
 
 export const MAP_FOG_SEEDS: MapFogSeedDef[] = [
-  { id: 'ch-keep', regionId: 'crownhaven', cx: 0.48, cy: 0.355, rx: 0.12, ry: 0.1 },
-  { id: 'ch-roofs', regionId: 'crownhaven', cx: 0.49, cy: 0.455, rx: 0.14, ry: 0.11 },
-  { id: 'ch-walls', regionId: 'crownhaven', cx: 0.46, cy: 0.54, rx: 0.13, ry: 0.1 },
-  { id: 'ca-road', regionId: 'crown-approaches', cx: 0.53, cy: 0.64, rx: 0.11, ry: 0.09 },
-  { id: 'ca-south', regionId: 'crown-approaches', cx: 0.545, cy: 0.73, rx: 0.1, ry: 0.085 },
-  { id: 'st-cliffs', regionId: 'smugglers-teeth', cx: 0.22, cy: 0.67, rx: 0.14, ry: 0.11 },
-  { id: 'st-wreck', regionId: 'smugglers-teeth', cx: 0.2, cy: 0.78, rx: 0.15, ry: 0.12 },
-  { id: 'ag-smithy', regionId: 'anvil-glade', cx: 0.8, cy: 0.7, rx: 0.1, ry: 0.085 },
-  { id: 'cw-gate', regionId: 'closed-way', cx: 0.63, cy: 0.23, rx: 0.1, ry: 0.08 },
-  { id: 'pg-spire', regionId: 'pallglass', cx: 0.88, cy: 0.39, rx: 0.09, ry: 0.1 },
-  { id: 'rc-keep', regionId: 'raven-castle', cx: 0.8, cy: 0.12, rx: 0.1, ry: 0.085 },
-  { id: 'vh-grove', regionId: 'vampire-house', cx: 0.36, cy: 0.78, rx: 0.09, ry: 0.08 },
-  { id: 'wt-isle', regionId: 'water-temple', cx: 0.18, cy: 0.46, rx: 0.11, ry: 0.09 },
-  { id: 'wt-water', regionId: 'water-temple', cx: 0.2, cy: 0.52, rx: 0.1, ry: 0.08 },
-  { id: 'py-dune', regionId: 'pyramid', cx: 0.24, cy: 0.16, rx: 0.11, ry: 0.09 },
-  { id: 'an-tower', regionId: 'ananiel', cx: 0.1, cy: 0.13, rx: 0.1, ry: 0.09 },
+  { id: 'ch-keep', regionId: 'crownhaven', cx: 0.5, cy: 0.835, rx: 0.16, ry: 0.055 },
+  { id: 'ch-plaza', regionId: 'crownhaven', cx: 0.5, cy: 0.89, rx: 0.2, ry: 0.07 },
+  { id: 'ch-walls', regionId: 'crownhaven', cx: 0.5, cy: 0.94, rx: 0.18, ry: 0.055 },
+  { id: 'ca-bridge', regionId: 'crown-approaches', cx: 0.51, cy: 0.68, rx: 0.12, ry: 0.045 },
+  { id: 'ca-road', regionId: 'crown-approaches', cx: 0.5, cy: 0.72, rx: 0.11, ry: 0.04 },
+  { id: 'st-cave', regionId: 'smugglers-teeth', cx: 0.18, cy: 0.52, rx: 0.13, ry: 0.055 },
+  { id: 'st-wreck', regionId: 'smugglers-teeth', cx: 0.14, cy: 0.56, rx: 0.12, ry: 0.05 },
+  { id: 'ag-smithy', regionId: 'anvil-glade', cx: 0.8, cy: 0.55, rx: 0.12, ry: 0.05 },
+  { id: 'cw-gate', regionId: 'closed-way', cx: 0.5, cy: 0.455, rx: 0.12, ry: 0.045 },
+  { id: 'wt-portal', regionId: 'water-temple', cx: 0.2, cy: 0.375, rx: 0.11, ry: 0.045 },
+  { id: 'wt-lake', regionId: 'water-temple', cx: 0.18, cy: 0.4, rx: 0.1, ry: 0.04 },
+  { id: 'pg-spire', regionId: 'pallglass', cx: 0.83, cy: 0.33, rx: 0.1, ry: 0.055 },
+  { id: 'rc-keep', regionId: 'raven-castle', cx: 0.5, cy: 0.255, rx: 0.13, ry: 0.05 },
+  { id: 'vh-manor', regionId: 'vampire-house', cx: 0.74, cy: 0.175, rx: 0.12, ry: 0.045 },
+  { id: 'py-dune', regionId: 'pyramid', cx: 0.5, cy: 0.125, rx: 0.13, ry: 0.05 },
+  { id: 'an-tower', regionId: 'ananiel', cx: 0.5, cy: 0.045, rx: 0.12, ry: 0.045 },
 ];
 
 /** Native Skia veil is unrolled — keep this in lockstep with `fogShader.ts`. */

@@ -14,11 +14,12 @@ import { FOG_SKSL } from './fogShader';
 import { MAP_FOG_SEEDS, MAP_FOG_SEED_SLOTS } from './layout';
 
 export type FogOverlayProps = {
-  mapSize: number;
+  mapWidth: number;
+  mapHeight: number;
   progress: Record<string, SharedValue<number>>;
 };
 
-export default function FogOverlay({ mapSize, progress }: FogOverlayProps) {
+export default function FogOverlay({ mapWidth, mapHeight, progress }: FogOverlayProps) {
   const clock = useSharedValue(0);
   const source = useMemo(() => Skia.RuntimeEffect.Make(FOG_SKSL), []);
 
@@ -33,7 +34,7 @@ export default function FogOverlay({ mapSize, progress }: FogOverlayProps) {
 
   const uniforms = useDerivedValue(() => {
     const next: Record<string, number | number[]> = {
-      res: [mapSize, mapSize],
+      res: [mapWidth, mapHeight],
       clock: clock.value,
     };
     for (let i = 0; i < MAP_FOG_SEED_SLOTS; i += 1) {
@@ -43,19 +44,24 @@ export default function FogOverlay({ mapSize, progress }: FogOverlayProps) {
         next[`p${i}`] = 0;
         continue;
       }
-      next[`s${i}`] = [seed.cx * mapSize, seed.cy * mapSize, seed.rx * mapSize, seed.ry * mapSize];
+      next[`s${i}`] = [
+        seed.cx * mapWidth,
+        seed.cy * mapHeight,
+        seed.rx * mapWidth,
+        seed.ry * mapHeight,
+      ];
       next[`p${i}`] = progress[seed.regionId]?.value ?? 0;
     }
     return next;
   });
 
-  if (mapSize <= 0 || !source) return null;
+  if (mapWidth <= 0 || mapHeight <= 0 || !source) return null;
 
   return (
     <Canvas
       pointerEvents="none"
       opaque={false}
-      style={{ width: mapSize, height: mapSize, backgroundColor: 'transparent' }}
+      style={{ width: mapWidth, height: mapHeight, backgroundColor: 'transparent' }}
     >
       <Fill>
         <Shader source={source} uniforms={uniforms} />

@@ -54,15 +54,16 @@ export type MapLocationDef = {
  * (rozbojnicy.png is the camp). Anvil = las (armory* is interior). Castle boss = mnich
  * on the throne. Pyramid boss = oziris. Titan = ananiel.
  */
+/** Discover seed order: Approaches first; Teeth/Anvil optional sides; Main ★ separate. */
 export const MAP_LOCATION_IDS: readonly MapLocationId[] = [
-  'smugglers-teeth',
   'crown-approaches',
+  'smugglers-teeth',
   'anvil-glade',
   'closed-way',
-  'raven-castle',
-  'pallglass',
-  'vampire-house',
   'water-temple',
+  'pallglass',
+  'raven-castle',
+  'vampire-house',
   'pyramid',
   'ananiel',
 ] as const;

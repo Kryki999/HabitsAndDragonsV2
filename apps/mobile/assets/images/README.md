@@ -17,7 +17,8 @@ Camp / castle stills already in this folder are for **Questy** (`HomeScenePanel`
 
 | File | Use |
 |------|-----|
-| `world/map-kingdom.jpg` | Kingdom orbit map (pan/zoom + pins) |
+| `map_board.png` | Kingdom corridor travel map (pan + pins + fog) |
+| `world/map-kingdom.jpg` | Unused legacy square orbit still (not live UI) |
 | `world/hub-crownhaven.jpg` | Crownhaven close-up hub |
 | `world/dungeon-gutterjack.jpg` | Unused cellar still (fight uses `mietek.png`) |
 | `mietek.png` | Gutterjack fight approach still |
