@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Castle, Store, Wine } from 'lucide-react-native';
 
@@ -9,35 +8,46 @@ import { impactAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
 
 import OverlayHud from './OverlayHud';
 import StillFrame from './StillFrame';
+import { SKARNE_ENCOUNTER_ID } from './content';
 import { HUB_HOTSPOTS, HUB_INTRINSIC, WORLD_ART, type HubHotspotDef } from './layout';
 import { useWorldStore } from './store';
-
-const COMING_SOON: Record<'market' | 'castle', { title: string; body: string }> = {
-  market: {
-    title: 'Market',
-    body: 'The stall will buy and sell later. Guide #1 lives here — coming soon.',
-  },
-  castle: {
-    title: 'Palace',
-    body: 'Gates stay shut until Champion ★1. The hill is a promise, not a door.',
-  },
-};
 
 export default function HubCrownhaven() {
   const insets = useSafeAreaInsets();
   const openMap = useWorldStore((s) => s.openMap);
   const openInterior = useWorldStore((s) => s.openInterior);
   const gutterjackCleared = useWorldStore((s) => s.gutterjackCleared);
-  const [soon, setSoon] = useState<'market' | 'castle' | null>(null);
+  const palaceOpen = useWorldStore((s) => s.clearedEncounterIds.includes(SKARNE_ENCOUNTER_ID));
+  const [whisper, setWhisper] = useState<string | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showWhisper = useCallback((message: string) => {
+    if (timer.current) clearTimeout(timer.current);
+    setWhisper(message);
+    timer.current = setTimeout(() => setWhisper(null), 2200);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (timer.current) clearTimeout(timer.current);
+    };
+  }, []);
 
   const onHotspot = (spot: HubHotspotDef) => {
     impactAsync(ImpactFeedbackStyle.Medium);
     if (spot.action === 'tavern') {
-      setSoon(null);
       openInterior('tavern', 'ground');
       return;
     }
-    setSoon(spot.id === 'castle' ? 'castle' : 'market');
+    if (spot.action === 'market') {
+      openInterior('market', 'stall');
+      return;
+    }
+    if (!palaceOpen) {
+      showWhisper('Gates stay shut until Champion ★1.');
+      return;
+    }
+    openInterior('palace', 'hall');
   };
 
   return (
@@ -67,13 +77,18 @@ export default function HubCrownhaven() {
                   style={[
                     styles.hotspotDot,
                     spot.id === 'tavern' && styles.hotspotDotTavern,
-                    spot.id === 'castle' && styles.hotspotDotCastle,
+                    spot.id === 'castle' && !palaceOpen && styles.hotspotDotCastle,
+                    spot.id === 'castle' && palaceOpen && styles.hotspotDotOpen,
                   ]}
                 >
                   {spot.id === 'tavern' ? (
                     <Wine size={15} color={Colors.dark.gold} strokeWidth={2.4} />
                   ) : spot.id === 'castle' ? (
-                    <Castle size={15} color={Colors.dark.textMuted} strokeWidth={2.4} />
+                    <Castle
+                      size={15}
+                      color={palaceOpen ? Colors.dark.gold : Colors.dark.textMuted}
+                      strokeWidth={2.4}
+                    />
                   ) : (
                     <Store size={15} color={Colors.dark.gold} strokeWidth={2.4} />
                   )}
@@ -81,7 +96,13 @@ export default function HubCrownhaven() {
                 <View style={styles.hotspotLabel}>
                   <Text style={styles.hotspotName}>{spot.label}</Text>
                   <Text style={styles.hotspotHint}>
-                    {spot.id === 'tavern' && gutterjackCleared ? 'Cleared' : spot.hint}
+                    {spot.id === 'tavern' && gutterjackCleared
+                      ? 'Cleared'
+                      : spot.id === 'castle'
+                        ? palaceOpen
+                          ? 'Advisor'
+                          : spot.hint
+                        : spot.hint}
                   </Text>
                 </View>
               </Pressable>
@@ -97,23 +118,9 @@ export default function HubCrownhaven() {
         left={{ icon: 'back', onPress: openMap, accessibilityLabel: 'Back' }}
       />
 
-      {soon ? (
-        <View pointerEvents="box-none" style={[styles.bannerWrap, { paddingBottom: 16 + insets.bottom }]}>
-          <LinearGradient colors={['transparent', 'rgba(7,5,16,0.55)']} style={styles.bannerFade} />
-          <View style={styles.banner}>
-            <Text style={styles.bannerKicker}>Coming soon</Text>
-            <Text style={styles.bannerTitle}>{COMING_SOON[soon].title}</Text>
-            <Text style={styles.bannerBody}>{COMING_SOON[soon].body}</Text>
-            <Pressable
-              onPress={() => {
-                impactAsync(ImpactFeedbackStyle.Light);
-                setSoon(null);
-              }}
-              style={({ pressed }) => [styles.bannerBtn, pressed && styles.hotspotPressed]}
-            >
-              <Text style={styles.bannerBtnText}>Stay in the square</Text>
-            </Pressable>
-          </View>
+      {whisper ? (
+        <View pointerEvents="none" style={[styles.whisperWrap, { paddingBottom: 16 + insets.bottom }]}>
+          <Text style={styles.whisper}>{whisper}</Text>
         </View>
       ) : null}
     </View>
@@ -150,6 +157,9 @@ const styles = StyleSheet.create({
   hotspotDotCastle: {
     borderColor: Colors.dark.textMuted + '99',
   },
+  hotspotDotOpen: {
+    borderColor: Colors.dark.gold + 'aa',
+  },
   hotspotLabel: {
     marginTop: 6,
     paddingHorizontal: 8,
@@ -173,56 +183,19 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
-  bannerWrap: {
+  whisperWrap: {
     position: 'absolute',
-    left: 0,
-    right: 0,
+    left: 16,
+    right: 16,
     bottom: 0,
+    alignItems: 'center',
   },
-  bannerFade: {
-    height: 36,
-  },
-  banner: {
-    marginHorizontal: 14,
-    paddingHorizontal: 16,
-    paddingTop: 14,
-    paddingBottom: 14,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: Colors.dark.border + 'cc',
-    backgroundColor: 'rgba(18, 12, 28, 0.94)',
-  },
-  bannerKicker: {
-    color: Colors.dark.gold,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 1.3,
-    textTransform: 'uppercase',
-    marginBottom: 4,
-  },
-  bannerTitle: {
-    color: Colors.dark.text,
-    fontSize: 17,
-    fontWeight: '800',
-  },
-  bannerBody: {
-    marginTop: 6,
-    color: Colors.dark.textSecondary,
-    fontSize: 13,
-    lineHeight: 19,
-  },
-  bannerBtn: {
-    marginTop: 12,
-    alignSelf: 'flex-start',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: Colors.dark.gold + '55',
-  },
-  bannerBtnText: {
+  whisper: {
     color: Colors.dark.gold,
     fontSize: 12,
-    fontWeight: '800',
+    fontWeight: '700',
+    textAlign: 'center',
+    textShadowColor: 'rgba(0,0,0,0.85)',
+    textShadowRadius: 6,
   },
 });

@@ -1,8 +1,8 @@
-import type { InteriorFloorId } from './interiors';
+import type { InteriorFloorId, WorldInteriorId } from './interiors';
+
+export type { InteriorFloorId, WorldInteriorId };
 
 export type WorldView = 'hub' | 'map' | 'interior' | 'location' | 'encounter';
-
-export type WorldInteriorId = 'tavern';
 
 export type MapLocationId =
   | 'smugglers-teeth'
@@ -21,6 +21,8 @@ export type WorldState = {
   currentInteriorId: WorldInteriorId | null;
   currentFloorId: InteriorFloorId | null;
   currentLocationId: MapLocationId | null;
+  /** Hotspot on the current location still (npc or dungeon). */
+  currentHotspotId: string | null;
   /** Location ids the player has seen. Crownhaven starts discovered. */
   discoveredLocationIds: string[];
   /** Kingdom-map fog holes that have opened. Crownhaven starts clear. */
@@ -36,7 +38,7 @@ export type WorldActions = {
   openInterior: (id: WorldInteriorId, floorId?: InteriorFloorId) => void;
   setFloor: (id: InteriorFloorId) => void;
   openLocation: (id: MapLocationId) => void;
-  openEncounter: (id: MapLocationId) => void;
+  openHotspot: (locationId: MapLocationId, hotspotId: string) => void;
   closeEncounter: () => void;
   markGutterjackCleared: () => void;
   markEncounterCleared: (id: string) => void;

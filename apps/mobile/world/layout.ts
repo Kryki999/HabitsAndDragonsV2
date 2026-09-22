@@ -259,7 +259,7 @@ export function nextHiddenFogRegionId(discoveredRegionIds: string[]): string | n
   return hidden?.id ?? null;
 }
 
-export type HubHotspotAction = 'tavern' | 'comingSoon';
+export type HubHotspotAction = 'tavern' | 'market' | 'palace';
 
 export type HubHotspotDef = {
   id: 'tavern' | 'market' | 'castle';
@@ -275,7 +275,7 @@ export type HubHotspotDef = {
  *
  * Palace = gold-trimmed entrance doors up the stairs. Tavern = arched doors of
  * the chalice-sign building (right) → Ground hall (elevator to Cellar / Gutterjack).
- * Market = veg crates.
+ * Market = veg crates → stall keeper. Palace opens after Champion ★1 (Skarne).
  */
 export const HUB_HOTSPOTS: HubHotspotDef[] = [
   {
@@ -289,17 +289,17 @@ export const HUB_HOTSPOTS: HubHotspotDef[] = [
   {
     id: 'market',
     label: 'Market',
-    hint: 'Coming soon',
+    hint: 'Stall',
     x: 0.18,
     y: 0.83,
-    action: 'comingSoon',
+    action: 'market',
   },
   {
     id: 'castle',
     label: 'Palace',
-    hint: 'Coming soon',
+    hint: 'After ★1',
     x: 0.5,
     y: 0.24,
-    action: 'comingSoon',
+    action: 'palace',
   },
 ];

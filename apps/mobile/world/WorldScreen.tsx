@@ -8,8 +8,13 @@ import LocationStill from './LocationStill';
 import MapBossApproach from './MapBossApproach';
 import NpcStill from './NpcStill';
 import TavernGround from './TavernGround';
-import { TAVERN_INTERIOR, floorById } from './interiors';
-import { MAP_LOCATIONS } from './locations';
+import {
+  MAP_LOCATIONS,
+  dungeonForHotspot,
+  getLocationHotspot,
+  npcById,
+} from './content';
+import { INTERIORS, floorById } from './interiors';
 import { useWorldStore } from './store';
 
 export default function WorldScreen() {
@@ -17,20 +22,32 @@ export default function WorldScreen() {
   const interiorId = useWorldStore((s) => s.currentInteriorId);
   const floorId = useWorldStore((s) => s.currentFloorId);
   const locationId = useWorldStore((s) => s.currentLocationId);
+  const hotspotId = useWorldStore((s) => s.currentHotspotId);
   const openHub = useWorldStore((s) => s.openHub);
   const openMap = useWorldStore((s) => s.openMap);
   const closeEncounter = useWorldStore((s) => s.closeEncounter);
 
-  const tavernFloor =
-    screen === 'interior' && interiorId === 'tavern'
-      ? floorById(TAVERN_INTERIOR, floorId ?? TAVERN_INTERIOR.defaultFloorId)
+  const interior = screen === 'interior' && interiorId ? INTERIORS[interiorId] : undefined;
+  const interiorFloor = interior
+    ? floorById(interior, floorId ?? interior.defaultFloorId)
+    : undefined;
+  const tavernFight =
+    interior?.id === 'tavern' &&
+    interiorFloor?.kind === 'fight' &&
+    interiorFloor.fightId === 'gutterjack';
+  const tavernHall = interior?.id === 'tavern' && Boolean(interiorFloor) && !tavernFight;
+  const hubNpc =
+    interiorFloor?.kind === 'npc' && interiorFloor.npcId
+      ? npcById(interiorFloor.npcId)
       : undefined;
-  const tavernFight = tavernFloor?.kind === 'fight' && tavernFloor.fightId === 'gutterjack';
-  const tavernHall = Boolean(tavernFloor) && !tavernFight;
 
   const mapLocation = screen === 'location' && locationId ? MAP_LOCATIONS[locationId] : undefined;
-  const mapEncounter = screen === 'encounter' && locationId ? MAP_LOCATIONS[locationId] : undefined;
-  const encounterKind = mapEncounter?.encounter.kind;
+  const encounterHotspot =
+    screen === 'encounter' && locationId ? getLocationHotspot(locationId, hotspotId) : undefined;
+  const encounterDungeon = dungeonForHotspot(encounterHotspot);
+  const encounterNpc =
+    encounterHotspot?.kind === 'npc' ? npcById(encounterHotspot.npcId) : undefined;
+  const encounterLocation = locationId ? MAP_LOCATIONS[locationId] : undefined;
 
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -61,9 +78,30 @@ export default function WorldScreen() {
         {screen === 'hub' ? <HubCrownhaven /> : null}
         {tavernHall ? <TavernGround /> : null}
         {tavernFight ? <GutterjackLocation /> : null}
+        {hubNpc && interior ? (
+          <NpcStill
+            name={hubNpc.name}
+            kicker={interior.hubKicker}
+            still={hubNpc.still}
+            flavor={hubNpc.flavor}
+            stillAnchor={hubNpc.stillAnchor}
+            onBack={openHub}
+            testID={`npc-still-${hubNpc.id}`}
+          />
+        ) : null}
         {mapLocation && locationId ? <LocationStill locationId={locationId} /> : null}
-        {encounterKind === 'boss' && locationId ? <MapBossApproach locationId={locationId} /> : null}
-        {encounterKind === 'npc' && locationId ? <NpcStill locationId={locationId} /> : null}
+        {encounterDungeon && locationId ? <MapBossApproach locationId={locationId} /> : null}
+        {encounterNpc && encounterLocation ? (
+          <NpcStill
+            name={encounterNpc.name}
+            kicker={encounterLocation.name}
+            still={encounterNpc.still}
+            flavor={encounterNpc.flavor}
+            stillAnchor={encounterNpc.stillAnchor}
+            onBack={closeEncounter}
+            testID={`npc-still-${encounterNpc.id}`}
+          />
+        ) : null}
       </View>
     </View>
   );

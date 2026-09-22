@@ -19,8 +19,8 @@ export type LootIconId =
   | "moon"
   | "wine";
 
-/** Combat biome / tier affix (Act 1: Common only). */
-export type CombatSynergyTier = "common";
+/** Combat biome / tier affix. Act 1 uses all four Bible names. */
+export type CombatSynergyTier = "common" | "elite" | "champion" | "titan";
 
 /** Slot loadoutu: strój / zbroja vs relikwia / broń / artefakt / akcesoria. */
 export type ItemLoadoutSlot = "outfit" | "relic";
