@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Image, StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
+import { Image, Platform, StyleSheet, Text, View, type LayoutChangeEvent, type ViewStyle } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -213,14 +213,19 @@ export default function KingdomMap() {
   return (
     <View style={styles.root}>
       <GestureDetector gesture={pan}>
-        <Animated.View style={styles.stage} onLayout={onLayout}>
+        <Animated.View
+          style={[styles.stage, Platform.OS === 'web' ? webPanLock : null]}
+          onLayout={onLayout}
+        >
           {mapW > 0 && mapH > 0 ? (
             <Animated.View
               collapsable={false}
               style={[styles.mapLayer, { width: mapW, height: mapH }, animatedStyle]}
               pointerEvents="box-none"
             >
-              <Image source={WORLD_ART.map} style={{ width: mapW, height: mapH }} resizeMode="stretch" />
+              <View pointerEvents="none" style={{ width: mapW, height: mapH }}>
+                <Image source={WORLD_ART.map} style={{ width: mapW, height: mapH }} resizeMode="stretch" />
+              </View>
               <View pointerEvents="none" style={StyleSheet.absoluteFill}>
                 <FogOverlay
                   mapWidth={mapW}
@@ -264,6 +269,9 @@ export default function KingdomMap() {
   );
 }
 
+/** Stops the browser from turning a pan into a page scroll or image drag. */
+const webPanLock = { touchAction: 'none' } as ViewStyle;
+
 const styles = StyleSheet.create({
   root: {
     flex: 1,
@@ -273,6 +281,7 @@ const styles = StyleSheet.create({
   stage: {
     flex: 1,
     overflow: 'hidden',
+    userSelect: 'none',
   },
   mapLayer: {
     transformOrigin: 'top left',

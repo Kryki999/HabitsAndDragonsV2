@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Tabs, useSegments } from 'expo-router';
+import { Tabs, usePathname } from 'expo-router';
 import { type ColorValue, StyleSheet, View } from 'react-native';
 
 import AccountBar from '@/components/AccountBar';
@@ -13,8 +13,8 @@ function tabIcon(name: keyof typeof Ionicons.glyphMap) {
 }
 
 export default function TabLayout() {
-  const segments = useSegments();
-  const showAccountBar = !segments.includes('world');
+  const pathname = usePathname();
+  const showAccountBar = pathname !== '/world';
 
   return (
     <View style={styles.shell}>
