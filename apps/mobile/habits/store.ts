@@ -2,6 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import { computeHabitGrant, countKeyDropsOnDate, lastGrantForHabit } from '@/lib/economy';
+import { useHeroStore } from '@/hero/store';
+
 import type { ActivityDay, AddHabitInput, Habit, HabitDifficulty } from './types';
 
 function todayKey(): string {
@@ -42,15 +45,17 @@ function patchActivityForDay(
   activityByDate: Record<string, ActivityDay>,
   date: string,
   deltaCompletions: number,
+  deltaXp = 0,
 ): Record<string, ActivityDay> {
   const prev = activityByDate[date] ?? { completions: 0, xpFromHabits: 0 };
   const completions = Math.max(0, prev.completions + deltaCompletions);
-  if (completions === 0 && prev.xpFromHabits === 0) {
+  const xpFromHabits = Math.max(0, prev.xpFromHabits + deltaXp);
+  if (completions === 0 && xpFromHabits === 0) {
     const next = { ...activityByDate };
     delete next[date];
     return next;
   }
-  return { ...activityByDate, [date]: { completions, xpFromHabits: prev.xpFromHabits } };
+  return { ...activityByDate, [date]: { completions, xpFromHabits } };
 }
 
 function appendCompletedHabitNameForDay(
@@ -160,11 +165,24 @@ export const useHabitsStore = create<HabitsState>()(
 
       completeHabit: (habitId) => {
         get().resetDailyIfNeeded();
+        let grantToApply: ReturnType<typeof computeHabitGrant> | null = null;
         set((state) => {
           const today = todayKey();
           const habit = state.habits.find((h) => h.id === habitId && h.isActive);
           if (!habit || habit.completedToday || habit.isFrozen) return state;
           if (habit.scheduledDate && habit.scheduledDate > today) return state;
+
+          const completionsBefore = state.activityByDate[today]?.completions ?? 0;
+          const grant = computeHabitGrant({
+            habitId,
+            difficulty: (habit.difficulty ?? 'medium') as HabitDifficulty,
+            completionIndex1Based: completionsBefore + 1,
+            keyDropsAlreadyToday: countKeyDropsOnDate(
+              useHeroStore.getState().habitGrantLogByDate ?? {},
+              today,
+            ),
+          });
+          grantToApply = grant;
 
           const updatedHabits = state.habits.map((h) => {
             if (h.id !== habitId) return h;
@@ -192,7 +210,7 @@ export const useHabitsStore = create<HabitsState>()(
 
           return {
             habits: updatedHabits,
-            activityByDate: patchActivityForDay(state.activityByDate, today, 1),
+            activityByDate: patchActivityForDay(state.activityByDate, today, 1, grant.xp),
             completedHabitNamesByDate: appendCompletedHabitNameForDay(
               state.completedHabitNamesByDate,
               today,
@@ -200,14 +218,25 @@ export const useHabitsStore = create<HabitsState>()(
             ),
           };
         });
+        if (grantToApply) useHeroStore.getState().applyHabitGrant(grantToApply);
       },
 
       uncompleteHabit: (habitId) => {
         get().resetDailyIfNeeded();
+        let shouldReverse = false;
+        let reversedXp = 0;
         set((state) => {
           const today = todayKey();
           const habit = state.habits.find((h) => h.id === habitId && h.isActive);
           if (!habit || !habit.completedToday) return state;
+
+          const grant = lastGrantForHabit(
+            useHeroStore.getState().habitGrantLogByDate ?? {},
+            today,
+            habitId,
+          );
+          reversedXp = grant?.xp ?? 0;
+          shouldReverse = true;
 
           const updatedHabits = state.habits.map((h) => {
             if (h.id !== habitId) return h;
@@ -226,7 +255,7 @@ export const useHabitsStore = create<HabitsState>()(
 
           return {
             habits: updatedHabits,
-            activityByDate: patchActivityForDay(state.activityByDate, today, -1),
+            activityByDate: patchActivityForDay(state.activityByDate, today, -1, -reversedXp),
             completedHabitNamesByDate: removeCompletedHabitNameForDay(
               state.completedHabitNamesByDate,
               today,
@@ -234,6 +263,10 @@ export const useHabitsStore = create<HabitsState>()(
             ),
           };
         });
+        if (shouldReverse) {
+          const today = todayKey();
+          useHeroStore.getState().reverseHabitGrant(habitId, today);
+        }
       },
 
       addHabit: (habit) => {

@@ -1,5 +1,7 @@
+import type { FightLootPrize } from '@/combat/types';
 import type { HeroHexStats } from '@/constants/heroHexStats';
 import type { StatType } from '@/habits/types';
+import type { HabitCompletionGrant } from '@/lib/economy';
 import type { ItemLoadoutSlot } from '@/types/dungeonLoot';
 
 export type HeroXpReward = { stat: StatType; amount: number };
@@ -10,11 +12,11 @@ export type HeroState = {
   unlockedTitleIds: string[];
   /** ISO date or datetime; used for "Joined the Realm". */
   createdAt: string | null;
-  /** Local gold — loot / sell / quests write here until server economy. */
+  /** Wallet — habits, fights, sell, and key shop write here. */
   gold: number;
-  /** Dungeon keys. Starts at 0; DEV can bump via addDungeonKeys. */
+  /** Dungeon keys. Starts at 0; buy 100g or habit drop / DEV. */
   dungeonKeys: number;
-  /** Demo level ring. Not the V1 XP curve. */
+  /** Soft level from habit XP. Constant `XP_PER_LEVEL` until Bible locks the curve. */
   playerLevel: number;
   currentLevelXP: number;
   xpForNextLevel: number;
@@ -22,12 +24,14 @@ export type HeroState = {
   ownedItemIds: string[];
   equippedOutfitId: string | null;
   equippedRelicId: string | null;
-  /** Lifetime dungeon wins — 0 until World/dungeons exist. */
+  /** Lifetime dungeon wins. */
   bossesDefeated: number;
   heroShopPurchaseEver: boolean;
   heroDailyQuestClaimsDate: string | null;
   heroDailyQuestClaimedIds: string[];
   heroEpicMilestoneClaimedIds: string[];
+  /** Per-completion gold/XP/key grants so uncomplete can reverse the same award. */
+  habitGrantLogByDate: Record<string, HabitCompletionGrant[]>;
 };
 
 export type HeroActions = {
@@ -44,4 +48,9 @@ export type HeroActions = {
   /** Removes one stacked copy. Returns false if none owned. */
   consumeOwnedItem: (itemId: string) => boolean;
   recordBossWin: () => void;
+  applyHabitGrant: (grant: HabitCompletionGrant) => void;
+  reverseHabitGrant: (habitId: string, dateKey: string) => HabitCompletionGrant | null;
+  buyDungeonKey: () => boolean;
+  spendDungeonKey: () => boolean;
+  applyLootPrize: (prize: FightLootPrize) => void;
 };

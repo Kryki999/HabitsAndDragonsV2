@@ -54,6 +54,7 @@ function DevToolsBody({ onClose }: { onClose: () => void }) {
   const discoverRegion = useWorldStore((s) => s.discoverRegion);
   const revealAllMap = useWorldStore((s) => s.revealAllMap);
   const resetWorldDiscovery = useWorldStore((s) => s.resetWorldDiscovery);
+  const clearEncounterCooldowns = useWorldStore((s) => s.clearEncounterCooldowns);
   const discoveredRegionIds = useWorldStore((s) => s.discoveredRegionIds);
 
   const [levelDraft, setLevelDraft] = useState(String(playerLevel));
@@ -172,6 +173,11 @@ function DevToolsBody({ onClose }: { onClose: () => void }) {
                 <ToolButton label="+1" onPress={() => bump(() => addDungeonKeys(1))} />
                 <ToolButton label="+5" onPress={() => bump(() => addDungeonKeys(5))} />
               </Row>
+              <ToolButton
+                label="Ready all dungeon CDs"
+                onPress={() => bump(() => clearEncounterCooldowns())}
+                wide
+              />
             </Section>
 
             <Section label="Map">

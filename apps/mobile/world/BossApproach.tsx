@@ -1,13 +1,20 @@
-import React, { useCallback, useMemo, useState, type ReactNode } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View, type ImageSourcePropType } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { DoorOpen, HelpCircle } from 'lucide-react-native';
+import { DoorOpen, HelpCircle, KeyRound } from 'lucide-react-native';
 
 import Colors from '@/constants/colors';
+import BuyKeySheet from '@/components/BuyKeySheet';
 import LootDetailModal, { type LootModalPayload } from '@/components/LootDetailModal';
-import { impactAsync, selectionAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
+import { impactAsync, notificationAsync, selectionAsync, ImpactFeedbackStyle, NotificationFeedbackType } from '@/lib/hapticsGate';
 import { useHeroStore } from '@/hero/store';
+import {
+  decideDungeonEntry,
+  dungeonCdMs,
+  formatCooldownRemaining,
+  KEY_PRICE_GOLD,
+} from '@/lib/economy';
 import BattleSimulationModal from '@/combat/BattleSimulationModal';
 import BossVictoryLootModal from '@/combat/BossVictoryLootModal';
 import FightLootTray from '@/combat/FightLootTray';
@@ -26,23 +33,12 @@ import type { DungeonLootEntry } from '@/types/dungeonLoot';
 
 import OverlayHud from './OverlayHud';
 import StillFrame, { type CoverAnchor } from './StillFrame';
+import { useWorldStore } from './store';
 
 function payloadFromEntry(entry: DungeonLootEntry): LootModalPayload {
   if (entry.kind === 'gold') return { type: 'gold', entry };
   if (entry.kind === 'empty') return { type: 'empty', entry };
   return { type: 'item', entry };
-}
-
-function grantPrize(
-  prize: FightLootPrize,
-  grantInventoryItem: (id: string) => void,
-  addGold: (n: number) => void,
-) {
-  if (prize.kind === 'gold') addGold(prize.amount);
-  if (prize.kind === 'item') grantInventoryItem(prize.item.id);
-  if (prize.kind === 'items') {
-    for (const item of prize.items) grantInventoryItem(item.id);
-  }
 }
 
 export type BossApproachProps = {
@@ -58,6 +54,8 @@ export type BossApproachProps = {
   sipWine?: boolean;
   /** Only Gutterjack first clear is a 100% tutorial lock. */
   tutorialLock?: boolean;
+  /** First Gutterjack: no key/CD gate. Still starts Common CD after the fight. */
+  skipEntryGate?: boolean;
   farmWeights?: readonly { id: string; weight: number }[];
   rollLoot?: (isFirstClear: boolean) => FightLootPrize;
   headerExtra?: ReactNode;
@@ -75,6 +73,7 @@ export default function BossApproach({
   onCleared,
   sipWine = false,
   tutorialLock = false,
+  skipEntryGate = false,
   farmWeights,
   rollLoot,
   headerExtra,
@@ -86,14 +85,26 @@ export default function BossApproach({
   const equippedRelicId = useHeroStore((s) => s.equippedRelicId);
   const ownedItemIds = useHeroStore((s) => s.ownedItemIds);
   const consumeOwnedItem = useHeroStore((s) => s.consumeOwnedItem);
-  const grantInventoryItem = useHeroStore((s) => s.grantInventoryItem);
+  const applyLootPrize = useHeroStore((s) => s.applyLootPrize);
   const addGold = useHeroStore((s) => s.addGold);
   const recordBossWin = useHeroStore((s) => s.recordBossWin);
+  const dungeonKeys = useHeroStore((s) => s.dungeonKeys ?? 0);
+  const gold = useHeroStore((s) => s.gold);
+  const spendDungeonKey = useHeroStore((s) => s.spendDungeonKey);
+  const cooldownUntil = useWorldStore((s) => s.encounterCooldownUntil?.[challenge.id]);
+  const startEncounterCooldown = useWorldStore((s) => s.startEncounterCooldown);
 
   const [phase, setPhase] = useState<FightPhase>('approach');
   const [resolution, setResolution] = useState<FightResolution | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
   const [inspect, setInspect] = useState<LootModalPayload | null>(null);
+  const [buyKeysOpen, setBuyKeysOpen] = useState(false);
+  const [nowMs, setNowMs] = useState(() => Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => setNowMs(Date.now()), 15000);
+    return () => clearInterval(id);
+  }, []);
 
   const hasWine = sipWine && wineInPack(ownedItemIds);
   const willSipWine = Boolean(hasWine && !isFirstClear);
@@ -119,13 +130,40 @@ export default function BossApproach({
     rollLoot ??
     (farmWeights ? () => rollWeightedLoot(farmWeights) : sipWine ? undefined : rollPlaygroundLoot);
 
+  const entry = useMemo(
+    () =>
+      decideDungeonEntry({
+        skipGate: skipEntryGate,
+        cooldownUntil,
+        dungeonKeys,
+        now: nowMs,
+      }),
+    [cooldownUntil, dungeonKeys, nowMs, skipEntryGate],
+  );
+
+  const entryHint = !entry.ok
+    ? `Free entry in ${formatCooldownRemaining(entry.readyAt, nowMs)} · need 1 key`
+    : entry.cost === 'key'
+      ? `Free entry in ${formatCooldownRemaining(cooldownUntil ?? '', nowMs)} · 1 key to enter now`
+      : entry.cost === 'tutorial'
+        ? 'Tutorial — first fight is free'
+        : 'Free entry ready';
+
+  const fightLabel = !entry.ok
+    ? gold >= KEY_PRICE_GOLD
+      ? `Buy key · ${KEY_PRICE_GOLD}g`
+      : 'Need a key'
+    : entry.cost === 'key'
+      ? 'Fight · 1 key'
+      : 'Fight';
+
   const handleBack = useCallback(() => {
     if (phase === 'clash' || phase === 'loot') return;
     impactAsync(ImpactFeedbackStyle.Light);
     onBack();
   }, [onBack, phase]);
 
-  const onFight = useCallback(() => {
+  const beginFight = useCallback(() => {
     selectionAsync();
     impactAsync(ImpactFeedbackStyle.Medium);
     const sipped = willSipWine ? consumeOwnedItem(GUTTERJACK_WINE_ID) : false;
@@ -141,13 +179,37 @@ export default function BossApproach({
     setPhase('clash');
   }, [addGold, breakdown, challenge, consumeOwnedItem, isFirstClear, lootRoller, willSipWine]);
 
+  const onFight = useCallback(() => {
+    if (phase !== 'approach') return;
+    const decision = decideDungeonEntry({
+      skipGate: skipEntryGate,
+      cooldownUntil: useWorldStore.getState().encounterCooldownUntil?.[challenge.id],
+      dungeonKeys: useHeroStore.getState().dungeonKeys ?? 0,
+    });
+    if (!decision.ok) {
+      impactAsync(ImpactFeedbackStyle.Light);
+      setBuyKeysOpen(true);
+      return;
+    }
+    if (decision.cost === 'key') {
+      if (!spendDungeonKey()) {
+        notificationAsync(NotificationFeedbackType.Warning);
+        setBuyKeysOpen(true);
+        return;
+      }
+    } else {
+      startEncounterCooldown(challenge.id, dungeonCdMs(challenge.tier));
+    }
+    beginFight();
+  }, [beginFight, challenge.id, challenge.tier, phase, skipEntryGate, spendDungeonKey, startEncounterCooldown]);
+
   const onOpenChest = useCallback(() => {
     if (!resolution?.won) return;
-    grantPrize(resolution.loot, grantInventoryItem, addGold);
+    applyLootPrize(resolution.loot);
     recordBossWin();
     if (isFirstClear) onCleared();
     setPhase('loot');
-  }, [addGold, grantInventoryItem, isFirstClear, onCleared, recordBossWin, resolution]);
+  }, [applyLootPrize, isFirstClear, onCleared, recordBossWin, resolution]);
 
   const onRematch = useCallback(() => {
     setResolution(null);
@@ -208,6 +270,7 @@ export default function BossApproach({
           <View pointerEvents="box-none" style={[styles.sheetWrap, { paddingBottom: 12 + insets.bottom }]}>
             <View style={styles.bottom}>
               <FightLootTray table={lootTable} onInspect={(entry) => setInspect(payloadFromEntry(entry))} />
+              <Text style={styles.entryHint}>{entryHint}</Text>
               <Pressable
                 testID="fight-button"
                 onPress={onFight}
@@ -219,8 +282,12 @@ export default function BossApproach({
                   end={{ x: 1, y: 0 }}
                   style={styles.fightGradient}
                 >
-                  <DoorOpen size={18} color="#1a1228" />
-                  <Text style={styles.fightLabel}>Fight</Text>
+                  {entry.ok && entry.cost === 'key' ? (
+                    <KeyRound size={18} color="#1a1228" />
+                  ) : (
+                    <DoorOpen size={18} color="#1a1228" />
+                  )}
+                  <Text style={styles.fightLabel}>{fightLabel}</Text>
                 </LinearGradient>
               </Pressable>
             </View>
@@ -261,6 +328,16 @@ export default function BossApproach({
         payload={inspect}
         accentHint={
           inspect?.type === 'item' ? undefined : inspect?.type === 'gold' ? Colors.dark.gold : undefined
+        }
+      />
+
+      <BuyKeySheet
+        visible={buyKeysOpen}
+        onClose={() => setBuyKeysOpen(false)}
+        dungeonHint={
+          !entry.ok
+            ? `Free entry in ${formatCooldownRemaining(entry.readyAt, nowMs)}. Buy a key to fight now.`
+            : undefined
         }
       />
     </View>
@@ -332,6 +409,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '800',
     color: '#1a1228',
+  },
+  entryHint: {
+    color: 'rgba(255,255,255,0.78)',
+    fontSize: 12,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: 8,
   },
   pressed: {
     opacity: 0.8,
