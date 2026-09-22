@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { Castle, MapPin } from 'lucide-react-native';
+import { Castle, Lock, MapPin } from 'lucide-react-native';
 
 import Colors from '@/constants/colors';
 import { impactAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
@@ -15,11 +15,15 @@ type Props = {
   left: number;
   top: number;
   onPress: () => void;
+  /** Dev unveil on a fogged pin. Production markers stay tap-only. */
+  onLongPress?: () => void;
 };
 
-const HEAD = 32;
-const STEM = 10;
-const WRAP = 44;
+/** Discreet circles. Screen size is this × the fixed map scale (~1.85). */
+const HEAD = 22;
+const ICON = 12;
+const STEM = 6;
+const WRAP = 30;
 
 export default function MapPinMarker({
   accessibilityLabel,
@@ -27,10 +31,11 @@ export default function MapPinMarker({
   left,
   top,
   onPress,
+  onLongPress,
 }: Props) {
   const locked = kind === 'locked';
-  const accent = locked ? Colors.dark.textMuted : Colors.dark.gold;
-  const zIndex = kind === 'home' ? 5 : 3;
+  const accent = locked ? Colors.dark.textSecondary : Colors.dark.gold;
+  const zIndex = kind === 'home' ? 5 : locked ? 2 : 3;
 
   return (
     <View
@@ -40,20 +45,31 @@ export default function MapPinMarker({
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={
-          locked ? `${accessibilityLabel}, hidden` : accessibilityLabel
+          locked ? `${accessibilityLabel}, locked` : accessibilityLabel
         }
         onPress={() => {
           impactAsync(locked ? ImpactFeedbackStyle.Light : ImpactFeedbackStyle.Medium);
           onPress();
         }}
-        hitSlop={8}
+        onLongPress={
+          onLongPress
+            ? () => {
+                impactAsync(ImpactFeedbackStyle.Medium);
+                onLongPress();
+              }
+            : undefined
+        }
+        delayLongPress={480}
+        hitSlop={12}
         style={({ pressed }) => [styles.headHit, pressed && styles.pressed]}
       >
         <View style={[styles.head, { borderColor: accent, backgroundColor: locked ? '#1a1524ee' : '#120c1cee' }]}>
           {kind === 'home' ? (
-            <Castle size={16} color={accent} strokeWidth={2.4} />
+            <Castle size={ICON} color={accent} strokeWidth={2.4} />
+          ) : kind === 'locked' ? (
+            <Lock size={ICON} color={accent} strokeWidth={2.4} />
           ) : (
-            <MapPin size={16} color={accent} strokeWidth={2.4} />
+            <MapPin size={ICON} color={accent} strokeWidth={2.4} />
           )}
         </View>
         <View style={[styles.stem, { backgroundColor: accent }]} />

@@ -18,7 +18,8 @@ const DevToolsPanel: ComponentType<DevToolsPanelProps> | null = __DEV__
   : null;
 
 /**
- * Global account HUD — V1 `TabsWithTopBar` layout over every tab.
+ * Account HUD on Quests, Hero, Social, and Mentor.
+ * The World tab omits this so the kingdom board can run full-bleed.
  * Pills: gold + keys (ui-upgrade variant). Mail is a disabled stub.
  */
 export default function AccountBar() {

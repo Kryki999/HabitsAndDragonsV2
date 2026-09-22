@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
+import { Image, StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Colors from '@/constants/colors';
-import { impactAsync, ImpactFeedbackStyle, notificationAsync, NotificationFeedbackType } from '@/lib/hapticsGate';
+import { notificationAsync, NotificationFeedbackType } from '@/lib/hapticsGate';
 
 import FogOverlay from './FogOverlay';
 import MapPinMarker from './MapPinMarker';
@@ -15,11 +15,11 @@ import { isMapLocationId } from './locations';
 import { useFogReveal } from './useFogReveal';
 import { useWorldStore } from './store';
 
-/** Cover scale: board fills viewport; tall art pans mostly up. */
-const MIN_SCALE = 1;
-const MAX_SCALE = 2.8;
-/** Closer than cover so Crownhaven fills the phone; pan up the corridor. */
-const START_SCALE = 1.85;
+/**
+ * One product camera. Closer than cover so Crownhaven fills the phone;
+ * the player pans up the corridor. No pinch and no zoom controls.
+ */
+const MAP_SCALE = 1.85;
 
 const MAP_ASPECT = MAP_INTRINSIC.width / MAP_INTRINSIC.height;
 
@@ -29,26 +29,24 @@ function clamp(n: number, min: number, max: number): number {
 }
 
 function clampOffsets(
-  nextScale: number,
   nextTx: number,
   nextTy: number,
   mapW: number,
   mapH: number,
   viewW: number,
   viewH: number,
-): { scale: number; tx: number; ty: number } {
+): { tx: number; ty: number } {
   'worklet';
-  const s = clamp(nextScale, MIN_SCALE, MAX_SCALE);
   if (mapW <= 0 || mapH <= 0 || viewW <= 0 || viewH <= 0) {
-    return { scale: s, tx: 0, ty: 0 };
+    return { tx: 0, ty: 0 };
   }
-  const scaledW = mapW * s;
-  const scaledH = mapH * s;
-  const minX = viewW - scaledW;
+  const scaledW = mapW * MAP_SCALE;
+  const scaledH = mapH * MAP_SCALE;
+  const minX = Math.min(0, viewW - scaledW);
   const maxX = 0;
-  const minY = viewH - scaledH;
+  const minY = Math.min(0, viewH - scaledH);
   const maxY = 0;
-  return { scale: s, tx: clamp(nextTx, minX, maxX), ty: clamp(nextTy, minY, maxY) };
+  return { tx: clamp(nextTx, minX, maxX), ty: clamp(nextTy, minY, maxY) };
 }
 
 /** Cover layout: both axes ≥ viewport at scale 1 (no letterbox). */
@@ -81,10 +79,8 @@ export default function KingdomMap() {
     [viewport.height, viewport.width],
   );
 
-  const scale = useSharedValue(START_SCALE);
   const tx = useSharedValue(0);
   const ty = useSharedValue(0);
-  const savedScale = useSharedValue(START_SCALE);
   const savedTx = useSharedValue(0);
   const savedTy = useSharedValue(0);
   const vw = useSharedValue(0);
@@ -110,9 +106,8 @@ export default function KingdomMap() {
     (width: number, height: number, view: Viewport) => {
       const home = KINGDOM_PINS.find((p) => p.id === 'crownhaven');
       const next = clampOffsets(
-        START_SCALE,
-        view.width / 2 - (home?.x ?? 0.5) * width * START_SCALE,
-        view.height / 2 - (home?.y ?? 0.86) * height * START_SCALE,
+        view.width / 2 - (home?.x ?? 0.5) * width * MAP_SCALE,
+        view.height / 2 - (home?.y ?? 0.86) * height * MAP_SCALE,
         width,
         height,
         view.width,
@@ -122,14 +117,12 @@ export default function KingdomMap() {
       vh.value = view.height;
       contentW.value = width;
       contentH.value = height;
-      scale.value = next.scale;
       tx.value = next.tx;
       ty.value = next.ty;
-      savedScale.value = next.scale;
       savedTx.value = next.tx;
       savedTy.value = next.ty;
     },
-    [contentH, contentW, savedScale, savedTx, savedTy, scale, tx, ty, vh, vw],
+    [contentH, contentW, savedTx, savedTy, tx, ty, vh, vw],
   );
 
   useEffect(() => {
@@ -145,7 +138,6 @@ export default function KingdomMap() {
     })
     .onUpdate((e) => {
       const next = clampOffsets(
-        scale.value,
         savedTx.value + e.translationX,
         savedTy.value + e.translationY,
         contentW.value,
@@ -161,40 +153,8 @@ export default function KingdomMap() {
       savedTy.value = ty.value;
     });
 
-  const pinch = Gesture.Pinch()
-    .onStart(() => {
-      savedScale.value = scale.value;
-      savedTx.value = tx.value;
-      savedTy.value = ty.value;
-    })
-    .onUpdate((e) => {
-      const nextScale = clamp(savedScale.value * e.scale, MIN_SCALE, MAX_SCALE);
-      const contentX = (e.focalX - savedTx.value) / savedScale.value;
-      const contentY = (e.focalY - savedTy.value) / savedScale.value;
-      const next = clampOffsets(
-        nextScale,
-        e.focalX - contentX * nextScale,
-        e.focalY - contentY * nextScale,
-        contentW.value,
-        contentH.value,
-        vw.value,
-        vh.value,
-      );
-      scale.value = next.scale;
-      tx.value = next.tx;
-      ty.value = next.ty;
-    })
-    .onEnd(() => {
-      savedScale.value = scale.value;
-      savedTx.value = tx.value;
-      savedTy.value = ty.value;
-    });
-
-  const composed = Gesture.Simultaneous(pan, pinch);
-
   const animatedStyle = useAnimatedStyle(() => {
     const next = clampOffsets(
-      scale.value,
       tx.value,
       ty.value,
       contentW.value,
@@ -204,7 +164,7 @@ export default function KingdomMap() {
     );
     return {
       transformOrigin: 'top left',
-      transform: [{ translateX: next.tx }, { translateY: next.ty }, { scale: next.scale }],
+      transform: [{ translateX: next.tx }, { translateY: next.ty }, { scale: MAP_SCALE }],
     };
   });
 
@@ -252,7 +212,7 @@ export default function KingdomMap() {
 
   return (
     <View style={styles.root}>
-      <GestureDetector gesture={composed}>
+      <GestureDetector gesture={pan}>
         <Animated.View style={styles.stage} onLayout={onLayout}>
           {mapW > 0 && mapH > 0 ? (
             <Animated.View
@@ -271,18 +231,6 @@ export default function KingdomMap() {
               </View>
               {KINGDOM_PINS.map((pin) => {
                 const kind = pinKindFor(pin.id, pin.kind, discoveredRegionIds);
-                if (kind === 'locked') {
-                  if (!__DEV__) return null;
-                  return (
-                    <DevFogMote
-                      key={pin.id}
-                      accessibilityLabel={pin.label}
-                      left={pin.x * mapW}
-                      top={pin.y * mapH}
-                      onLongPress={() => unveil(pin.id)}
-                    />
-                  );
-                }
                 return (
                   <MapPinMarker
                     key={pin.id}
@@ -291,6 +239,7 @@ export default function KingdomMap() {
                     left={pin.x * mapW}
                     top={pin.y * mapH}
                     onPress={() => onPin(pin.id)}
+                    onLongPress={__DEV__ && kind === 'locked' ? () => unveil(pin.id) : undefined}
                   />
                 );
               })}
@@ -315,32 +264,6 @@ export default function KingdomMap() {
   );
 }
 
-function DevFogMote({
-  accessibilityLabel,
-  left,
-  top,
-  onLongPress,
-}: {
-  accessibilityLabel: string;
-  left: number;
-  top: number;
-  onLongPress: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`${accessibilityLabel}, hidden in fog`}
-      onLongPress={() => {
-        impactAsync(ImpactFeedbackStyle.Medium);
-        onLongPress();
-      }}
-      delayLongPress={480}
-      hitSlop={14}
-      style={[styles.mote, { left: left - 6, top: top - 6 }]}
-    />
-  );
-}
-
 const styles = StyleSheet.create({
   root: {
     flex: 1,
@@ -353,16 +276,6 @@ const styles = StyleSheet.create({
   },
   mapLayer: {
     transformOrigin: 'top left',
-  },
-  mote: {
-    position: 'absolute',
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: 'rgba(236, 240, 246, 0.32)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.22)',
-    zIndex: 2,
   },
   fogWrap: {
     position: 'absolute',
