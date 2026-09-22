@@ -52,6 +52,7 @@ export const useWorldStore = create<WorldStore>()(
       discoveredRegionIds: [...DEFAULT_REVEALED_REGION_IDS],
       clearedEncounterIds: [],
       gutterjackCleared: false,
+      encounterCooldownUntil: {},
 
       openHub: () =>
         set({
@@ -158,6 +159,16 @@ export const useWorldStore = create<WorldStore>()(
           gutterjackCleared: id === 'gutterjack' ? true : state.gutterjackCleared,
         })),
 
+      startEncounterCooldown: (encounterId, durationMs) =>
+        set((state) => ({
+          encounterCooldownUntil: {
+            ...(state.encounterCooldownUntil ?? {}),
+            [encounterId]: new Date(Date.now() + Math.max(0, durationMs)).toISOString(),
+          },
+        })),
+
+      clearEncounterCooldowns: () => set({ encounterCooldownUntil: {} }),
+
       discoverRegion: (id: string) =>
         set((state) => {
           if (!REGION_IDS.has(id)) return state;
@@ -186,11 +197,12 @@ export const useWorldStore = create<WorldStore>()(
           discoveredRegionIds: [...DEFAULT_REVEALED_REGION_IDS],
           clearedEncounterIds: [],
           gutterjackCleared: false,
+          encounterCooldownUntil: {},
         }),
     }),
     {
       name: 'hnd-world-local',
-      version: 5,
+      version: 6,
       storage: createJSONStorage(() => AsyncStorage),
       migrate: (persisted) => {
         const prev = persisted as Partial<WorldState> | undefined;
@@ -203,6 +215,7 @@ export const useWorldStore = create<WorldStore>()(
           discoveredRegionIds: asRegionIds(prev?.discoveredRegionIds ?? prev?.discoveredLocationIds),
           clearedEncounterIds,
           gutterjackCleared: prev?.gutterjackCleared ?? clearedEncounterIds.includes('gutterjack'),
+          encounterCooldownUntil: prev?.encounterCooldownUntil ?? {},
         };
       },
       partialize: (state) => ({
@@ -210,6 +223,7 @@ export const useWorldStore = create<WorldStore>()(
         discoveredRegionIds: state.discoveredRegionIds,
         clearedEncounterIds: state.clearedEncounterIds,
         gutterjackCleared: state.gutterjackCleared,
+        encounterCooldownUntil: state.encounterCooldownUntil,
       }),
     },
   ),

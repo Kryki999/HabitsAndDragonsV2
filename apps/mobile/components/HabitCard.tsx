@@ -10,7 +10,9 @@ import { Check, Coins } from 'lucide-react-native';
 import { impactAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
 import Colors from '@/constants/colors';
 import { Habit, HabitDifficulty } from '@/habits/types';
-import { DIFFICULTY_BASE_REWARDS } from '@/lib/economy';
+import { useHabitsStore } from '@/habits/store';
+import { useHeroStore } from '@/hero/store';
+import { displayRewardsForHabit } from '@/lib/economy';
 import TaskCardOverlay, { CardMetrics } from '@/components/TaskCardOverlay';
 
 const ACCENT = Colors.dark.gold;
@@ -56,6 +58,21 @@ function HabitCard({
   const displayCompleted = readOnly ? !!historicalCompleted : habit.completedToday;
   const checkAnim = useRef(new Animated.Value(displayCompleted ? 1 : 0)).current;
 
+  const today = new Date().toISOString().split('T')[0]!;
+  const completionsToday = useHabitsStore((s) => s.activityByDate[today]?.completions ?? 0);
+  const grantLog = useHeroStore((s) => s.habitGrantLogByDate ?? {});
+  const rewards = displayRewardsForHabit({
+    habitId: habit.id,
+    difficulty: (habit.difficulty ?? 'medium') as HabitDifficulty,
+    completedToday: habit.completedToday,
+    completionsToday,
+    grantLog,
+    date: today,
+  });
+  const rewardGold = rewards.gold;
+  const rewardXp = rewards.xp;
+  const droppedKey = rewards.keys > 0;
+
   useEffect(() => {
     Animated.spring(checkAnim, {
       toValue: displayCompleted ? 1 : 0,
@@ -64,9 +81,6 @@ function HabitCard({
       useNativeDriver: true,
     }).start();
   }, [displayCompleted, checkAnim]);
-
-  const diffKey = (habit.difficulty ?? 'medium') as HabitDifficulty;
-  const baseReward = DIFFICULTY_BASE_REWARDS[diffKey];
 
   // Tapping the card body → measure position, then open overlay
   const handleCardPress = useCallback(() => {
@@ -149,12 +163,15 @@ function HabitCard({
               {/* Vertical reward stack */}
               <View style={styles.rewardStack}>
                 <View style={styles.rewardRow}>
-                  <Text style={styles.rewardXP}>+{baseReward.xp} XP</Text>
+                  <Text style={styles.rewardXP}>+{rewardXp} XP</Text>
                 </View>
                 <View style={styles.rewardRow}>
-                  <Text style={styles.rewardGold}>+{baseReward.gold}</Text>
+                  <Text style={styles.rewardGold}>+{rewardGold}</Text>
                   <Coins size={10} color={Colors.dark.gold} strokeWidth={2.5} />
                 </View>
+                {droppedKey ? (
+                  <Text style={styles.rewardKey}>+1 key</Text>
+                ) : null}
               </View>
 
               {/* Checkbox — separate tap zone */}
@@ -204,6 +221,8 @@ function HabitCard({
           onDelete={onDelete}
           onEdit={onEdit}
           onReschedule={onReschedule}
+          rewardGold={rewardGold}
+          rewardXp={rewardXp}
         />
       )}
     </>
@@ -281,6 +300,11 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700' as const,
     color: Colors.dark.gold,
+  },
+  rewardKey: {
+    fontSize: 10,
+    fontWeight: '800' as const,
+    color: Colors.dark.cyan,
   },
   checkCircle: {
     width: 30,

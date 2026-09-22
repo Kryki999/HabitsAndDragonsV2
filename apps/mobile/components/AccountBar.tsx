@@ -6,6 +6,7 @@ import { Coins, KeyRound, Mail, Settings as SettingsIcon } from 'lucide-react-na
 
 import CircularProgress from '@/components/CircularProgress';
 import SettingsModal from '@/components/SettingsModal';
+import BuyKeySheet from '@/components/BuyKeySheet';
 import Colors from '@/constants/colors';
 import { useHeroStore } from '@/hero/store';
 import { impactAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
@@ -33,6 +34,7 @@ export default function AccountBar() {
   const heroDisplayName = useHeroStore((s) => s.heroDisplayName);
   const [devOpen, setDevOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [buyKeysOpen, setBuyKeysOpen] = useState(false);
 
   const xpProgress = xpForNextLevel > 0 ? currentLevelXP / xpForNextLevel : 0;
   const hudPlayerName = (heroDisplayName?.trim() || 'Wayfarer').slice(0, 48);
@@ -52,6 +54,7 @@ export default function AccountBar() {
     >
       {DevToolsPanel ? <DevToolsPanel visible={devOpen} onClose={() => setDevOpen(false)} /> : null}
       <SettingsModal visible={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <BuyKeySheet visible={buyKeysOpen} onClose={() => setBuyKeysOpen(false)} />
 
       <View style={styles.topBarRow}>
         <Pressable
@@ -96,7 +99,11 @@ export default function AccountBar() {
           </StatPill>
           <StatPill
             testID="account-keys"
-            accessibilityLabel={`${dungeonKeys} keys`}
+            accessibilityLabel={`${dungeonKeys} keys. Tap to buy a key`}
+            onPress={() => {
+              impactAsync(ImpactFeedbackStyle.Light);
+              setBuyKeysOpen(true);
+            }}
             onLongPress={openDev}
           >
             <KeyRound color={Colors.dark.cyan} size={14} />
@@ -151,14 +158,16 @@ function StatPill({
   children,
   testID,
   accessibilityLabel,
+  onPress,
   onLongPress,
 }: {
   children: React.ReactNode;
   testID: string;
   accessibilityLabel: string;
+  onPress?: () => void;
   onLongPress?: () => void;
 }) {
-  if (!onLongPress) {
+  if (!onPress && !onLongPress) {
     return (
       <View
         testID={testID}
@@ -175,7 +184,8 @@ function StatPill({
     <Pressable
       testID={testID}
       accessibilityRole="button"
-      accessibilityLabel={`${accessibilityLabel}. Long press for DEV tools`}
+      accessibilityLabel={onPress ? accessibilityLabel : `${accessibilityLabel}. Long press for DEV tools`}
+      onPress={onPress}
       onLongPress={onLongPress}
       delayLongPress={450}
       style={styles.pillBadge}

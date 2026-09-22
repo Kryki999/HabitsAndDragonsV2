@@ -30,6 +30,8 @@ export type WorldState = {
   /** Boss encounter ids that have been first-cleared. */
   clearedEncounterIds: string[];
   gutterjackCleared: boolean;
+  /** ISO timestamp when free entry is ready again, per encounter id. */
+  encounterCooldownUntil: Record<string, string>;
 };
 
 export type WorldActions = {
@@ -42,6 +44,8 @@ export type WorldActions = {
   closeEncounter: () => void;
   markGutterjackCleared: () => void;
   markEncounterCleared: (id: string) => void;
+  startEncounterCooldown: (encounterId: string, durationMs: number) => void;
+  clearEncounterCooldowns: () => void;
   discoverRegion: (id: string) => void;
   /** Opens every fog region and marks map pins discovered. */
   revealAllMap: () => void;

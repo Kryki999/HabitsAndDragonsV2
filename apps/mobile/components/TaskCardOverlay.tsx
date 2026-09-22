@@ -48,7 +48,9 @@ import {
 } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { Habit, HabitDifficulty } from '@/habits/types';
-import { DIFFICULTY_BASE_REWARDS } from '@/lib/economy';
+import { displayRewardsForHabit } from '@/lib/economy';
+import { useHabitsStore } from '@/habits/store';
+import { useHeroStore } from '@/hero/store';
 import { impactAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
 
 // ─── Public types ─────────────────────────────────────────────────────────────
@@ -71,6 +73,8 @@ interface Props {
   onDelete: (id: string) => void;
   onEdit?: (habit: Habit) => void;
   onReschedule?: (habit: Habit) => void;
+  rewardGold?: number;
+  rewardXp?: number;
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -96,6 +100,8 @@ export default function TaskCardOverlay({
   onDelete,
   onEdit,
   onReschedule,
+  rewardGold,
+  rewardXp,
 }: Props) {
   const { width: SW, height: SH } = useWindowDimensions();
 
@@ -225,9 +231,20 @@ export default function TaskCardOverlay({
     }
   }, [habit, onReschedule, triggerClose]);
 
-  const diffKey = (habit.difficulty ?? 'medium') as HabitDifficulty;
-  const rewards = DIFFICULTY_BASE_REWARDS[diffKey];
   const isCompleted = habit.completedToday;
+  const today = new Date().toISOString().split('T')[0]!;
+  const completionsToday = useHabitsStore((s) => s.activityByDate[today]?.completions ?? 0);
+  const grantLog = useHeroStore((s) => s.habitGrantLogByDate ?? {});
+  const computed = displayRewardsForHabit({
+    habitId: habit.id,
+    difficulty: (habit.difficulty ?? 'medium') as HabitDifficulty,
+    completedToday: habit.completedToday,
+    completionsToday,
+    grantLog,
+    date: today,
+  });
+  const goldShown = rewardGold ?? computed.gold;
+  const xpShown = rewardXp ?? computed.xp;
 
   // ── Dynamic theme (gold for completed quests) ────────────────────────────────
   const cardBorderColor = isCompleted
@@ -382,9 +399,9 @@ export default function TaskCardOverlay({
 
             {/* Reward stack — right side */}
             <View style={styles.compactRewardStack}>
-              <Text style={styles.compactXP}>+{rewards.xp} XP</Text>
+              <Text style={styles.compactXP}>+{xpShown} XP</Text>
               <View style={styles.compactGoldRow}>
-                <Text style={styles.compactGold}>+{rewards.gold}</Text>
+                <Text style={styles.compactGold}>+{goldShown}</Text>
                 <Coins size={10} color={Colors.dark.gold} strokeWidth={2.5} />
               </View>
             </View>
@@ -411,11 +428,11 @@ export default function TaskCardOverlay({
             <View style={styles.rewardColumn}>
               <View style={styles.rewardRow}>
                 <Flame size={11} color={Colors.dark.fire} strokeWidth={2.5} />
-                <Text style={styles.rewardXPText}>+{rewards.xp} XP</Text>
+                <Text style={styles.rewardXPText}>+{xpShown} XP</Text>
               </View>
               <View style={styles.rewardRow}>
                 <Coins size={11} color={Colors.dark.gold} strokeWidth={2.5} />
-                <Text style={styles.rewardGoldText}>+{rewards.gold}</Text>
+                <Text style={styles.rewardGoldText}>+{goldShown}</Text>
               </View>
             </View>
 

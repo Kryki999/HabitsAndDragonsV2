@@ -24,6 +24,7 @@ export default function GutterjackLocation() {
       lootTable={GUTTERJACK_LOOT_TABLE}
       isFirstClear={!alreadyCleared}
       tutorialLock={!alreadyCleared}
+      skipEntryGate={!alreadyCleared}
       sipWine
       onBack={openHub}
       onCleared={markGutterjackCleared}
