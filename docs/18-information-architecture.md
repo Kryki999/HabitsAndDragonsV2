@@ -64,13 +64,23 @@ Zwoje teleportu = natychmiastowy fokus / skip timera (później).
 
 Jak gracz chodzi po Świecie **w apce teraz** (nie nowy tab, nie lista wyjść):
 
-1. **Mapa królestwa** — piny bez nazw; nazwa w HUD / szept po tapie. Bez zmian w tym locku.
+1. **Mapa królestwa** — piny bez nazw; nazwa w HUD / szept po tapie otwartego miejsca. Kamera i kłódki: lock 2026-09-22.
 2. **Hub Crownhaven** — pełny still do tab bara. HUD: Capital / Crownhaven. Wejścia = hotspoty na grafice. **Back** → mapa. Zero listy lokacji pod obrazkiem.
 3. **Tawerna** — HUD: kicker hubu (`Crownhaven`) + tytuł miejsca (`Tavern`). Góra-prawo: **winda z etykietami** (Upper later / Ground / Cellar). Aktywne piętro podświetlone; tap = skok. Jedna decyzja na ekran: Back opuszcza miejsce (→ hub), winda zmienia piętro.
 4. **Cellar / Gutterjack** — walka bez przebudowy (tray rarity + Fight CTA, win% góra-prawo). Winda w tym samym stacku, nad win%.
-5. **Account HUD** — globalny pasek **nad wszystkimi tabami** (V1 `TabsWithTopBar`): avatar + pierścień XP, nick, `Lv.n`; **pills** gold + keys (surface, thin purple border, radius 20); prawo: mail (stub/disabled) + settings (haptics). `__DEV__`: badge **DEV** otwiera panel (long-press na pills = skrót). Production: bez badge/panelu. Streak PARK (brak globalnego streak w `habits`).
+5. **Account HUD** — Questy, Hero, Social, Mentor. **Nie** na tabie World (lock 2026-09-22). V1 `TabsWithTopBar`: avatar + pierścień XP, nick, `Lv.n`; **pills** gold + keys (surface, thin purple border, radius 20); prawo: mail (stub/disabled) + settings (haptics). `__DEV__`: badge **DEV** otwiera panel (long-press na pills = skrót). Production: bez badge/panelu. Streak PARK (brak globalnego streak w `habits`).
 
 Hotspot schodów na stillu jest **opcjonalny** i woła to samo `setFloor` co winda — nie drugie menu. Structure windy jest gotowa na trzecie piętro (Upper = locked placeholder).
+
+---
+
+## Playground lock — kamera korytarza (2026-09-22)
+
+Plansza królestwa w apce teraz:
+
+1. **Zoom** — jedna skala produktowa. Gracz tylko panuje. Pinch i przyciski +/- są wyłączone. Clamp krawędzi zostaje.
+2. **Piny** — małe kółka, bez nazw. Odkryte: ikona landmarku (Crownhaven = zamek). Nieodkryte: ta sama wielkość, **kłódka** zamiast landmarku. Tap kłódki nie otwiera lokacji.
+3. **Account HUD** — zostaje na Questy, Hero, Social, Mentor. Na World paska nie ma: plansza full-bleed pod status barem, tytuł HUD pod safe area.
 
 ---
 

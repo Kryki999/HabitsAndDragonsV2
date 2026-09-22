@@ -15,7 +15,7 @@ type HudAction = {
 };
 
 type Props = {
-  /** Kept so World screens can pass safe-area; the global account bar already ate the top inset. */
+  /** World is full-bleed. The title row sits below the status bar. */
   insets?: EdgeInsets;
   kicker?: string;
   title: string;
@@ -31,12 +31,13 @@ function isHudAction(value: HudAction | React.ReactNode | undefined): value is H
   return typeof v.onPress === 'function' && (v.icon === 'back' || typeof v.label === 'string');
 }
 
-export default function OverlayHud({ kicker, title, left, right, onTitleLongPress }: Props) {
+export default function OverlayHud({ insets, kicker, title, left, right, onTitleLongPress }: Props) {
+  const paddingTop = (insets?.top ?? 0) + 8;
   return (
     <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
       <LinearGradient
         colors={['rgba(7,5,16,0.82)', 'rgba(7,5,16,0.28)', 'transparent']}
-        style={[styles.topFade, { paddingTop: 8 }]}
+        style={[styles.topFade, { paddingTop }]}
         pointerEvents="box-none"
       >
         <View style={styles.row}>

@@ -5,6 +5,7 @@ import type { ImageSourcePropType } from 'react-native';
  *
  * All positions are **normalized 0–1** over the still (x = left→right, y = top→bottom).
  * Map pins: icon only (no name labels). Anchor = stem tip on the landmark.
+ * Fogged pins use the same circle with a lock instead of the landmark icon.
  * Hub hotspots: (x, y) is below the icon. Tune this file only.
  *
  * How to retune
