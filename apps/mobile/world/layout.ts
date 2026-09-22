@@ -203,44 +203,47 @@ export type MapFogSeedDef = {
 
 export const MAP_FOG_SEEDS: MapFogSeedDef[] = [
   // Crownhaven — full walled city + fields; stops short of the river
-  { id: 'ch-city', regionId: 'crownhaven', cx: 0.5, cy: 0.885, rx: 0.46, ry: 0.12 },
-  { id: 'ch-south', regionId: 'crownhaven', cx: 0.5, cy: 0.975, rx: 0.5, ry: 0.08 },
-  { id: 'ch-plaza', regionId: 'crownhaven', cx: 0.5, cy: 0.835, rx: 0.38, ry: 0.07 },
+  { id: 'ch-city', regionId: 'crownhaven', cx: 0.5, cy: 0.885, rx: 0.48, ry: 0.125 },
+  { id: 'ch-south', regionId: 'crownhaven', cx: 0.5, cy: 0.975, rx: 0.52, ry: 0.085 },
+  { id: 'ch-plaza', regionId: 'crownhaven', cx: 0.5, cy: 0.83, rx: 0.4, ry: 0.075 },
   // Approaches — river belt (tower + camp); short of Teeth / Anvil
-  { id: 'ca-center', regionId: 'crown-approaches', cx: 0.5, cy: 0.7, rx: 0.4, ry: 0.085 },
-  { id: 'ca-west', regionId: 'crown-approaches', cx: 0.16, cy: 0.705, rx: 0.26, ry: 0.085 },
-  { id: 'ca-east', regionId: 'crown-approaches', cx: 0.84, cy: 0.705, rx: 0.26, ry: 0.085 },
+  { id: 'ca-center', regionId: 'crown-approaches', cx: 0.5, cy: 0.695, rx: 0.44, ry: 0.095 },
+  { id: 'ca-west', regionId: 'crown-approaches', cx: 0.14, cy: 0.7, rx: 0.28, ry: 0.095 },
+  { id: 'ca-east', regionId: 'crown-approaches', cx: 0.86, cy: 0.7, rx: 0.28, ry: 0.095 },
   // Smuggler's Teeth — west coast cove + wreck
-  { id: 'st-cove', regionId: 'smugglers-teeth', cx: 0.16, cy: 0.54, rx: 0.26, ry: 0.11 },
-  { id: 'st-west', regionId: 'smugglers-teeth', cx: 0.05, cy: 0.505, rx: 0.16, ry: 0.12 },
+  { id: 'st-cove', regionId: 'smugglers-teeth', cx: 0.16, cy: 0.54, rx: 0.28, ry: 0.12 },
+  { id: 'st-west', regionId: 'smugglers-teeth', cx: 0.04, cy: 0.5, rx: 0.18, ry: 0.13 },
   // Anvil Glade — east forest smithy
-  { id: 'ag-forge', regionId: 'anvil-glade', cx: 0.84, cy: 0.54, rx: 0.26, ry: 0.11 },
-  { id: 'ag-east', regionId: 'anvil-glade', cx: 0.95, cy: 0.505, rx: 0.16, ry: 0.12 },
+  { id: 'ag-forge', regionId: 'anvil-glade', cx: 0.84, cy: 0.54, rx: 0.28, ry: 0.12 },
+  { id: 'ag-east', regionId: 'anvil-glade', cx: 0.96, cy: 0.5, rx: 0.18, ry: 0.13 },
   // Closed Way — dark gate on the spine
-  { id: 'cw-gate', regionId: 'closed-way', cx: 0.5, cy: 0.45, rx: 0.36, ry: 0.1 },
-  { id: 'cw-path', regionId: 'closed-way', cx: 0.5, cy: 0.52, rx: 0.26, ry: 0.07 },
+  { id: 'cw-gate', regionId: 'closed-way', cx: 0.5, cy: 0.45, rx: 0.4, ry: 0.11 },
+  { id: 'cw-path', regionId: 'closed-way', cx: 0.5, cy: 0.52, rx: 0.3, ry: 0.08 },
   // Water Temple — west portal island
-  { id: 'wt-portal', regionId: 'water-temple', cx: 0.15, cy: 0.36, rx: 0.26, ry: 0.1 },
-  { id: 'wt-west', regionId: 'water-temple', cx: 0.05, cy: 0.34, rx: 0.16, ry: 0.115 },
+  { id: 'wt-portal', regionId: 'water-temple', cx: 0.14, cy: 0.355, rx: 0.28, ry: 0.11 },
+  { id: 'wt-west', regionId: 'water-temple', cx: 0.04, cy: 0.34, rx: 0.18, ry: 0.125 },
   // Pallglass — east wizard tower
-  { id: 'pg-spire', regionId: 'pallglass', cx: 0.85, cy: 0.32, rx: 0.26, ry: 0.11 },
-  { id: 'pg-east', regionId: 'pallglass', cx: 0.95, cy: 0.3, rx: 0.16, ry: 0.12 },
+  { id: 'pg-spire', regionId: 'pallglass', cx: 0.86, cy: 0.315, rx: 0.28, ry: 0.12 },
+  { id: 'pg-east', regionId: 'pallglass', cx: 0.96, cy: 0.3, rx: 0.18, ry: 0.13 },
   // Raven Castle — dark forest keep
-  { id: 'rc-keep', regionId: 'raven-castle', cx: 0.5, cy: 0.255, rx: 0.38, ry: 0.1 },
-  { id: 'rc-path', regionId: 'raven-castle', cx: 0.5, cy: 0.335, rx: 0.26, ry: 0.07 },
+  { id: 'rc-keep', regionId: 'raven-castle', cx: 0.5, cy: 0.25, rx: 0.42, ry: 0.11 },
+  { id: 'rc-path', regionId: 'raven-castle', cx: 0.5, cy: 0.33, rx: 0.3, ry: 0.08 },
   // Vampire House — NE vineyard
-  { id: 'vh-manor', regionId: 'vampire-house', cx: 0.78, cy: 0.17, rx: 0.32, ry: 0.09 },
-  { id: 'vh-east', regionId: 'vampire-house', cx: 0.94, cy: 0.15, rx: 0.18, ry: 0.09 },
-  // Pyramid — desert belt
-  { id: 'py-center', regionId: 'pyramid', cx: 0.5, cy: 0.115, rx: 0.48, ry: 0.09 },
-  { id: 'py-belt', regionId: 'pyramid', cx: 0.5, cy: 0.155, rx: 0.42, ry: 0.065 },
+  { id: 'vh-manor', regionId: 'vampire-house', cx: 0.78, cy: 0.165, rx: 0.36, ry: 0.1 },
+  { id: 'vh-east', regionId: 'vampire-house', cx: 0.95, cy: 0.14, rx: 0.2, ry: 0.1 },
+  // Pyramid — desert belt (incl. NW corner fill)
+  { id: 'py-center', regionId: 'pyramid', cx: 0.5, cy: 0.11, rx: 0.5, ry: 0.1 },
+  { id: 'py-belt', regionId: 'pyramid', cx: 0.5, cy: 0.155, rx: 0.46, ry: 0.07 },
+  { id: 'py-west', regionId: 'pyramid', cx: 0.1, cy: 0.12, rx: 0.2, ry: 0.1 },
   // Ananiel — void tower + top sky
-  { id: 'an-tower', regionId: 'ananiel', cx: 0.5, cy: 0.04, rx: 0.46, ry: 0.09 },
-  { id: 'an-sky', regionId: 'ananiel', cx: 0.5, cy: 0.0, rx: 0.52, ry: 0.075 },
+  { id: 'an-tower', regionId: 'ananiel', cx: 0.5, cy: 0.035, rx: 0.5, ry: 0.1 },
+  { id: 'an-sky', regionId: 'ananiel', cx: 0.5, cy: 0.0, rx: 0.56, ry: 0.085 },
+  { id: 'an-nw', regionId: 'ananiel', cx: 0.08, cy: 0.03, rx: 0.18, ry: 0.08 },
+  { id: 'an-ne', regionId: 'ananiel', cx: 0.92, cy: 0.03, rx: 0.18, ry: 0.08 },
 ];
 
 /** Native Skia veil is unrolled — keep this in lockstep with `fogShader.ts`. */
-export const MAP_FOG_SEED_SLOTS = 24;
+export const MAP_FOG_SEED_SLOTS = 28;
 
 export function isFogRegionRevealed(id: string, discoveredRegionIds: string[]): boolean {
   const region = MAP_FOG_REGIONS.find((entry) => entry.id === id);

@@ -262,7 +262,12 @@ export default function KingdomMap() {
             >
               <Image source={WORLD_ART.map} style={{ width: mapW, height: mapH }} resizeMode="stretch" />
               <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-                <FogOverlay mapWidth={mapW} mapHeight={mapH} progress={progress} />
+                <FogOverlay
+                  mapWidth={mapW}
+                  mapHeight={mapH}
+                  progress={progress}
+                  discoveredRegionIds={discoveredRegionIds}
+                />
               </View>
               {KINGDOM_PINS.map((pin) => {
                 const kind = pinKindFor(pin.id, pin.kind, discoveredRegionIds);

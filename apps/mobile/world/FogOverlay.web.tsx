@@ -13,22 +13,35 @@ import Svg, {
 } from 'react-native-svg';
 import type { SharedValue } from 'react-native-reanimated';
 
-import { MAP_FOG_SEEDS } from './layout';
+import { isFogRegionRevealed, MAP_FOG_REGIONS, MAP_FOG_SEEDS } from './layout';
 
 type FogOverlayProps = {
   mapWidth: number;
   mapHeight: number;
   progress: Record<string, SharedValue<number>>;
+  /** Forces a paint when discovery changes (SharedValues alone do not). */
+  discoveredRegionIds: string[];
 };
 
 /**
  * Web preview of the continuous veil. Native Skia (noise-warped field) is the look.
  * One mask: merged seeds, turbulenced + blurred so openings are bays, not stamps.
+ * When every region is open, unmount the veil so unveil-all leaves zero fog.
  */
-export default function FogOverlay({ mapWidth, mapHeight, progress }: FogOverlayProps) {
-  useFogTick(progress);
+export default function FogOverlay({
+  mapWidth,
+  mapHeight,
+  progress,
+  discoveredRegionIds,
+}: FogOverlayProps) {
+  useFogTick(progress, discoveredRegionIds);
 
   if (mapWidth <= 0 || mapHeight <= 0) return null;
+
+  const allClear = MAP_FOG_REGIONS.every((region) =>
+    isFogRegionRevealed(region.id, discoveredRegionIds),
+  );
+  if (allClear) return null;
 
   const blurBase = Math.min(mapWidth, mapHeight);
 
@@ -88,8 +101,12 @@ export default function FogOverlay({ mapWidth, mapHeight, progress }: FogOverlay
   );
 }
 
-function useFogTick(progress: Record<string, SharedValue<number>>) {
+function useFogTick(progress: Record<string, SharedValue<number>>, discoveredRegionIds: string[]) {
   const [, setTick] = useState(0);
+  useEffect(() => {
+    setTick((n) => n + 1);
+  }, [discoveredRegionIds]);
+
   useEffect(() => {
     let frame = 0;
     const loop = () => {

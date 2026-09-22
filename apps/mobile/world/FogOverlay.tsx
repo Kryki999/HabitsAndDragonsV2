@@ -11,15 +11,27 @@ import {
 } from 'react-native-reanimated';
 
 import { FOG_SKSL } from './fogShader';
-import { MAP_FOG_SEEDS, MAP_FOG_SEED_SLOTS } from './layout';
+import {
+  isFogRegionRevealed,
+  MAP_FOG_REGIONS,
+  MAP_FOG_SEEDS,
+  MAP_FOG_SEED_SLOTS,
+} from './layout';
 
 export type FogOverlayProps = {
   mapWidth: number;
   mapHeight: number;
   progress: Record<string, SharedValue<number>>;
+  /** Forces a paint when discovery changes (SharedValues alone do not on web). */
+  discoveredRegionIds: string[];
 };
 
-export default function FogOverlay({ mapWidth, mapHeight, progress }: FogOverlayProps) {
+export default function FogOverlay({
+  mapWidth,
+  mapHeight,
+  progress,
+  discoveredRegionIds,
+}: FogOverlayProps) {
   const clock = useSharedValue(0);
   const source = useMemo(() => Skia.RuntimeEffect.Make(FOG_SKSL), []);
 
@@ -56,6 +68,12 @@ export default function FogOverlay({ mapWidth, mapHeight, progress }: FogOverlay
   });
 
   if (mapWidth <= 0 || mapHeight <= 0 || !source) return null;
+
+  // Unveil-all: drop the veil entirely so soft edges cannot leave orphan scraps.
+  const allClear = MAP_FOG_REGIONS.every((region) =>
+    isFogRegionRevealed(region.id, discoveredRegionIds),
+  );
+  if (allClear) return null;
 
   return (
     <Canvas
