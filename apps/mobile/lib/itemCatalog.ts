@@ -1,8 +1,8 @@
-import { GUTTERJACK_ITEMS } from '@/world/content';
+import { WORLD_LOOT_ITEMS } from '@/world/content';
 import type { LootItemEntry } from '@/types/dungeonLoot';
 
 /**
- * Hero catalog: demo stand-ins + Gutterjack drop items.
+ * Hero catalog: demo stand-ins + Act 1 dungeon drop items.
  * V1 raster art was gitignored; slots use Lucide glyphs.
  */
 const DEMO_ITEMS: LootItemEntry[] = [
@@ -28,7 +28,7 @@ const DEMO_ITEMS: LootItemEntry[] = [
 
 const byId = new Map<string, LootItemEntry>([
   ...DEMO_ITEMS.map((item) => [item.id, item] as const),
-  ...GUTTERJACK_ITEMS.map((item) => [item.id, item] as const),
+  ...WORLD_LOOT_ITEMS.map((item) => [item.id, item] as const),
 ]);
 
 export function resolveLootItemById(itemId: string): LootItemEntry | null {

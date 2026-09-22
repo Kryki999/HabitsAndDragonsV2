@@ -1,41 +1,50 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, type ImageSourcePropType } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Colors from '@/constants/colors';
 
 import OverlayHud from './OverlayHud';
-import StillFrame from './StillFrame';
-import { LOCATION_STILL_INTRINSIC, MAP_LOCATIONS } from './locations';
-import { useWorldStore } from './store';
-import type { MapLocationId } from './types';
+import StillFrame, { type CoverAnchor } from './StillFrame';
+import { LOCATION_STILL_INTRINSIC } from './content';
 
 type Props = {
-  locationId: MapLocationId;
+  name: string;
+  kicker: string;
+  still: ImageSourcePropType;
+  flavor: string;
+  onBack: () => void;
+  testID?: string;
+  stillAnchor?: CoverAnchor;
 };
 
-/** Ally still — same World grammar as a location, no Fight. */
-export default function NpcStill({ locationId }: Props) {
+/** Ally / hub still — same World grammar as a location, no Fight. */
+export default function NpcStill({
+  name,
+  kicker,
+  still,
+  flavor,
+  onBack,
+  testID,
+  stillAnchor = 'center',
+}: Props) {
   const insets = useSafeAreaInsets();
-  const closeEncounter = useWorldStore((s) => s.closeEncounter);
-  const location = MAP_LOCATIONS[locationId];
-  const encounter = location.encounter;
-  if (encounter.kind !== 'npc') return null;
 
   return (
-    <View style={styles.root} testID={`npc-still-${encounter.id}`}>
+    <View style={styles.root} testID={testID ?? `npc-still-${name}`}>
       <StillFrame
-        source={encounter.still}
+        source={still}
         intrinsicWidth={LOCATION_STILL_INTRINSIC.width}
         intrinsicHeight={LOCATION_STILL_INTRINSIC.height}
+        anchor={stillAnchor}
       />
 
       <OverlayHud
         insets={insets}
-        kicker={location.name}
-        title={encounter.name}
-        left={{ icon: 'back', onPress: closeEncounter, accessibilityLabel: 'Back' }}
+        kicker={kicker}
+        title={name}
+        left={{ icon: 'back', onPress: onBack, accessibilityLabel: 'Back' }}
       />
 
       <View pointerEvents="none" style={[styles.veilWrap, { paddingBottom: 16 + insets.bottom }]}>
@@ -43,7 +52,7 @@ export default function NpcStill({ locationId }: Props) {
           colors={['transparent', 'rgba(7,5,16,0.55)', 'rgba(7,5,16,0.92)']}
           style={styles.fade}
         />
-        <Text style={styles.flavor}>{encounter.flavor}</Text>
+        <Text style={styles.flavor}>{flavor}</Text>
       </View>
     </View>
   );

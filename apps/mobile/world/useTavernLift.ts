@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { isFloorOpen, TAVERN_INTERIOR, type InteriorFloorDef, type InteriorFloorId } from './interiors';
+import { isFloorOpen, TAVERN_INTERIOR, type InteriorFloorDef } from './interiors';
 import { useWorldStore } from './store';
 
-/** Shared lift handler for every tavern floor (hall + Gutterjack cellar). */
-export function useTavernLift() {
-  const floorId = (useWorldStore((s) => s.currentFloorId) ?? TAVERN_INTERIOR.defaultFloorId) as InteriorFloorId;
+/** Shared lift handler — tavern and map dungeon elevators. */
+export function useFloorLift(floors: InteriorFloorDef[], currentId: string) {
   const setFloor = useWorldStore((s) => s.setFloor);
   const [whisper, setWhisper] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -26,15 +25,21 @@ export function useTavernLift() {
 
   const onPickFloor = useCallback(
     (next: InteriorFloorDef) => {
-      if (next.id === floorId) return;
+      if (next.id === currentId) return;
       if (!isFloorOpen(next)) {
         showWhisper(next.hint ?? 'Later.');
         return;
       }
       setFloor(next.id);
     },
-    [floorId, setFloor, showWhisper],
+    [currentId, setFloor, showWhisper],
   );
 
-  return { floorId, onPickFloor, whisper };
+  return { floorId: currentId, onPickFloor, whisper };
+}
+
+/** Shared lift handler for every tavern floor (hall + Gutterjack cellar). */
+export function useTavernLift() {
+  const floorId = useWorldStore((s) => s.currentFloorId) ?? TAVERN_INTERIOR.defaultFloorId;
+  return useFloorLift(TAVERN_INTERIOR.floors, floorId);
 }

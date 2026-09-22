@@ -2,6 +2,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import {
+  dungeonFloorById,
+  dungeonForHotspot,
+  getLocationHotspot,
+  isDungeonFloorUnlocked,
+} from './content';
 import { INTERIORS, floorById, isFloorOpen, resolveFloorId, type InteriorFloorId } from './interiors';
 import { DEFAULT_REVEALED_REGION_IDS, MAP_FOG_REGIONS } from './layout';
 import type { MapLocationId, WorldActions, WorldInteriorId, WorldState } from './types';
@@ -41,6 +47,7 @@ export const useWorldStore = create<WorldStore>()(
       currentInteriorId: null,
       currentFloorId: null,
       currentLocationId: null,
+      currentHotspotId: null,
       discoveredLocationIds: [...ALWAYS_DISCOVERED],
       discoveredRegionIds: [...DEFAULT_REVEALED_REGION_IDS],
       clearedEncounterIds: [],
@@ -52,6 +59,7 @@ export const useWorldStore = create<WorldStore>()(
           currentInteriorId: null,
           currentFloorId: null,
           currentLocationId: null,
+          currentHotspotId: null,
         }),
 
       openMap: () =>
@@ -60,6 +68,7 @@ export const useWorldStore = create<WorldStore>()(
           currentInteriorId: null,
           currentFloorId: null,
           currentLocationId: null,
+          currentHotspotId: null,
         }),
 
       openInterior: (id: WorldInteriorId, floorId?: InteriorFloorId) =>
@@ -73,44 +82,67 @@ export const useWorldStore = create<WorldStore>()(
             currentInteriorId: id,
             currentFloorId: nextFloor,
             currentLocationId: null,
+            currentHotspotId: null,
             discoveredLocationIds: discovered,
           };
         }),
 
       setFloor: (id: InteriorFloorId) =>
         set((state) => {
-          if (state.currentScreen !== 'interior' || !state.currentInteriorId) return state;
-          const interior = INTERIORS[state.currentInteriorId];
-          const floor = floorById(interior, id);
-          if (!floor || !isFloorOpen(floor)) return state;
-          if (floor.id === state.currentFloorId) return state;
-          let discovered = state.discoveredLocationIds;
-          if (floor.id === 'cellar') discovered = uniquePush(discovered, 'gutterjack');
-          return { currentFloorId: floor.id, discoveredLocationIds: discovered };
+          if (state.currentScreen === 'interior' && state.currentInteriorId) {
+            const interior = INTERIORS[state.currentInteriorId];
+            const floor = floorById(interior, id);
+            if (!floor || !isFloorOpen(floor)) return state;
+            if (floor.id === state.currentFloorId) return state;
+            let discovered = state.discoveredLocationIds;
+            if (floor.id === 'cellar') discovered = uniquePush(discovered, 'gutterjack');
+            return { currentFloorId: floor.id, discoveredLocationIds: discovered };
+          }
+
+          if (state.currentScreen === 'encounter' && state.currentLocationId) {
+            const hotspot = getLocationHotspot(state.currentLocationId, state.currentHotspotId);
+            const dungeon = dungeonForHotspot(hotspot);
+            if (!dungeon) return state;
+            const floor = dungeonFloorById(dungeon, id);
+            if (floor.id !== id) return state;
+            if (!isDungeonFloorUnlocked(floor, state.clearedEncounterIds)) return state;
+            if (floor.id === state.currentFloorId) return state;
+            return { currentFloorId: floor.id };
+          }
+
+          return state;
         }),
 
       openLocation: (id: MapLocationId) =>
         set((state) => ({
           currentScreen: 'location',
           currentLocationId: id,
+          currentHotspotId: null,
           currentInteriorId: null,
           currentFloorId: null,
           discoveredLocationIds: uniquePush(state.discoveredLocationIds, id),
         })),
 
-      openEncounter: (id: MapLocationId) =>
-        set((state) => ({
-          currentScreen: 'encounter',
-          currentLocationId: id,
-          currentInteriorId: null,
-          currentFloorId: null,
-          discoveredLocationIds: uniquePush(state.discoveredLocationIds, id),
-        })),
+      openHotspot: (locationId: MapLocationId, hotspotId: string) =>
+        set((state) => {
+          const hotspot = getLocationHotspot(locationId, hotspotId);
+          const dungeon = dungeonForHotspot(hotspot);
+          return {
+            currentScreen: 'encounter',
+            currentLocationId: locationId,
+            currentHotspotId: hotspot?.id ?? hotspotId,
+            currentInteriorId: null,
+            currentFloorId: dungeon?.defaultFloorId ?? null,
+            discoveredLocationIds: uniquePush(state.discoveredLocationIds, locationId),
+          };
+        }),
 
       closeEncounter: () =>
         set((state) => ({
           currentScreen: 'location',
           currentLocationId: state.currentLocationId,
+          currentHotspotId: null,
+          currentFloorId: null,
         })),
 
       markGutterjackCleared: () =>
@@ -149,6 +181,7 @@ export const useWorldStore = create<WorldStore>()(
           currentInteriorId: null,
           currentFloorId: null,
           currentLocationId: null,
+          currentHotspotId: null,
           discoveredLocationIds: [...ALWAYS_DISCOVERED],
           discoveredRegionIds: [...DEFAULT_REVEALED_REGION_IDS],
           clearedEncounterIds: [],
@@ -157,7 +190,7 @@ export const useWorldStore = create<WorldStore>()(
     }),
     {
       name: 'hnd-world-local',
-      version: 4,
+      version: 5,
       storage: createJSONStorage(() => AsyncStorage),
       migrate: (persisted) => {
         const prev = persisted as Partial<WorldState> | undefined;

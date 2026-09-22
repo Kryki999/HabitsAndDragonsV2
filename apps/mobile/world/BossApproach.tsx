@@ -16,6 +16,7 @@ import {
   computeWinChance,
   resolveFight,
   rollPlaygroundLoot,
+  rollWeightedLoot,
   wineInPack,
   GUTTERJACK_WINE_ID,
 } from '@/combat/engine';
@@ -55,6 +56,9 @@ export type BossApproachProps = {
   onCleared: () => void;
   /** Gutterjack wine sip + Gutterjack loot roller. */
   sipWine?: boolean;
+  /** Only Gutterjack first clear is a 100% tutorial lock. */
+  tutorialLock?: boolean;
+  farmWeights?: readonly { id: string; weight: number }[];
   rollLoot?: (isFirstClear: boolean) => FightLootPrize;
   headerExtra?: ReactNode;
   whisper?: string | null;
@@ -70,6 +74,8 @@ export default function BossApproach({
   onBack,
   onCleared,
   sipWine = false,
+  tutorialLock = false,
+  farmWeights,
   rollLoot,
   headerExtra,
   whisper,
@@ -103,13 +109,15 @@ export default function BossApproach({
           ownedItemIds,
           willSipWine,
         },
-        { sipWine },
+        { sipWine, tutorialLock },
       ),
-    [challenge, equippedRelicId, isFirstClear, ownedItemIds, playerLevel, sipWine, willSipWine],
+    [challenge, equippedRelicId, isFirstClear, ownedItemIds, playerLevel, sipWine, tutorialLock, willSipWine],
   );
 
   const chanceColor = winChanceColor(breakdown.displayPct);
-  const lootRoller = rollLoot ?? (sipWine ? undefined : rollPlaygroundLoot);
+  const lootRoller =
+    rollLoot ??
+    (farmWeights ? () => rollWeightedLoot(farmWeights) : sipWine ? undefined : rollPlaygroundLoot);
 
   const handleBack = useCallback(() => {
     if (phase === 'clash' || phase === 'loot') return;

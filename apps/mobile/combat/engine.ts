@@ -3,7 +3,6 @@ import {
   GUTTERJACK_EMPTY,
   GUTTERJACK_FARM_WEIGHTS,
   GUTTERJACK_GOLD,
-  GUTTERJACK_ITEMS,
   GUTTERJACK_TULIP_ID,
   GUTTERJACK_WINE_ID,
   GUTTER_CORK_ID,
@@ -11,6 +10,9 @@ import {
   PLAYGROUND_FARM_WEIGHTS,
   PLAYGROUND_GOLD,
   PLAYGROUND_GOLD_ID,
+  lootEmptyById,
+  lootGoldById,
+  lootItemById,
 } from '@/world/content';
 import type { LootItemEntry } from '@/types/dungeonLoot';
 
@@ -39,7 +41,7 @@ export function randomInt(min: number, max: number): number {
 }
 
 function itemById(id: string): LootItemEntry | null {
-  return GUTTERJACK_ITEMS.find((i) => i.id === id) ?? null;
+  return lootItemById(id);
 }
 
 function equippedBonus(
@@ -70,12 +72,12 @@ export type WinChanceInput = {
 
 /**
  * V2 Bible combat (Act 1): level Δ + equipped affixes + one pot.
- * No hex, no class, no dragons. First fight = 100% tutorial lock.
+ * No hex, no class, no dragons. Gutterjack first fight = 100% tutorial lock.
  */
 export function computeWinChance(
   challenge: CombatChallenge,
   input: WinChanceInput,
-  opts?: { sipWine?: boolean },
+  opts?: { sipWine?: boolean; tutorialLock?: boolean },
 ): WinChanceBreakdown {
   const sipWine = opts?.sipWine === true;
   const levelDelta = input.playerLevel - challenge.bossLevel;
@@ -86,7 +88,7 @@ export function computeWinChance(
 
   const raw = challenge.baseWinChance + levelBonus + gear.bonus + potionBonus;
   const farm = clamp01(Math.min(CHANCE_CEIL, Math.max(CHANCE_FLOOR, raw)));
-  const tutorialLock = input.isFirstClear;
+  const tutorialLock = opts?.tutorialLock === true;
   const chance = tutorialLock ? 1 : farm;
 
   const lines: WinChanceLine[] = [
@@ -127,7 +129,7 @@ export function computeWinChance(
   const howToImprove: string[] = [];
   if (gear.bonus <= 0) {
     howToImprove.push(
-      sipWine ? "Equip Gutterjack's Tulip — +10% vs Common." : 'Equip a Common-synergy relic for a win bump.',
+      sipWine ? "Equip Gutterjack's Tulip — +10% vs Common." : 'Equip a synergy relic for a win bump.',
     );
   }
   if (sipWine && !hasWine) {
@@ -159,10 +161,13 @@ export function computeWinChance(
 }
 
 export function computeGutterjackWinChance(input: WinChanceInput): WinChanceBreakdown {
-  return computeWinChance(GUTTERJACK_CHALLENGE, input, { sipWine: true });
+  return computeWinChance(GUTTERJACK_CHALLENGE, input, {
+    sipWine: true,
+    tutorialLock: input.isFirstClear,
+  });
 }
 
-function pickWeightedRow(rows: { id: string; weight: number }[]): string {
+function pickWeightedRow(rows: readonly { id: string; weight: number }[]): string {
   const total = rows.reduce((s, r) => s + r.weight, 0);
   let u = Math.random() * total;
   for (const row of rows) {
@@ -215,6 +220,24 @@ export function rollPlaygroundLoot(isFirstClear: boolean): FightLootPrize {
       entry: PLAYGROUND_GOLD,
     };
   }
+  return { kind: 'empty', entry: PLAYGROUND_EMPTY };
+}
+
+/** Bible dungeon floors: weighted table, same roll on first clear (zero pity). */
+export function rollWeightedLoot(weights: readonly { id: string; weight: number }[]): FightLootPrize {
+  const id = pickWeightedRow(weights);
+  const empty = lootEmptyById(id);
+  if (empty) return { kind: 'empty', entry: empty };
+  const gold = lootGoldById(id);
+  if (gold) {
+    return {
+      kind: 'gold',
+      amount: randomInt(gold.goldMin, gold.goldMax),
+      entry: gold,
+    };
+  }
+  const item = lootItemById(id);
+  if (item) return { kind: 'item', item };
   return { kind: 'empty', entry: PLAYGROUND_EMPTY };
 }
 

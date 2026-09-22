@@ -8,7 +8,7 @@ import { impactAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
 
 import OverlayHud from './OverlayHud';
 import StillFrame from './StillFrame';
-import { LOCATION_STILL_INTRINSIC, MAP_LOCATIONS } from './locations';
+import { LOCATION_STILL_INTRINSIC, MAP_LOCATIONS, isHotspotCleared } from './content';
 import { useWorldStore } from './store';
 import type { MapLocationId } from './types';
 
@@ -16,20 +16,13 @@ type Props = {
   locationId: MapLocationId;
 };
 
-/** Map drill-in: still + HUD + one encounter hotspot. Not an exit list. */
+/** Map drill-in: still + HUD + NPC / dungeon hotspots. Not an exit list. */
 export default function LocationStill({ locationId }: Props) {
   const insets = useSafeAreaInsets();
   const openMap = useWorldStore((s) => s.openMap);
-  const openEncounter = useWorldStore((s) => s.openEncounter);
+  const openHotspot = useWorldStore((s) => s.openHotspot);
   const clearedEncounterIds = useWorldStore((s) => s.clearedEncounterIds);
   const location = MAP_LOCATIONS[locationId];
-  const { hotspot, encounter } = location;
-  const cleared = encounter.kind === 'boss' && clearedEncounterIds.includes(encounter.id);
-
-  const onHotspot = () => {
-    impactAsync(ImpactFeedbackStyle.Medium);
-    openEncounter(locationId);
-  };
 
   return (
     <View style={styles.root} testID={`location-still-${locationId}`}>
@@ -39,32 +32,43 @@ export default function LocationStill({ locationId }: Props) {
         intrinsicHeight={LOCATION_STILL_INTRINSIC.height}
       >
         {(box) => (
-          <Pressable
-            testID={`location-hotspot-${locationId}`}
-            accessibilityLabel={`${hotspot.label}, ${hotspot.hint}`}
-            onPress={onHotspot}
-            hitSlop={12}
-            style={({ pressed }) => [
-              styles.hotspot,
-              {
-                left: hotspot.x * box.width - 44,
-                top: hotspot.y * box.height - 56,
-              },
-              pressed && styles.hotspotPressed,
-            ]}
-          >
-            <View style={[styles.hotspotDot, encounter.kind === 'npc' && styles.hotspotDotNpc]}>
-              {encounter.kind === 'npc' ? (
-                <Sparkles size={15} color={Colors.dark.cyan} strokeWidth={2.4} />
-              ) : (
-                <Swords size={15} color={Colors.dark.gold} strokeWidth={2.4} />
-              )}
-            </View>
-            <View style={styles.hotspotLabel}>
-              <Text style={styles.hotspotName}>{hotspot.label}</Text>
-              <Text style={styles.hotspotHint}>{cleared ? 'Cleared' : hotspot.hint}</Text>
-            </View>
-          </Pressable>
+          <>
+            {location.hotspots.map((hotspot) => {
+              const cleared = isHotspotCleared(hotspot, clearedEncounterIds);
+              return (
+                <Pressable
+                  key={hotspot.id}
+                  testID={`location-hotspot-${locationId}-${hotspot.id}`}
+                  accessibilityLabel={`${hotspot.label}, ${hotspot.hint}`}
+                  onPress={() => {
+                    impactAsync(ImpactFeedbackStyle.Medium);
+                    openHotspot(locationId, hotspot.id);
+                  }}
+                  hitSlop={12}
+                  style={({ pressed }) => [
+                    styles.hotspot,
+                    {
+                      left: hotspot.x * box.width - 44,
+                      top: hotspot.y * box.height - 56,
+                    },
+                    pressed && styles.hotspotPressed,
+                  ]}
+                >
+                  <View style={[styles.hotspotDot, hotspot.kind === 'npc' && styles.hotspotDotNpc]}>
+                    {hotspot.kind === 'npc' ? (
+                      <Sparkles size={15} color={Colors.dark.cyan} strokeWidth={2.4} />
+                    ) : (
+                      <Swords size={15} color={Colors.dark.gold} strokeWidth={2.4} />
+                    )}
+                  </View>
+                  <View style={styles.hotspotLabel}>
+                    <Text style={styles.hotspotName}>{hotspot.label}</Text>
+                    <Text style={styles.hotspotHint}>{cleared ? 'Cleared' : hotspot.hint}</Text>
+                  </View>
+                </Pressable>
+              );
+            })}
+          </>
         )}
       </StillFrame>
 

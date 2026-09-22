@@ -1,18 +1,20 @@
 import type { ImageSourcePropType } from 'react-native';
 
-import { WORLD_ART, TAVERN_GROUND_INTRINSIC } from './layout';
+import { HUB_INTRINSIC, WORLD_ART, TAVERN_GROUND_INTRINSIC } from './layout';
+
+export type WorldInteriorId = 'tavern' | 'market' | 'palace';
 
 /**
- * Multi-floor interiors (tavern first).
+ * Hub interiors (tavern + stall + palace). Map dungeons use `content.ts` floors
+ * and the same labeled lift chrome.
  *
  * The labeled floor lift is the IA — not a stairs icon, not a list under the still.
  * Optional `stairTo` on a floor still is the same `setFloor` as tapping the lift.
- * Add a floor = one row here; Upper is a locked placeholder until we have art.
  */
 
-export type InteriorFloorKind = 'still' | 'fight' | 'locked';
+export type InteriorFloorKind = 'still' | 'fight' | 'locked' | 'npc';
 
-export type InteriorFloorId = 'upper' | 'ground' | 'cellar';
+export type InteriorFloorId = string;
 
 export type InteriorFloorDef = {
   id: InteriorFloorId;
@@ -26,7 +28,8 @@ export type InteriorFloorDef = {
     width: number;
     height: number;
   };
-  fightId?: 'gutterjack';
+  fightId?: string;
+  npcId?: string;
   /**
    * Optional diegetic shortcut on THIS floor's still.
    * Same action as picking `to` in the lift — never a second menu.
@@ -35,7 +38,7 @@ export type InteriorFloorDef = {
 };
 
 export type InteriorDef = {
-  id: 'tavern';
+  id: WorldInteriorId;
   name: string;
   hubKicker: string;
   defaultFloorId: InteriorFloorId;
@@ -53,7 +56,7 @@ export const TAVERN_INTERIOR: InteriorDef = {
       id: 'upper',
       label: 'Upper',
       kind: 'locked',
-      hint: 'Upper rooms — later.',
+      hint: 'Cups — later.',
     },
     {
       id: 'ground',
@@ -75,9 +78,53 @@ export const TAVERN_INTERIOR: InteriorDef = {
   ],
 };
 
-export const INTERIORS = {
+export const MARKET_INTERIOR: InteriorDef = {
+  id: 'market',
+  name: 'Market stall',
+  hubKicker: 'Crownhaven',
+  defaultFloorId: 'stall',
+  floors: [
+    {
+      id: 'stall',
+      label: 'Stall',
+      kind: 'npc',
+      hint: 'Guide #1',
+      npcId: 'vendor',
+      still: {
+        source: WORLD_ART.hub,
+        width: HUB_INTRINSIC.width,
+        height: HUB_INTRINSIC.height,
+      },
+    },
+  ],
+};
+
+export const PALACE_INTERIOR: InteriorDef = {
+  id: 'palace',
+  name: 'Palace',
+  hubKicker: 'Crownhaven',
+  defaultFloorId: 'hall',
+  floors: [
+    {
+      id: 'hall',
+      label: 'Hall',
+      kind: 'npc',
+      hint: 'Advisor',
+      npcId: 'advisor',
+      still: {
+        source: WORLD_ART.hub,
+        width: HUB_INTRINSIC.width,
+        height: HUB_INTRINSIC.height,
+      },
+    },
+  ],
+};
+
+export const INTERIORS: Record<WorldInteriorId, InteriorDef> = {
   tavern: TAVERN_INTERIOR,
-} as const;
+  market: MARKET_INTERIOR,
+  palace: PALACE_INTERIOR,
+};
 
 export function floorById(interior: InteriorDef, id: InteriorFloorId): InteriorFloorDef | undefined {
   return interior.floors.find((floor) => floor.id === id);
