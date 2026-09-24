@@ -1,8 +1,8 @@
-# Prompt — ekran straganu (shop / guide #1)
+# Prompt — winieta straganu (portret babki)
 
-> **Kadr 3.** Nie crop stolicy. Hub = plac z 3 hotspotami. Tap w stragan → **osobny 9:16**: babka + lady + puste gniazda na itemy.  
-> Kreska: [`style-kit.md`](style-kit.md) + mag A3.  
-> Produkt: [`23`](../../23-act1-location-brainstorm.md) §B1 · [`06`](../../06-economy-loot.md) §7 · [`24`](../../24-map-production.md).
+> **2026-09-24:** UI sklepu = sheet jak Home — winieta + **siatka itemów**. Mock: [`../ui/mocks/shop.png`](../ui/mocks/shop.png). UI: [`../ui/design-bible.md`](../ui/design-bible.md) (archetyp A).  
+> Ten plik zostaje **promptem malunku headera** (babka / lady), nie layoutem SKU. Puste gniazda L/R na stillu = **superseded**.  
+> Wejście: tap straganu na hubie → ekran sklepu (grid), nie inventory namalowane w JPEG.
 
 **Ustawienia generatora:** **9:16** · 1080×1920 look-dev / 1440×2560 master · **nowy obraz** (nie „edytuj to zdjęcie”).
 

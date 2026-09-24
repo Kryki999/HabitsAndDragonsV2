@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=390, initial-scale=1" />
+  <title>H&D — Archetype E: Kingdom Map</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="tokens.css" />
+  <link rel="stylesheet" href="components.css" />
+  <link rel="stylesheet" href="glyphs.css" />
+  <style>
+    /* Fixed product zoom ~1.85x of fit-width; camera panned to the capital. */
+    .map { position: absolute; z-index: 0; width: 722px; height: 1282px; left: -166px; top: -540px; }
+    .map img { width: 100%; height: 100%; }
+    /* Fog of war = the same mist as the UI canvas */
+    .fog { position: absolute; inset: 0 0 auto 0; height: 330px; z-index: 4; pointer-events: none;
+      background: linear-gradient(180deg, rgba(169,187,251,.97) 0%, rgba(169,187,251,.85) 38%, rgba(145,162,242,0) 100%); }
+    .seam { top: 640px; height: 120px; }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="map"><img src="assets/map-board.jpg" alt="" /></div>
+    <div class="fog"></div>
+    <div class="seam"></div>
+
+    <div class="status" style="color: var(--ink); text-shadow: none"><span>9:41</span><span class="sys"><span class="bars"><i style="height:4px;background:var(--ink)"></i><i style="height:6px;background:var(--ink)"></i><i style="height:8px;background:var(--ink)"></i><i style="height:11px;background:var(--ink)"></i></span><span class="batt" style="border-color:var(--ink)"></span></span></div>
+
+    <div class="scene-head" style="padding-left: 20px">
+      <span><div class="kicker">Kingdom</div><div class="name">Map</div></span>
+    </div>
+
+    
+    <div class="mpin locked" style="left: 139px; top: 186px"><span class="head"><span class="glyph g-lock"></span></span><span class="tip"></span></div>
+    <div class="mpin locked" style="left: 348px; top: 238px"><span class="head"><span class="glyph g-lock"></span></span><span class="tip"></span></div>
+    <div class="mpin" style="left: 204px; top: 262px"><span class="head"><img class="sticker" src="assets/fe-crossed-swords.svg" alt="" /></span><span class="tip"></span></div>
+    <div class="mpin current" style="left: 194px; top: 500px"><span class="head"><img src="assets/avatar-hero.jpg" alt="" /></span><span class="tip"></span></div>
+
+    <div class="peek card">
+      <span class="thumb"><img src="assets/still-crownhaven.jpg" alt="" style="object-position: 50% 20%" /></span>
+      <span class="col"><div class="caption" style="color: var(--brand)">You are here</div><div class="nm">Crownhaven</div><div class="meta">Capital · 3 places</div></span>
+      <button class="btn btn-primary">Enter</button>
+    </div>
+
+    <nav class="tabbar">
+      <div class="tab"><img class="sticker" src="assets/fe-scroll.svg" alt="" />Quests</div>
+      <div class="tab active"><img class="sticker" src="assets/fe-world-map.svg" alt="" />World</div>
+      <div class="tab"><span class="avatar"><img src="assets/avatar-hero.jpg" alt="" /></span>Hero</div>
+      <div class="tab"><img class="sticker" src="assets/fe-handshake.svg" alt="" />Social</div>
+      <div class="tab"><img class="sticker" src="assets/fe-man-mage.svg" alt="" />Mentor</div>
+    </nav>
+    <div class="home-ind"></div>
+  </div>
+</body>
+</html>

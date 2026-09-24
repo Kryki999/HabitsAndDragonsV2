@@ -10,15 +10,16 @@ Ciemny fantasy UI, izometria/obóz, assety bossów — reuse możliwy wybiórczo
 
 ---
 
-## Cel (final) — jedna marka, trzy warstwy
+## Cel (final) — jedna marka, cztery warstwy
 
-Nie robimy czterech osobnych estetyk. Robimy **jeden świat**, renderowany w trzech „soczewkach”:
+Nie robimy czterech osobnych estetyk. Robimy **jeden świat**, renderowany w czterech „soczewkach”:
 
 | Warstwa | Co to w produkcie | Estetyka | Tool |
 |---------|-------------------|----------|------|
 | **A. Świat** | Mapa królestwa, close-up lokacji, tła | **Painterly cartoon fantasy** (ref poniżej) | Ilustracja 2D (AI draft → cleanup) |
 | **B. Aktorzy / UI motion** | Bohater, NPC bust, itemy, dropy, HUD micro | **Graphic cartoon** — czytelny kształt, ten sam świat kolorów | **Rive** |
 | **C. Beaty fabularne** | Onboarding, lampki Main ★, reveal | **Ten sam świat co A**, postacie jak B | Pre-render video (AI + gate) |
+| **D. Chrome produktu** | Sheet Home/Hero + overlay World (pills, plakietki, CTA, tab bar) | Periwinkle mist + biel z wargą + złoto; **nie** malowane w stillu | RN kit — [`reference/ui/design-bible.md`](reference/ui/design-bible.md) |
 
 **Inspiracje postaci / tonu (nie 1:1 art):** Rick & Morty × Vox Machina × Shakes & Fidget = *energia, ekspresja, humor, czytelność* — **nie** „płaski R&M lineart na całą mapę”.  
 **Inspiracja mapy (lock kierunku):** ref w `reference/art/` — ciepła izometria/wysoki kąt, woda turkusu, dachy terracotta, gęsty las, mosty, żywe miasto.
@@ -28,8 +29,9 @@ Nie robimy czterech osobnych estetyk. Robimy **jeden świat**, renderowany w trz
 Czysty styl *Rick & Morty* (gruba kreska, flat color) **zderzy się** z tą mapą.  
 Zamiast tego: **świat = painterly cartoon** (jak ref), **postacie = odrobinę bardziej graficzne/czytelne**, ale **ta sama paleta, to samo światło, ta sama architektura**. Tak robią gry, które wyglądają spójnie (świat bogatszy, postać czytelna na UI).
 
-**Look-dev 2026-08-16:** Mag A3 = **ground truth kreski**. Stolica = udany outdoor w tym języku, nie druga biblia. Konflikt → wygrywa mag.  
-**Paste default:** [`style-kit.md`](reference/art/style-kit.md) (krótki lock + SCENE). Pełny master / 20-rozdziałowa biblia = nie wklejać.  
+**Look-dev 2026-08-16:** Mag A3 = **ground truth kreski**. Stolica = udany outdoor w tym języku, nie druga biblia. Konflikt A/B/C → wygrywa mag.  
+**Look-dev 2026-09-24:** warstwa D (chrome) ≠ A. Home/Hero ~90% sheet; World = still + kit. Chrome: [`reference/ui/design-bible.md`](reference/ui/design-bible.md) + [`reference/ui/golden/`](reference/ui/golden/).  
+**Paste default kreski:** [`style-kit.md`](reference/art/style-kit.md) (krótki lock + SCENE). Pełny master / 20-rozdziałowa biblia = nie wklejać.  
 Kadry w toku: sklep [`prompt-vendor-shop.md`](reference/art/prompt-vendor-shop.md) · Gutterjack [`prompt-gutterjack-dungeon.md`](reference/art/prompt-gutterjack-dungeon.md) · Teeth [`prompt-smugglers-teeth-closeup.md`](reference/art/prompt-smugglers-teeth-closeup.md) · Approaches [`prompt-crown-approaches-closeup.md`](reference/art/prompt-crown-approaches-closeup.md) · Anvil [`prompt-anvil-glade-closeup.md`](reference/art/prompt-anvil-glade-closeup.md) · Torrik [`prompt-torrik-smithy.md`](reference/art/prompt-torrik-smithy.md) · Stillgaze [`prompt-stillgaze-dungeon.md`](reference/art/prompt-stillgaze-dungeon.md) · Closed Way [`prompt-closed-way-closeup.md`](reference/art/prompt-closed-way-closeup.md) · Skarne [`prompt-closed-way-dungeons.md`](reference/art/prompt-closed-way-dungeons.md).
 
 ---
@@ -149,7 +151,7 @@ LOOK-DEV (1 lokacja = Crownhaven)
 | **Close-up lokacji** | Ten sam world-style co mapa; hotspoty (domek / jaskinia) jak w `23` |
 | **Rive** | Postać i item **nie** próbują malować painterly brush stroke — uproszczone, ale kolory + proporcje świata |
 | **Filmiki** | Grade i tła = świat A; aktorzy ≈ B; **zakaz** losowego stylu modelu AI per klip |
-| **UI Finch** | Lekki HUD na wierzchu — nie walczy z mapą o detal; dużo oddechu |
+| **UI Finch** | Lekki HUD na wierzchu — nie walczy z mapą o detal; dużo oddechu. Lock chrome: [`reference/ui/design-bible.md`](reference/ui/design-bible.md) — **warstwa D**: ten sam kit tokenów na Home/Hero (sheet) i World (still + overlay), połączone szwem mgły. HUD **nigdy** w JPEG. |
 
 ### AI video — twarda reguła
 
@@ -180,6 +182,8 @@ Każdy klip przechodzi **human gate** (`10`, `12`). Odrzut > „wystarczy że ł
 - [ ] Wersja Crownhaven „gasnąca” (detale menelni) vs mapa „ładna z daleka”
 - [ ] Pipeline mapy (AI → stitch → kafelki vs jeden WebP) — plan w [`24`](24-map-production.md)
 - [ ] Look-dev Crownhaven: prompt w [`reference/art/prompt-crownhaven-closeup.md`](reference/art/prompt-crownhaven-closeup.md)
+- [x] UI Bible v2 + goldeny (Home, mapa, Crownhaven, Gutterjack, kit sheet) — [`reference/ui/design-bible.md`](reference/ui/design-bible.md) (2026-09-24)
+- [ ] Styl postaci w winietach: kreska świata (`mage.png`) vs miękki Wayfarer z mocków — rekomendacja: kreska świata
 
 ---
 

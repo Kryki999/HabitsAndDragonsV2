@@ -16,6 +16,8 @@ Detailed behavior: [`.cursor/rules/co-founder-mode.mdc`](.cursor/rules/co-founde
 
 When working on lore / Week 1 / Act 1, read **full** [`docs/21-world-bible-mvp.md`](docs/21-world-bible-mvp.md) — it includes **decision log, inspirations, boss bank, and rejected options**. Do **not** slim that file down to “final only”; future agents need the memory of *how* we got here. Update the decision log when changing a lock. Story prose for Act 1: [`docs/22-universe-story-act1.md`](docs/22-universe-story-act1.md).
 
+**UI / screens:** [`docs/reference/ui/design-bible.md`](docs/reference/ui/design-bible.md) — look at `docs/reference/ui/golden/*.png` first, name the archetype (A–E), use only its components and tokens, render a look-dev PNG and pass the gate before app code.
+
 **Art generation:** [`docs/reference/art/style-kit.md`](docs/reference/art/style-kit.md). Attach the wizard tavern image only. Paste STYLE LOCK + a new SCENE. Do not paste the long master prompt or attach old city JPEGs as style.
 
 ## Where truth lives

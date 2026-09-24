@@ -70,11 +70,11 @@ If extra polish fights the line/shapes/cel-shade, remove the polish.
 
 ## SCENE — szablon (zawsze nowy, zawsze konkret)
 
-Nie wkładaj tu maga ani „jak w poprzednim mieście”. Tylko **ta** scena.
+Nie wkładaj tu maga ani „jak w poprzednim mieście”. Tylko **ta** scena. HUD / ikony / przyciski **nie** należą do SCENE — overlay jest w [`../ui/design-bible.md`](../ui/design-bible.md). Za to **strefy pod UI** tak: dopisz blok `UI SAFE ZONES` z sekcji 7 biblii UI.
 
 ```text
 SCENE:
-- Format: vertical 9:16 mobile RPG location still. New drawing. No UI, no HUD, no readable letters.
+- Format: vertical 9:16 mobile RPG location still. New drawing. No UI, no HUD, no readable letters, no icons, no buttons, no neon markers.
 - Camera: [gdzie stoimy, dokąd patrzymy].
 - Bottom ~10%: [pusty grunt — bruk / piasek / trawa].
 - Hotspot(s) that must read in 0.5s: [co jest tappable].
@@ -126,6 +126,7 @@ Odrzuć, jeśli:
 - [ ] Oczy Disney / too pretty
 - [ ] Drewno/kamień/bruk pełne ziarna
 - [ ] Brak czytelnego hotspotu albo zapchany dół pod taby
+- [ ] Namalowany HUD / ikony / przyciski / neon markery (to kit overlay, nie still)
 - [ ] Skopiowany mag albo skopiowane miasto
 
 **Pass =** „kolejna lokacja z tej gry”, nie „fajne fantasy w podobnym klimacie”.

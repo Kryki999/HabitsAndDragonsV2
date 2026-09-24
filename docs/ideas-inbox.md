@@ -70,6 +70,7 @@ Emotki = kolekcja kosmetyczna (`05`/`06`). Skup: zwykły ~10–15g, unikaty/hero
 
 | Data | Fragment | Trafił do |
 |------|----------|-----------|
+| 2026-09-24 | 5 SS sheet look-dev (Home/Hero/onboarding/streak/shop) | [`reference/ui/mocks/`](reference/ui/mocks/) |
 | 2026-07-30 | Archiwum mid-concept | `reference/archive-concept-mid.md` |
 | 2026-07-30 | Wizja mapa/isekai/onboarding | `00`, `01`, `03`, `04`, `09`, `10`, `15` |
 | 2026-08-04 | Pałac / doradca / Main vs punkty | `17`, `21`, `23` |

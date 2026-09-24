@@ -54,6 +54,9 @@ Kod w `apps/mobile` tylko gdy świadomie wychodzimy z trybu koncepcji (albo gdy 
 | [`23-act1-location-brainstorm.md`](23-act1-location-brainstorm.md) | Burza mózgów Akt 1 — lokacje, NPC, lampki (prototyp) |
 | [`24-map-production.md`](24-map-production.md) | Produkcja mapy: AI, rozdzielczość, P1 still vs P2 życie |
 | [`25-welcome.md`](25-welcome.md) | **Onboarding nowej osoby** — synteza koncepcji (start tutaj) |
+| [`reference/ui/design-bible.md`](reference/ui/design-bible.md) | **UI Bible (LOCK v2)** — tokeny, 3 szuflady ikon, komponenty, archetypy ekranów A–E, UI na malunku, gate. Wzorce: [`reference/ui/golden/`](reference/ui/golden/) |
+| [`reference/ui/kit.md`](reference/ui/kit.md) | Log drogi do UI Bible (superseded) |
+| [`reference/ui/mocks/`](reference/ui/mocks/) | Sheet look-dev PNG (Home, Hero, onboarding, streak, sklep) |
 | [`reference/art/style-kit.md`](reference/art/style-kit.md) | **Kreska — paste** (krótki lock + SCENE) |
 | [`reference/art/rpg-visual-style-bible-v1.1.md`](reference/art/rpg-visual-style-bible-v1.1.md) | Biblia kreski (ludzka, nie paste) |
 | [`reference/art/rpg-art-master-prompt-v1.1.md`](reference/art/rpg-art-master-prompt-v1.1.md) | Archiwum: długi Master Prompt |

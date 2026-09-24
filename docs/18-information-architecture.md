@@ -66,11 +66,11 @@ Jak gracz chodzi po Świecie **w apce teraz** (nie nowy tab, nie lista wyjść):
 
 1. **Mapa królestwa** — piny bez nazw; nazwa w HUD / szept po tapie otwartego miejsca. Kamera i kłódki: lock 2026-09-22.
 2. **Hub Crownhaven** — pełny still do tab bara. HUD: Capital / Crownhaven. Wejścia = hotspoty na grafice. **Back** → mapa. Zero listy lokacji pod obrazkiem.
-3. **Tawerna** — HUD: kicker hubu (`Crownhaven`) + tytuł miejsca (`Tavern`). Góra-prawo: **winda z etykietami** (Upper later / Ground / Cellar). Aktywne piętro podświetlone; tap = skok. Jedna decyzja na ekran: Back opuszcza miejsce (→ hub), winda zmienia piętro.
-4. **Cellar / Gutterjack** — walka bez przebudowy (tray rarity + Fight CTA, win% góra-prawo). Winda w tym samym stacku, nad win%.
+3. **Tawerna** — HUD: kicker = miejsce (`Tavern`), tytuł = piętro (`Ground` / `Cellar`). Góra-prawo: **LevelNav** — strzałki ▲▼ między piętrami, **kłódka** zamiast strzałki gdy piętro zamknięte (tap = warunek), kropki głębokości. *(2026-09-24 zastępuje windę z etykietami — [`reference/ui/design-bible.md`](reference/ui/design-bible.md).)* Jedna decyzja na ekran: Back opuszcza miejsce (→ hub), strzałki zmieniają piętro. Ten sam komponent dla poziomów lochów (Common → Elite → Champion).
+4. **Cellar / Gutterjack** — kompaktowa karta walki na dole (nazwa + win% · 4 dropy + Fight), max ~18% ekranu. LevelNav w prawym górnym rogu.
 5. **Account HUD** — Questy, Hero, Social, Mentor. **Nie** na tabie World (lock 2026-09-22). V1 `TabsWithTopBar`: avatar + pierścień XP, nick, `Lv.n`; **pills** gold + keys (surface, thin purple border, radius 20); prawo: mail (stub/disabled) + settings (haptics). `__DEV__`: badge **DEV** otwiera panel (long-press na pills = skrót). Production: bez badge/panelu. Streak PARK (brak globalnego streak w `habits`).
 
-Hotspot schodów na stillu jest **opcjonalny** i woła to samo `setFloor` co winda — nie drugie menu. Structure windy jest gotowa na trzecie piętro (Upper = locked placeholder).
+Hotspot schodów na stillu jest **opcjonalny** i woła to samo `setFloor` co strzałki — nie drugie menu. Struktura pięter jest gotowa na trzecie piętro (Upper = locked placeholder). Kod `world/FloorLift.tsx` = stara winda, do wymiany na LevelNav przy porcie UI.
 
 ---
 
@@ -122,7 +122,9 @@ Warunek: Mentor jako **HUD icon** zamiast taba → wracamy do 5.
 | Smoki w HUD | **PARK** |
 | Questy = czysta lista IRL + dom stolicy | **PROPOSE KEEP** |
 | Świat = mapa + drill lokacji | **PROPOSE KEEP** |
-| Crownhaven hub / tawerna / winda | **LOCK playground** (2026-09-21) — hotspoty + labeled lift, nie lista wyjść |
+| Crownhaven hub / tawerna / piętra | **LOCK** — hotspoty, nie lista wyjść. Piętra/poziomy = **LevelNav** (strzałki + kłódka), 2026-09-24; labeled lift z 2026-09-21 unieważniony |
+| World chrome / ikony | **LOCK v2** (2026-09-24) — still bez HUD; nameplate z kotwicą na landmarku; sticker (treść) vs MingCute Fill (system); ten sam tab bar co Home + szew; mgła wojny = mgła UI; [`reference/ui/design-bible.md`](reference/ui/design-bible.md) |
+| Mapa: tap pinu | **PROPOSE** (2026-09-24) — PeekCard (nazwa + „Enter”) zamiast szeptu; piny dalej bez nazw |
 | Bohater / Społeczność / Mentor | **PROPOSE KEEP** |
 | Obecność twarda vs soft focus | **Czeka na Twój werdykt** (rekomendacja: soft focus A3) |
 | Day 0–7 | Po potwierdzeniu HUD |

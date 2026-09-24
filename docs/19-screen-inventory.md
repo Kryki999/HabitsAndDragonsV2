@@ -19,16 +19,16 @@
 | S04 | Lista questów / nawyków | P1 | tab/panel | Odhaczam dzień | Y |
 | S05 | Feedback nagrody (XP/gold) | global | modal | Satysfakcja | Y |
 | S06 | Mapa królestwa (fog + 1 lokacja) | P3 | tab | Obietnica świata | Y |
-| S07 | Widok lokacji (NPC i/lub loch) | P3 | drill | RPG atom. Playground: hub still + tawerna Ground / winda / Cellar; mapa → still lokacji Akt 1 | Y |
+| S07 | Widok lokacji (NPC i/lub loch) | P3 | drill | RPG atom. Playground: hub still + tawerna Ground / strzałki LevelNav / Cellar; mapa → still lokacji Akt 1 | Y |
 | S08 | Loch — run / wynik | P3 | flow | Boss/loot | Y |
 | S09 | Start wyprawy + timer | P3 | modal | Wyjazd | Y |
 | S10 | Powrót wyprawy (wieczór) | P3 | modal | Finch check | Y |
 | S11 | Mentor fullscreen + mood | P4 | fullscreen | Coach / pamięć | Y |
 | S12 | Bohater — profil + 2 sloty | P5 | tab | Flex / tożsamość | Y |
-| S13 | Stragan — babka + sklep | P2 drill | drill | Kup / sprzedaj / guide #1 | Y |
-| S14 | Kuźnia — Torrik | P3 drill | drill | Ally / affinity | Y |
+| S13 | Stragan — sklep | P2 drill | drill | Tap straganu → sheet: winieta babki + siatka SKU ([`reference/ui/mocks/shop.png`](reference/ui/mocks/shop.png)). Puste gniazda na stillu = superseded | Y |
+| S14 | Kuźnia — Torrik | P3 drill | drill | Ally / affinity 1/2/3 — AllyCard ([`reference/ui/golden/world-npc-torrik.png`](reference/ui/golden/world-npc-torrik.png)) | Y |
 | S15 | Loch Stillgaze (Anvil Glade) | P3 flow | flow | Common 1-poziom; still: [`prompt-stillgaze-dungeon.md`](reference/art/prompt-stillgaze-dungeon.md) | Y |
-| S16 | Loch Gutterjack (piwnica menelni) | P3 flow | flow | Common tutorial; dojście: hub → tawerna Ground → winda Cellar; still: [`prompt-gutterjack-dungeon.md`](reference/art/prompt-gutterjack-dungeon.md) | Y |
+| S16 | Loch Gutterjack (piwnica menelni) | P3 flow | flow | Common tutorial; dojście: hub → tawerna Ground → strzałka ▼ Cellar; still: [`prompt-gutterjack-dungeon.md`](reference/art/prompt-gutterjack-dungeon.md) | Y |
 | S17 | Closed Way — close-up szlaku | P3 drill | drill | ★1 lokacja; [`prompt-closed-way-closeup.md`](reference/art/prompt-closed-way-closeup.md) | Y |
 | S18 | Champion Skarne (Closed Way) | P3 flow | flow | Main ★; still: [`prompt-closed-way-dungeons.md`](reference/art/prompt-closed-way-dungeons.md) | Y |
 

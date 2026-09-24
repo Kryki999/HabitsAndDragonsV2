@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=390, initial-scale=1" />
+  <title>H&D — Archetype A: Sheet + Vignette (Quests)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="tokens.css" />
+  <link rel="stylesheet" href="components.css" />
+  <link rel="stylesheet" href="glyphs.css" />
+  <style>
+    .vignette { height: 410px; }
+    .vignette img { object-position: 50% 32%; }
+    .seam { top: 270px; height: 140px; }
+    .habit { height: 76px; }
+    .top-row { position: absolute; top: 56px; left: var(--screen-x); right: var(--screen-x); z-index: 30; display: flex; align-items: center; gap: 8px; }
+    .top-row .spacer { flex: 1; }
+    .top-row .icon-btn.ghost { filter: drop-shadow(0 1px 3px rgba(0,0,0,.6)); }
+    .crown { position: absolute; top: 368px; left: var(--screen-x); right: var(--screen-x); z-index: 20; display: flex; align-items: center; gap: 12px; padding: 14px 16px 14px 12px; }
+    .crown .coin-big { width: 60px; height: 60px; border-radius: 50%; background: #fff; display: grid; place-items: center; flex: none; box-shadow: var(--drop-sm); }
+    .crown .coin-big img { width: 44px; height: 44px; }
+    .crown .col { flex: 1; }
+    .crown .ttl { font: 900 19px/1 var(--font); color: #fff; margin-bottom: 8px; text-shadow: var(--shadow-on-canvas); }
+    .list-head { position: absolute; top: 472px; left: 20px; right: 20px; z-index: 20; }
+    .list { position: absolute; top: 508px; left: var(--screen-x); right: var(--screen-x); z-index: 20; display: flex; flex-direction: column; gap: 10px; }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="vignette"><img src="assets/vignette-mage.jpg" alt="" /></div>
+    <div class="seam"></div>
+
+    <div class="status"><span>9:41</span><span class="sys"><span class="bars"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:11px"></i></span><span class="batt"></span></span></div>
+
+    <div class="top-row">
+      <span class="icon-btn ghost"><span class="glyph g-menu"></span></span>
+      <span class="spacer"></span>
+      <span class="pill-currency"><img class="sticker" src="assets/hd-coin.svg" alt="" />320</span>
+      <span class="pill-currency"><img class="sticker" src="assets/fe-old-key.svg" alt="" />2</span>
+      <span class="avatar"><img src="assets/avatar-hero.jpg" alt="" /></span>
+    </div>
+
+    <div class="crown card-inset">
+      <span class="coin-big"><img src="assets/fe-crown.svg" alt="" /></span>
+      <div class="col">
+        <div class="ttl">Crown Day 9</div>
+        <div class="progress"><span class="fill" style="width: 34%"></span><span class="val">7 / 20</span></div>
+      </div>
+    </div>
+
+    <div class="list-head section-head">
+      <span class="glyph g-cal"></span>3 quests left today<span class="spacer"></span><span class="glyph g-filter"></span><span class="glyph g-add"></span>
+    </div>
+
+    <div class="list">
+      <div class="card habit"><span class="grip"></span><span class="well"><img class="sticker" src="assets/fe-leaf-fluttering-in-wind.svg" alt="" /></span><span class="title">Take 3 deep breaths</span><span class="reward">50<img src="assets/hd-coin.svg" alt="" /></span><span class="check-btn"><span class="glyph g-check"></span></span></div>
+      <div class="card habit"><span class="grip"></span><span class="well"><img class="sticker" src="assets/fe-soap.svg" alt="" /></span><span class="title">Wash my face</span><span class="reward">50<img src="assets/hd-coin.svg" alt="" /></span><span class="check-btn"><span class="glyph g-check"></span></span></div>
+      <div class="card habit"><span class="grip"></span><span class="well"><img class="sticker" src="assets/fe-droplet.svg" alt="" /></span><span class="title">Drink water</span><span class="reward">50<img src="assets/hd-coin.svg" alt="" /></span><span class="check-btn"><span class="glyph g-check"></span></span></div>
+    </div>
+
+    <nav class="tabbar">
+      <div class="tab active"><img class="sticker" src="assets/fe-scroll.svg" alt="" />Quests</div>
+      <div class="tab"><img class="sticker" src="assets/fe-world-map.svg" alt="" />World</div>
+      <div class="tab"><span class="avatar"><img src="assets/avatar-hero.jpg" alt="" /></span>Hero</div>
+      <div class="tab"><img class="sticker" src="assets/fe-handshake.svg" alt="" />Social</div>
+      <div class="tab"><img class="sticker" src="assets/fe-man-mage.svg" alt="" />Mentor</div>
+    </nav>
+    <div class="home-ind"></div>
+  </div>
+</body>
+</html>

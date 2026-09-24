@@ -1,0 +1,300 @@
+/* H&D look-dev components. One class = one component from docs/reference/ui/design-bible.md. */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: #23264a; font-family: var(--font); color: var(--ink); -webkit-font-smoothing: antialiased; }
+img { display: block; }
+
+/* ---------- Phone frame ---------- */
+.phone {
+  position: relative;
+  width: 390px;
+  height: 844px;
+  overflow: hidden;
+  background: var(--canvas);
+}
+
+/* ---------- Status bar ---------- */
+.status {
+  position: absolute; inset: 0 0 auto 0; height: 50px; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 30px 0 34px;
+  color: #fff; font: 800 16px/1 var(--font);
+  text-shadow: var(--shadow-on-art);
+  pointer-events: none;
+}
+.status .sys { display: flex; gap: 6px; align-items: center; }
+.status .bars { display: flex; gap: 2px; align-items: flex-end; height: 11px; }
+.status .bars i { width: 3px; background: #fff; border-radius: 1px; }
+.status .batt { width: 24px; height: 12px; border: 2px solid #fff; border-radius: 4px; position: relative; }
+.status .batt::after { content: ""; position: absolute; inset: 1px 3px 1px 1px; background: #fff; border-radius: 1px; }
+
+/* ---------- Glyph (system icon, mono) ---------- */
+.glyph {
+  display: inline-block; width: 22px; height: 22px; flex: none;
+  background: currentColor;
+  -webkit-mask: var(--g) center / contain no-repeat;
+  mask: var(--g) center / contain no-repeat;
+}
+/* .g-* glyph sources live in glyphs.css (generated) */
+
+/* ---------- Sticker (content icon, color, die-cut white edge) ---------- */
+.sticker {
+  width: 28px; height: 28px; flex: none; object-fit: contain;
+  filter:
+    drop-shadow(1.6px 0 0 #fff) drop-shadow(-1.6px 0 0 #fff)
+    drop-shadow(0 1.6px 0 #fff) drop-shadow(0 -1.6px 0 #fff)
+    drop-shadow(0 3px 3px rgba(40, 50, 140, 0.28));
+}
+.sticker.lg { width: 44px; height: 44px; }
+.sticker.xl { width: 56px; height: 56px; }
+
+/* ---------- Currency pill ---------- */
+.pill-currency {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 36px; padding: 0 14px 0 6px;
+  background: var(--surface); border-radius: var(--r-pill);
+  box-shadow: var(--drop-sm);
+  font: 900 16px/1 var(--font); color: var(--ink);
+}
+.pill-currency .sticker { width: 26px; height: 26px; filter: none; }
+
+/* ---------- Avatar ---------- */
+.avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 3px solid #fff; box-shadow: var(--drop-sm);
+  overflow: hidden; background: var(--surface-2);
+}
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ---------- Icon button ---------- */
+.icon-btn {
+  width: 44px; height: 44px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--surface); color: var(--brand);
+  box-shadow: var(--lip-surface), var(--drop-sm);
+}
+.icon-btn.ghost { background: transparent; box-shadow: none; color: #fff; filter: drop-shadow(0 2px 0 rgba(59,71,158,.3)); }
+.icon-btn.ghost .glyph { width: 28px; height: 28px; }
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  height: 58px; padding: 0 28px; border-radius: var(--r-pill);
+  font: 900 19px/1 var(--font); letter-spacing: 0.01em;
+  border: 0; width: 100%;
+}
+.btn-primary { background: var(--brand); color: #fff; box-shadow: var(--lip-brand), 0 10px 22px rgba(74, 82, 209, 0.35); }
+.btn-flow { background: var(--surface); color: var(--ink); box-shadow: var(--lip-surface), var(--drop-md); }
+.btn .sticker { width: 30px; height: 30px; }
+
+/* ---------- Card ---------- */
+.card {
+  background: var(--surface); border-radius: var(--r-lg);
+  box-shadow: 0 3px 0 rgba(90, 100, 190, 0.14), var(--drop-sm);
+}
+.card-inset { background: var(--canvas-deep); border-radius: var(--r-lg); box-shadow: inset 0 2px 0 rgba(255,255,255,.12); }
+
+/* ---------- Section header on canvas ---------- */
+.section-head {
+  display: flex; align-items: center; gap: 10px;
+  color: var(--on-canvas); font: 900 21px/1.1 var(--font);
+  text-shadow: var(--shadow-on-canvas);
+}
+.section-head .spacer { flex: 1; }
+.section-head .glyph { width: 26px; height: 26px; }
+.caption { font: var(--t-caption); letter-spacing: var(--caption-track); text-transform: uppercase; color: var(--ink-2); }
+
+/* ---------- Progress ---------- */
+.progress {
+  position: relative; height: 26px; border-radius: var(--r-pill);
+  background: var(--surface); overflow: hidden;
+  box-shadow: inset 0 2px 0 rgba(40,50,140,.08);
+}
+.progress .fill { position: absolute; inset: 3px auto 3px 3px; border-radius: var(--r-pill); background: linear-gradient(180deg, #ffc65a, var(--gold)); box-shadow: inset 0 -3px 0 var(--gold-deep); }
+.progress .val { position: absolute; inset: 0; display: grid; place-items: center; font: 900 15px/1 var(--font); color: var(--ink); }
+
+/* ---------- Habit row ---------- */
+.habit {
+  display: flex; align-items: center; gap: 12px;
+  height: 84px; padding: 0 14px 0 10px;
+}
+.habit .grip { width: 6px; height: 18px; flex: none; background: radial-gradient(circle, var(--ink-3) 1.4px, transparent 1.6px) 0 0 / 6px 6px; }
+.habit .well { width: 56px; height: 56px; border-radius: 50%; background: var(--surface-2); display: grid; place-items: center; flex: none; }
+.habit .well .sticker { width: 32px; height: 32px; }
+.habit .title { flex: 1; font: 800 18px/1.2 var(--font); color: var(--ink); }
+.habit .reward { display: flex; align-items: center; gap: 4px; font: 800 15px/1 var(--font); color: var(--ink-2); }
+.habit .reward img { width: 18px; height: 18px; }
+.check-btn {
+  width: 56px; height: 52px; border-radius: 16px; flex: none;
+  background: var(--surface-2); color: var(--brand);
+  display: grid; place-items: center;
+  box-shadow: var(--lip-surface);
+}
+.check-btn .glyph { width: 26px; height: 26px; }
+
+/* ---------- Tab bar ---------- */
+.tabbar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 96px; z-index: 40;
+  background: var(--canvas-hi);
+  border-radius: 28px 28px 0 0;
+  box-shadow: 0 -1px 0 rgba(255,255,255,.55) inset, 0 -8px 24px rgba(40, 50, 140, 0.14);
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  padding: 8px 8px 30px;
+}
+.tab {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  border-radius: 18px; color: #fff; font: 800 12px/1 var(--font);
+  text-shadow: var(--shadow-on-canvas);
+}
+.tab .sticker { width: 34px; height: 34px; }
+.tab .avatar { width: 36px; height: 36px; border-width: 2px; box-shadow: none; }
+.tab.active { background: rgba(255, 255, 255, 0.6); color: var(--canvas-ink); text-shadow: none; }
+.home-ind { position: absolute; left: 50%; bottom: 8px; width: 134px; height: 5px; margin-left: -67px; border-radius: 3px; background: rgba(21,22,56,.55); z-index: 45; }
+
+/* ---------- Art layers ---------- */
+.art { position: absolute; inset: 0; z-index: 0; }
+.art img { width: 100%; height: 100%; object-fit: cover; }
+.scrim-top { position: absolute; inset: 0 0 auto 0; height: 150px; z-index: 5; background: linear-gradient(180deg, rgba(14, 14, 40, 0.55), rgba(14, 14, 40, 0)); pointer-events: none; }
+/* Mist seam: art always dissolves into canvas where app chrome begins */
+.seam { position: absolute; left: 0; right: 0; z-index: 6; pointer-events: none; background: linear-gradient(180deg, rgba(145,162,242,0) 0%, rgba(145,162,242,.55) 45%, var(--canvas) 100%); }
+
+/* ---------- Vignette (sheet header art) ---------- */
+.vignette { position: absolute; inset: 0 0 auto 0; z-index: 0; overflow: hidden; }
+.vignette img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ---------- Scene header (World) ---------- */
+.scene-head {
+  position: absolute; left: var(--screen-x); top: 58px; z-index: 30;
+  display: flex; align-items: center; gap: 10px;
+  height: 56px; padding: 0 20px 0 6px;
+  background: var(--surface); border-radius: var(--r-pill);
+  box-shadow: var(--lip-surface), var(--drop-on-art);
+}
+.scene-head .back { width: 44px; height: 44px; border-radius: 50%; background: var(--brand-soft); color: var(--brand); display: grid; place-items: center; }
+.scene-head .back .glyph { width: 24px; height: 24px; }
+.scene-head .kicker { font: var(--t-caption); letter-spacing: var(--caption-track); text-transform: uppercase; color: var(--brand); }
+.scene-head .name { font: 900 20px/1.05 var(--font); color: var(--ink); }
+
+/* ---------- Nameplate (tappable landmark label on art) ---------- */
+.plate {
+  position: absolute; z-index: 20;
+  transform: translate(-50%, -100%);
+  display: flex; flex-direction: column; align-items: center;
+}
+.plate .body {
+  display: flex; align-items: center; gap: 8px;
+  height: 46px; padding: 0 16px 0 7px;
+  background: var(--surface); border-radius: var(--r-pill);
+  box-shadow: var(--lip-surface), var(--drop-on-art);
+  font: 900 16px/1 var(--font); color: var(--ink); white-space: nowrap;
+}
+.plate .medal { width: 34px; height: 34px; border-radius: 50%; background: var(--surface-2); display: grid; place-items: center; }
+.plate .medal .sticker { width: 24px; height: 24px; }
+.plate .sub { display: block; font: 800 10px/1.1 var(--font); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); margin-top: 2px; }
+.plate .tail { width: 14px; height: 9px; margin-top: 3px; background: var(--surface); clip-path: polygon(0 0, 100% 0, 50% 100%); filter: drop-shadow(0 3px 2px rgba(0,0,0,.35)); }
+.plate .anchor { width: 14px; height: 14px; margin-top: 4px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px var(--brand), 0 0 0 9px rgba(255,255,255,.35), 0 2px 6px rgba(0,0,0,.5); }
+.plate.locked .body { background: rgba(255,255,255,.9); color: var(--ink-2); }
+.plate.locked .medal { background: var(--surface-3); color: var(--ink-2); }
+.plate.locked .anchor { box-shadow: 0 0 0 3px var(--ink-3), 0 2px 6px rgba(0,0,0,.5); }
+.plate.featured .body { box-shadow: 0 4px 0 var(--gold-deep), var(--drop-on-art); outline: 3px solid var(--gold); outline-offset: -1px; }
+.plate.featured .anchor { box-shadow: 0 0 0 3px var(--gold), 0 0 0 10px rgba(253,180,60,.35), 0 2px 6px rgba(0,0,0,.5); }
+
+/* ---------- Map pin (kingdom map, no name) ---------- */
+.mpin { position: absolute; z-index: 20; transform: translate(-50%, -100%); display: flex; flex-direction: column; align-items: center; }
+.pin-demo .mpin { position: relative; transform: none; }
+.mpin .head { width: 46px; height: 46px; border-radius: 50%; background: var(--surface); display: grid; place-items: center; overflow: hidden; box-shadow: var(--lip-surface), var(--drop-on-art); }
+.mpin .head .sticker { width: 30px; height: 30px; }
+.mpin .tip { width: 14px; height: 10px; margin-top: 2px; background: var(--surface); clip-path: polygon(0 0, 100% 0, 50% 100%); filter: drop-shadow(0 2px 2px rgba(0,0,0,.4)); }
+.mpin.current .head { width: 56px; height: 56px; border: 3px solid var(--gold); box-shadow: 0 4px 0 var(--gold-deep), 0 0 0 7px rgba(253,180,60,.35), var(--drop-on-art); }
+.mpin.current .head img { width: 100%; height: 100%; object-fit: cover; }
+.mpin.current .tip { background: var(--gold); }
+.mpin.locked .head { width: 36px; height: 36px; background: var(--surface-3); color: var(--ink-3); box-shadow: var(--drop-on-art); }
+.mpin.locked .head .glyph { width: 18px; height: 18px; }
+.mpin.locked .tip { background: var(--surface-3); }
+
+/* ---------- Peek card (selected map location) ---------- */
+.peek { position: absolute; left: var(--screen-x); right: var(--screen-x); bottom: 110px; z-index: 30; display: flex; align-items: center; gap: 14px; padding: 12px 12px 12px 12px; }
+.peek .thumb { width: 64px; height: 64px; border-radius: 18px; overflow: hidden; flex: none; box-shadow: 0 3px 0 var(--surface-3); }
+.peek .thumb img { width: 100%; height: 100%; object-fit: cover; }
+.peek .col { flex: 1; min-width: 0; }
+.peek .nm { font: 900 20px/1.05 var(--font); color: var(--ink); }
+.peek .meta { font: 800 13px/1.2 var(--font); color: var(--ink-2); margin-top: 4px; }
+.peek .btn { width: auto; height: 48px; padding: 0 20px; font-size: 17px; }
+
+/* ---------- Level nav (floors of a place: arrows, lock when closed) ---------- */
+.level-nav {
+  position: absolute; right: var(--screen-x); top: 58px; z-index: 30;
+  width: 56px; padding: 6px; border-radius: var(--r-pill);
+  background: var(--surface); box-shadow: var(--lip-surface), var(--drop-on-art);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.level-nav .step { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--brand); color: #fff; box-shadow: 0 3px 0 var(--brand-deep); }
+.level-nav .step .glyph { width: 22px; height: 22px; }
+.level-nav .step.locked { background: var(--surface-3); color: var(--ink-3); box-shadow: none; }
+.level-nav .step.locked .glyph { width: 18px; height: 18px; }
+.level-nav .depth { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 2px 0; }
+.level-nav .depth i { width: 8px; height: 8px; border-radius: 50%; background: var(--surface-3); }
+.level-nav .depth i.here { width: 12px; height: 12px; background: var(--gold); box-shadow: 0 0 0 3px var(--gold-soft); }
+.level-nav .depth i.closed { background: transparent; box-shadow: inset 0 0 0 2px var(--ink-3); }
+.level-nav.demo { position: relative; top: 0; right: 0; }
+
+/* ---------- Tag ---------- */
+.tag { display: inline-flex; align-items: center; height: 22px; padding: 0 9px; border-radius: var(--r-pill); font: 900 11px/1 var(--font); letter-spacing: .06em; text-transform: uppercase; }
+.tag.boss { background: #ffe3de; color: #c2412f; }
+.tag.ally { background: #dcf5e6; color: var(--success-deep); }
+
+/* ---------- Scene card (compact bottom card on a scene: encounter / ally) ---------- */
+.scene-card { position: absolute; left: var(--screen-x); right: var(--screen-x); bottom: 108px; z-index: 30; padding: 12px 12px 12px 16px; }
+.scene-card .row1 { display: flex; align-items: center; gap: 8px; height: 30px; }
+.scene-card .nm { font: 900 22px/1 var(--font); color: var(--ink); }
+.scene-card .spacer { flex: 1; }
+.scene-card .meta { font: 800 13px/1 var(--font); color: var(--ink-2); white-space: nowrap; }
+
+/* Encounter: name · win chance / loot strip · Fight */
+.win-pill { display: inline-flex; align-items: baseline; gap: 4px; height: 30px; padding: 0 12px; border-radius: var(--r-pill); background: #dcf5e6; font: 900 17px/30px var(--font); color: var(--success-deep); }
+.win-pill small { font: 800 11px/1 var(--font); letter-spacing: .06em; text-transform: uppercase; }
+.encounter .row2 { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.encounter .loot { display: flex; gap: 6px; }
+.encounter .loot .item { width: 46px; border-radius: 13px; border-width: 2.5px; }
+.encounter .loot .item .qty { font-size: 10px; right: 2px; bottom: 1px; }
+.encounter .btn { flex: 1; height: 52px; padding: 0 12px; font-size: 18px; gap: 6px; }
+.encounter .btn .sticker { width: 26px; height: 26px; }
+
+/* Ally: name + Talk / 3-level track / what raises it */
+.ally .btn { width: auto; height: 38px; padding: 0 16px; font-size: 15px; box-shadow: 0 3px 0 var(--brand-deep); }
+.track { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); margin: 10px 0 0; }
+.track .bar { position: absolute; left: 16.66%; right: 16.66%; top: 17px; height: 8px; border-radius: var(--r-pill); background: var(--surface-2); overflow: hidden; }
+.track .bar .fill { position: absolute; inset: 0 auto 0 0; border-radius: var(--r-pill); background: var(--gold); box-shadow: inset 0 -2px 0 var(--gold-deep); }
+.track .lv { position: relative; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.track .node { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); box-shadow: 0 0 0 3px var(--surface-3), 0 3px 0 3px var(--surface-3); }
+.track .node .sticker { width: 26px; height: 26px; }
+.track .lv.done .node { box-shadow: 0 0 0 3px var(--success), 0 3px 0 3px var(--success-deep); }
+.track .lv.next .node { box-shadow: 0 0 0 3px var(--gold), 0 3px 0 3px var(--gold-deep), 0 0 0 9px var(--gold-soft); }
+.track .lv.closed .node { background: var(--surface-2); color: var(--ink-3); }
+.track .lv.closed .node .glyph { width: 18px; height: 18px; }
+.track .badge { position: absolute; top: -4px; left: calc(50% + 12px); width: 18px; height: 18px; border-radius: 50%; background: var(--success); color: #fff; display: grid; place-items: center; box-shadow: 0 0 0 2px #fff; }
+.track .badge .glyph { width: 11px; height: 11px; }
+.track .lbl { font: 800 12px/1.1 var(--font); color: var(--ink-2); text-align: center; }
+.track .lbl b { display: block; font: 900 10px/1.2 var(--font); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+.track .lv.next .lbl b { color: var(--gold-deep); }
+.raise { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding: 7px 10px; border-radius: var(--r-sm); background: var(--surface-2); font: 800 13px/1.2 var(--font); color: var(--ink-2); }
+.raise .sticker { width: 20px; height: 20px; }
+.raise b { color: var(--ink); font-weight: 900; }
+.raise .spacer { flex: 1; }
+.raise .cnt { font: 900 13px/1 var(--font); color: var(--gold-deep); }
+
+/* ---------- Item tile (rarity frame) ---------- */
+.item {
+  position: relative; aspect-ratio: 1; border-radius: 18px; overflow: hidden;
+  border: 3px solid var(--rc, var(--r-common));
+  box-shadow: 0 3px 0 var(--rc, var(--r-common));
+  background: #2a1d18;
+}
+.item img { width: 100%; height: 100%; object-fit: cover; }
+.item .qty { position: absolute; right: 4px; bottom: 3px; font: 900 12px/1 var(--font); color: #fff; text-shadow: 0 1px 2px #000, 0 0 4px #000; }
+.item.light { background: color-mix(in srgb, var(--rc, var(--r-common)) 16%, #fff); }
+.item.light img { width: 70%; height: 70%; margin: 15%; object-fit: contain; }
+.item.light .qty { color: var(--ink); text-shadow: 0 0 3px #fff, 0 0 3px #fff; }
+.item.rare { --rc: var(--r-rare); }
+.item.epic { --rc: var(--r-epic); }
+.item.legendary { --rc: var(--r-legendary); }
