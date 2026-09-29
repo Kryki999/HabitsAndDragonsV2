@@ -63,7 +63,7 @@
 
 | #   | Hotspot      | Kiedy              | Co jest w środku                                                            |
 | --- | ------------ | ------------------ | --------------------------------------------------------------------------- |
-| 1   | **Stragan**  | Od D0              | Tap → kadr babki/sklepu (6 gniazd) + stodoła (Dom Lv1)                       |
+| 1   | **Stragan**  | Od D0              | Tap → sklep archetyp A: winieta babki + dymek, katalog Buy / Sell (LOCK 2026-09-24). Stodoła = Dom Lv1 |
 | 2   | **Menelnia** | L2 (misja Mentora) | Piwnica = Gutterjack → po clear: parter (koło) + piętro (kubeczki) + Mentor |
 | 3   | **Pałac**    | Po clear ★1        | Doradca (Lv affinity) → po Titanie schody / król                            |
 
@@ -77,7 +77,7 @@ Klimat: *żywe królestwo, które udaje, że jest OK* — Re:Zero scale + nasz D
 - To **NPC stolicy**, nie „kapusta-mascot”. **Guide #1** do końca early game (obok Mentora).  
 - **Też sklep** (sink gold): skup loot, klucze, freeze streak, rotacja itemów ~tydzień — `[06](06-economy-loot.md)` §7.  
 - Daje nocleg w **stodole** (Dom Lv1) — `[17](17-player-journey.md)`.  
-- **Tap straganu** → osobny kadr 9:16 (nie crop placu): ona + lady + 6 pustych gniazd na itemy po bokach. Prompt: [`reference/art/prompt-vendor-shop.md`](reference/art/prompt-vendor-shop.md). Day 0 = ten sam obraz, najpierw dialog.
+- **Tap straganu** → ekran sklepu (nie crop placu): winieta 9:16 (babka po lewej, luz na dymek po prawej) + katalog chrome Buy / Sell. Prompt malunku: [`reference/art/prompt-vendor-shop.md`](reference/art/prompt-vendor-shop.md). Gniazda SKU na stillu = superseded (2026-09-24). Day 0 = ten sam obraz, najpierw dialog.
 
 ## B2. Tawerna → menelnia (hotspot #2)
 
@@ -206,7 +206,12 @@ Obraz: §B0.
 
 ---
 
-# C. Mapa — kierunki (roboczo, do dogrania)
+# C. Mapa — kierunki
+
+Geografia biomów (woda L / las P / pustynia góra) i graf odblokowań **zostają**.  
+**Kamera na telefonie = LOCK 2026-09-25** — nie rysujemy pierścieni wokół stolicy. Szczegół + graybox: [`24`](24-map-production.md).
+
+### Graf (kiedy się odblokowuje) — zostaje
 
 ```text
                          [dalej las / zakazana ścieżka]
@@ -228,7 +233,35 @@ Obraz: §B0.
               [później] Pustynia TBD ── ★3? Osiris ──► Ananiel (Titan)
 ```
 
-**Pierścień 1 (od hubu, wybór 3):**
+„Pierścień 1 / 2” = **kolejność bramek**, nie kształt na ekranie. Cmentarz na diagramie = archiwum (OUT).
+
+### Telefon (jak to widać) — LOCK 2026-09-25
+
+Pielgrzymka **z dołu do góry**. Crownhaven = próg domu. Ananiel = czubek + jedyny horyzont.
+
+```text
+Ananiel                 środek
+Pyramid                 środek
+(rezerwa) · Vampire     skrzydło / pusto     ← nie na trakcie
+Raven Castle            środek     ★2
+Water Temple · Pallglass
+Closed Way              środek     ★1
+Teeth · Anvil           lewo / prawo         ← wybór R1
+Approaches              środek     próg
+Crownhaven              środek     spawn
+```
+
+| Lock | Werdykt |
+|------|---------|
+| Rzędy | Na danej wysokości: **albo** jeden środek, **albo** para L/P. Nigdy trzy, nigdy środek+skrzydło. |
+| Approaches | Osobny rząd-próg nad stolicą, **nie** trzeci pin w rzędzie z Teeth/Anvil. |
+| R1 wybór | Para **Teeth · Anvil** (woda L, las P). |
+| Vampire | Pobocze: pin prawo, lewo = rezerwa Akt 2 (teren, nie pusty pin). |
+| B | 200 px środek–środek rzędów na artboardzie 390. |
+
+Makieta: [`reference/ui/lookdev/world-map-gray.html`](reference/ui/lookdev/world-map-gray.html).
+
+**Pierścień 1 (od hubu, pula wyboru — graf, nie jeden rząd na mapie):**
 
 
 | Lokacja                                  | Kierunek roboczy             | Mix                               |
@@ -271,7 +304,7 @@ Riptooth, Stillacre, Unlit Beacon, Tithe Barn — odłożone po feedbacku zało�
 - **Gdzie:** piwnice menelni.  
 - **Tier:** Common / tutorial.  
 - **NPC w tawernie:** klimat żuli (nie muszą być „quest hubami”).  
-- **Po:** otwarcie mapy / 3 piny R1.
+- **Po:** otwarcie mapy — Approaches (próg) + para R1 Teeth / Anvil.
 
 **Loch still (art 2026-08-18):** jeden kadr walki — Mietek **siedzi** na beczce, broń = stłuczona butelka (tulipan), korek na szyi. Załoga nie jest L1. Prompt: [`reference/art/prompt-gutterjack-dungeon.md`](reference/art/prompt-gutterjack-dungeon.md). Nie stół Mentora, nie toast.
 
@@ -854,7 +887,7 @@ Zakładka Świat
 
 ```
 
-To jest **hipoteza UX** — spójna z „mapa musi być wow” + discover once. Do walidacji przy IA/ekranach (`18`, `19`).
+To jest **hipoteza UX** drill-in (mapa → close-up → hotspot) — LOCK chrome 2026-09-24 (`18`, PeekCard). Kamera paska: `24` / `18` 2026-09-25.
 
 ---
 

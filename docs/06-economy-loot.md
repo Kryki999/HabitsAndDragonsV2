@@ -397,7 +397,7 @@ Otwarte na later: free swap przy nowym Unikat/Heroic dropie; **aukcje = model Bo
 | **Bound** (założyłeś ≥1 raz) | **Nie** na aukcję · skup NPC nadal (świadomie słaby gold) · afiks tylko gdy equipped |
 
 **Po co:** Heroic/Unikat z farta = prawdziwy jackpot ekonomiczny (dziesiątki kluczy między graczami), duplikat = sell, flex/trade social.  
-**Po co nie w Day 0–30:** osobny produkt (UI, fee, escrow, boty, support, podatki gold); Akt 1 ma domknąć mapę + loot + habit. Tab Społeczność najpierw friends/ranking.
+**Po co nie w Day 0–30:** osobny produkt (UI, fee, escrow, boty, support, podatki gold); Akt 1 ma domknąć mapę + loot + habit. Tab Społeczność najpierw **friends + Hall of Heroes**; ranking **PARK** ([`08`](08-social.md)).
 
 **Spinanie z anti-swap:** zero konfliktu — Bound ≠ forever-power; nadal equipped-only + lock Atrybutu do resetu dnia.
 
@@ -503,7 +503,7 @@ Pierwszy NPC rynku = też **kupiec**. Lore + ekonomia w jednym.
 
 Psychologia: gold pod refresh / outfit — „klucz teraz vs item za tydzień”. Sprzedaż loot = dopłata, nie zamiennik odhaczania.
 
-**Ekran:** 9:16 babka + lady; **6 pustych gniazd** L/R (klucz, freeze, rotacja). SKU maluje UI, nie ilustracja. Skup loot = dolny pasek. Art: [`prompt-vendor-shop.md`](reference/art/prompt-vendor-shop.md).
+**Ekran (LOCK 2026-09-24 v2.3):** winieta babki + dymek na górze, pod spodem katalog max 6 SKU (klucz, freeze, rotacja), zakładki **Buy / Sell loot** — [`golden/shop.png`](reference/ui/golden/shop.png), archetyp A w [`design-bible.md`](reference/ui/design-bible.md). Lookdev wygrywa ze starszym „dolnym paskiem”. Gniazda SKU na stillu i dolny pasek sprzedaży = superseded. Art winiety: [`prompt-vendor-shop.md`](reference/art/prompt-vendor-shop.md).
 
 **Twarda reguła:** normalny dzień sprzedaży trash **<<** 300g pensji; jackpot Unikat/Heroic = miły bonus.
 

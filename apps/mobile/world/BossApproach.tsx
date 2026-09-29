@@ -1,8 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View, type ImageSourcePropType } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { StyleSheet, View, type ImageSourcePropType } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { DoorOpen, HelpCircle, KeyRound } from 'lucide-react-native';
 
 import Colors from '@/constants/colors';
 import BuyKeySheet from '@/components/BuyKeySheet';
@@ -17,7 +15,6 @@ import {
 } from '@/lib/economy';
 import BattleSimulationModal from '@/combat/BattleSimulationModal';
 import BossVictoryLootModal from '@/combat/BossVictoryLootModal';
-import FightLootTray from '@/combat/FightLootTray';
 import WinChanceBreakdownModal from '@/combat/WinChanceBreakdownModal';
 import {
   computeWinChance,
@@ -27,13 +24,17 @@ import {
   wineInPack,
   GUTTERJACK_WINE_ID,
 } from '@/combat/engine';
-import { winChanceColor } from '@/combat/winChanceColor';
 import type { CombatChallenge, FightLootPrize, FightPhase, FightResolution, WinChanceBreakdown } from '@/combat/types';
 import type { DungeonLootEntry } from '@/types/dungeonLoot';
+import { EncounterCard } from '@/ui/EncounterCard';
+import { SceneHead } from '@/ui/SceneHead';
+import { ScrimTop, SeamDock } from '@/ui/Seam';
+import type { StickerName } from '@/ui/stickerRegistry';
+import { tokens } from '@/ui/tokens';
 
-import OverlayHud from './OverlayHud';
 import StillFrame, { type CoverAnchor } from './StillFrame';
 import { useWorldStore } from './store';
+import { WorldNotice } from './WorldNotice';
 
 function payloadFromEntry(entry: DungeonLootEntry): LootModalPayload {
   if (entry.kind === 'gold') return { type: 'gold', entry };
@@ -58,7 +59,9 @@ export type BossApproachProps = {
   skipEntryGate?: boolean;
   farmWeights?: readonly { id: string; weight: number }[];
   rollLoot?: (isFirstClear: boolean) => FightLootPrize;
-  headerExtra?: ReactNode;
+  sceneKicker?: string;
+  sceneName?: string;
+  levelNav?: ReactNode;
   whisper?: string | null;
 };
 
@@ -76,7 +79,9 @@ export default function BossApproach({
   skipEntryGate = false,
   farmWeights,
   rollLoot,
-  headerExtra,
+  sceneKicker,
+  sceneName,
+  levelNav,
   whisper,
 }: BossApproachProps) {
   const insets = useSafeAreaInsets();
@@ -125,7 +130,6 @@ export default function BossApproach({
     [challenge, equippedRelicId, isFirstClear, ownedItemIds, playerLevel, sipWine, tutorialLock, willSipWine],
   );
 
-  const chanceColor = winChanceColor(breakdown.displayPct);
   const lootRoller =
     rollLoot ??
     (farmWeights ? () => rollWeightedLoot(farmWeights) : sipWine ? undefined : rollPlaygroundLoot);
@@ -156,6 +160,7 @@ export default function BossApproach({
     : entry.cost === 'key'
       ? 'Fight · 1 key'
       : 'Fight';
+  const fightSticker: StickerName = !entry.ok || entry.cost === 'key' ? 'key' : 'swords';
 
   const handleBack = useCallback(() => {
     if (phase === 'clash' || phase === 'loot') return;
@@ -234,64 +239,32 @@ export default function BossApproach({
 
       {showApproachChrome ? (
         <>
-          <OverlayHud
-            insets={insets}
-            kicker={challenge.dungeonName}
-            title={challenge.bossName}
-            left={{ icon: 'back', onPress: handleBack, accessibilityLabel: 'Back' }}
-            right={
-              <View style={styles.rightStack}>
-                {headerExtra}
-                <Pressable
-                  testID="win-chance"
-                  onPress={() => {
-                    impactAsync(ImpactFeedbackStyle.Light);
-                    setHelpOpen(true);
-                  }}
-                  hitSlop={8}
-                  style={({ pressed }) => [styles.winBadge, pressed && styles.pressed]}
-                >
-                  <Text style={[styles.winPct, { color: chanceColor }]}>{breakdown.displayPct}%</Text>
-                  <View style={styles.helpDot}>
-                    <HelpCircle size={15} color={Colors.dark.cyan} strokeWidth={2.4} />
-                  </View>
-                </Pressable>
-              </View>
-            }
+          <ScrimTop />
+          <SeamDock fade={60} />
+          <SceneHead
+            kicker={sceneKicker ?? challenge.dungeonName}
+            name={sceneName ?? challenge.bossName}
+            onBack={handleBack}
           />
-
-          <LinearGradient
-            pointerEvents="none"
-            colors={['transparent', 'transparent', 'rgba(7,5,16,0.28)', 'rgba(7,5,16,0.7)']}
-            locations={[0, 0.52, 0.8, 1]}
-            style={styles.floorVeil}
-          />
-
-          <View pointerEvents="box-none" style={[styles.sheetWrap, { paddingBottom: 12 + insets.bottom }]}>
-            <View style={styles.bottom}>
-              <FightLootTray table={lootTable} onInspect={(entry) => setInspect(payloadFromEntry(entry))} />
-              <Text style={styles.entryHint}>{entryHint}</Text>
-              <Pressable
-                testID="fight-button"
-                onPress={onFight}
-                style={({ pressed }) => [styles.fightOuter, pressed && styles.fightPressed]}
-              >
-                <LinearGradient
-                  colors={[...Colors.gradients.gold]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.fightGradient}
-                >
-                  {entry.ok && entry.cost === 'key' ? (
-                    <KeyRound size={18} color="#1a1228" />
-                  ) : (
-                    <DoorOpen size={18} color="#1a1228" />
-                  )}
-                  <Text style={styles.fightLabel}>{fightLabel}</Text>
-                </LinearGradient>
-              </Pressable>
+          {levelNav ? (
+            <View pointerEvents="box-none" style={[styles.nav, { top: insets.top + 8 }]}>
+              {levelNav}
             </View>
-          </View>
+          ) : null}
+          <EncounterCard
+            name={challenge.bossName}
+            winPct={breakdown.displayPct}
+            onWinPress={() => {
+              impactAsync(ImpactFeedbackStyle.Light);
+              setHelpOpen(true);
+            }}
+            entryHint={entryHint}
+            loot={lootTable}
+            onInspect={(entry) => setInspect(payloadFromEntry(entry))}
+            fightLabel={fightLabel}
+            fightSticker={fightSticker}
+            onFight={onFight}
+          />
         </>
       ) : null}
 
@@ -316,11 +289,7 @@ export default function BossApproach({
 
       <WinChanceBreakdownModal visible={helpOpen} breakdown={breakdown} onClose={() => setHelpOpen(false)} />
 
-      {whisper ? (
-        <View pointerEvents="none" style={[styles.whisperWrap, { top: 56 }]}>
-          <Text style={styles.whisper}>{whisper}</Text>
-        </View>
-      ) : null}
+      {whisper ? <WorldNotice message={whisper} top={insets.top + 72} /> : null}
 
       <LootDetailModal
         visible={inspect != null}
@@ -347,91 +316,11 @@ export default function BossApproach({
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#070510',
+    backgroundColor: tokens.canvas,
   },
-  rightStack: {
-    alignItems: 'flex-end',
-    gap: 8,
-  },
-  winBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.14)',
-    backgroundColor: 'rgba(0,0,0,0.45)',
-  },
-  winPct: {
-    fontSize: 14,
-    fontWeight: '800',
-    letterSpacing: 0.2,
-  },
-  helpDot: {
-    padding: 1,
-  },
-  floorVeil: {
+  nav: {
     position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    top: '58%',
-  },
-  sheetWrap: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  bottom: {
-    paddingHorizontal: 12,
-  },
-  fightOuter: {
-    borderRadius: 14,
-    overflow: 'hidden',
-    alignSelf: 'stretch',
-  },
-  fightPressed: {
-    opacity: 0.92,
-    transform: [{ scale: 0.98 }],
-  },
-  fightGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    paddingVertical: 14,
-    paddingHorizontal: 12,
-  },
-  fightLabel: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#1a1228',
-  },
-  entryHint: {
-    color: 'rgba(255,255,255,0.78)',
-    fontSize: 12,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  pressed: {
-    opacity: 0.8,
-  },
-  whisperWrap: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    alignItems: 'center',
-  },
-  whisper: {
-    color: Colors.dark.gold,
-    fontSize: 12,
-    fontWeight: '700',
-    textAlign: 'center',
-    textShadowColor: 'rgba(0,0,0,0.85)',
-    textShadowRadius: 6,
+    right: tokens.screenX,
+    zIndex: 30,
   },
 });

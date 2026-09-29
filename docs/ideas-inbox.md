@@ -8,16 +8,22 @@ Tu wrzucamy **surowe** pomysły. Rozrzut do filarów robi partner / agent.
 
 Tap hotspotu → grafika babki + straganu, itemy po bokach.  
 Lock kierunku: kadr 3 (nie crop placu), 6 pustych gniazd, SKU = UI.  
-Plik: [`reference/art/prompt-vendor-shop.md`](reference/art/prompt-vendor-shop.md).
+Plik: [`reference/art/prompt-vendor-shop.md`](reference/art/prompt-vendor-shop.md).  
+**Superseded 2026-09-24:** gniazda i dolny pasek sprzedaży wyszły. Zostaje kadr 3 + katalog Buy / Sell w chrome (lookdev `shop`).
 
 ---
 
 ## Dump — 2026-08-15 produkcja mapy (AI + pan/zoom)
 
 Założyciel: szata graficzna / mapa z generatorów AI; czy 4K 16:9 pod scroll.  
-Rozstrzygnięcie robocze: **nie 16:9**; kwadrat 4096² MVP; dwa podejścia (still vs warstwy życia).  
+Rozstrzygnięcie wtedy: **nie 16:9**; kwadrat 4096² MVP; dwa podejścia (still vs warstwy życia).  
 Dopisek (ten sam dzień): **dwa kadry** — najpierw close-upy lokacji, orbita później jako ogólny widok (nie 1:1).  
+**Superseded 2026-09-25:** nie kwadrat, nie pinch, nie hub w środku. **Pionowy pasek** 390×1920, Crownhaven na dole, lock X, B=200, środek-albo-para. Dwa kadry (pasek ≠ close-up) **zostają**.  
 Plik: [`24-map-production.md`](24-map-production.md).
+
+## Dump — 2026-09-25 mapa = pielgrzymka
+
+Fit-width zabił Y na korytarzu 9:16. Founder: wyższy pasek, nie zoom z powrotem. Graybox zatwierdzony (B=200, Vampire skrzydło+rezerwa). Nie generować artu zanim generator nie dostanie szarego PNG jako composition lock.
 
 ## Dump — dodatkowe pomysły (po prototypie)
 
@@ -71,6 +77,9 @@ Emotki = kolekcja kosmetyczna (`05`/`06`). Skup: zwykły ~10–15g, unikaty/hero
 | Data | Fragment | Trafił do |
 |------|----------|-----------|
 | 2026-09-24 | 5 SS sheet look-dev (Home/Hero/onboarding/streak/shop) | [`reference/ui/mocks/`](reference/ui/mocks/) |
+| 2026-09-24 | Goldeny Hero / streak / level-up / sklep (kierunek `shop.png`) / 2× onboarding; Talk out z NPC; niższa AllyCard; poświata za kartą → szew do tab bara; brak Fight/Talk w kit-sheet | [`reference/ui/design-bible.md`](reference/ui/design-bible.md) v2.2, `19`, `15`, `06` §7 |
+| 2026-09-24 | Founder: PeekCard „Enter”; sklep Buy / Sell jako zakładki; LevelNav z lookdev = najnowsza nawigacja pięter. Szept, dolny pasek sprzedaży, winda z etykietami, gniazda SKU = superseded | `reference/ui/design-bible.md` v2.3, `00`, `06` §7, `18`, `19` S06, `21`, `23` B0–B1, `24`, `prompt-vendor-shop` |
+| 2026-09-24 | LevelNav bez nazwy piętra przy przytrzymaniu. Winieta babki later — na razie wycinek Crownhaven | `reference/ui/design-bible.md`, `18`, `21`, `prompt-vendor-shop` |
 | 2026-07-30 | Archiwum mid-concept | `reference/archive-concept-mid.md` |
 | 2026-07-30 | Wizja mapa/isekai/onboarding | `00`, `01`, `03`, `04`, `09`, `10`, `15` |
 | 2026-08-04 | Pałac / doradca / Main vs punkty | `17`, `21`, `23` |

@@ -295,7 +295,7 @@ Hex reveal (pierwszy pełny)
 Questy → dojście do L4 (~4 jednostki XP w ciągu dnia)
   → Celebracja L4:
        • 2. punkt odkrycia (wybór kolejnego pinu R1 spośród pozostałych)
-       • Zakładka Społeczność odblokowana (soft teach: znajomi later)
+       • Zakładka Społeczność odblokowana (soft teach: hall + dolina + „oto Twój kod”)
   → Start wyprawy na 2. pin (timer 4–6 h) ALBO od razu close-up jeśli już odkryty wcześniej
   → Na 1. lokacji R1: 1 walka (Common/Elite) z REALNYM % + teach CD
   → Opcjonalnie: koło menelni; Gutterjack tylko jeśli CD gotowe

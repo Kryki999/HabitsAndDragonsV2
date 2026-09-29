@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=390, initial-scale=1" />
+  <title>H&D — Fight: loot roll</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../tokens.css" />
+  <link rel="stylesheet" href="../components.css" />
+  <link rel="stylesheet" href="../glyphs.css" />
+  <style>
+    .head { top: 108px; gap: 8px; }
+    .roll { position: absolute; left: 0; right: 0; top: 268px; height: 158px; z-index: 5; }
+    .roll .window { position: absolute; left: 0; right: 0; top: 14px; bottom: 28px; overflow: hidden; }
+    .roll .strip { display: flex; gap: 8px; align-items: flex-start; height: 100%; margin-left: -102px; }
+    .roll .cell { width: 78px; flex: none; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .roll .cell .item { width: 78px; border-radius: 16px; }
+    .roll .cell:nth-child(4) .item { transform: translateY(-2px); box-shadow: 0 0 0 3px var(--gold), 0 4px 0 3px var(--gold-deep); }
+    .roll .cell b {
+      font: 800 11px/1.1 var(--font); color: #fff; text-align: center;
+      text-shadow: var(--shadow-on-canvas);
+    }
+    .roll .empty {
+      width: 100%; aspect-ratio: 1; border-radius: 16px;
+      background: var(--surface-2); color: var(--ink-3);
+      display: grid; place-items: center;
+      box-shadow: var(--lip-surface);
+    }
+    .roll .empty .glyph { width: 26px; height: 26px; }
+    .tick {
+      position: absolute; left: 50%; z-index: 6; width: 0; height: 0;
+      transform: translateX(-50%);
+    }
+    .tick.up { top: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 10px solid var(--gold); filter: drop-shadow(0 2px 0 var(--gold-deep)); }
+    .tick.down { bottom: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-bottom: 10px solid var(--gold); filter: drop-shadow(0 -2px 0 var(--gold-deep)); }
+    .fade { position: absolute; top: 14px; bottom: 28px; width: 36px; z-index: 4; pointer-events: none; }
+    .fade.l { left: 0; background: linear-gradient(90deg, var(--canvas), rgba(145,162,242,0)); }
+    .fade.r { right: 0; background: linear-gradient(270deg, var(--canvas), rgba(145,162,242,0)); }
+    .hint { position: absolute; left: 32px; right: 32px; top: 448px; z-index: 5; }
+  </style>
+</head>
+<body>
+  <!-- Proposal. Still of the case-roll. Marker is gold because it points at the prize. -->
+  <div class="phone flow">
+    <div class="status"><span>9:41</span><span class="sys"><span class="bars"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:11px"></i></span><span class="batt"></span></span></div>
+
+    <div class="flow-stage head">
+      <div class="kicker" style="font: var(--t-caption); letter-spacing: var(--caption-track); text-transform: uppercase; color: #fff; text-shadow: var(--shadow-on-canvas);">Gutterjack</div>
+      <div class="flow-title">Rolling</div>
+    </div>
+
+    <div class="roll">
+      <span class="tick up"></span>
+      <span class="tick down"></span>
+      <div class="window">
+        <div class="strip">
+          <div class="cell"><div class="item light"><img src="../assets/fe-nazar-amulet.svg" alt="" /></div><b>Cork</b></div>
+          <div class="cell"><div class="empty"><span class="glyph g-close"></span></div><b>Empty</b></div>
+          <div class="cell"><div class="item light"><img src="../assets/hd-coin.svg" alt="" /><span class="qty">32</span></div><b>Gold</b></div>
+          <div class="cell"><div class="item light"><img src="../assets/fe-wine-glass.svg" alt="" /></div><b>Wine</b></div>
+          <div class="cell"><div class="item light unique"><img src="../assets/fe-dagger.svg" alt="" /></div><b>Tulip</b></div>
+          <div class="cell"><div class="item light"><img src="../assets/fe-nazar-amulet.svg" alt="" /></div><b>Cork</b></div>
+          <div class="cell"><div class="item light"><img src="../assets/hd-coin.svg" alt="" /><span class="qty">40</span></div><b>Gold</b></div>
+        </div>
+      </div>
+      <div class="fade l"></div>
+      <div class="fade r"></div>
+    </div>
+
+    <div class="flow-stage hint"><div class="flow-note">The strip slows onto one prize</div></div>
+    <div class="home-ind"></div>
+  </div>
+</body>
+</html>

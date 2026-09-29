@@ -85,7 +85,7 @@ export default function FogOverlay({
           y={0}
           width={mapWidth}
           height={mapHeight}
-          fill="rgba(122, 136, 152, 0.986)"
+          fill="rgba(169, 187, 251, 0.97)"
           mask="url(#kingdom-fog-mask)"
         />
         <Rect
@@ -93,7 +93,7 @@ export default function FogOverlay({
           y={0}
           width={mapWidth}
           height={mapHeight}
-          fill="rgba(198, 208, 218, 0.78)"
+          fill="rgba(169, 187, 251, 0.55)"
           mask="url(#kingdom-fog-mask)"
         />
       </Svg>

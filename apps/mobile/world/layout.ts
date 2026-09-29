@@ -1,5 +1,7 @@
 import type { ImageSourcePropType } from 'react-native';
 
+import type { StickerName } from '@/ui/stickerRegistry';
+
 /**
  * World playground layout — pin / hotspot coordinates.
  *
@@ -10,7 +12,7 @@ import type { ImageSourcePropType } from 'react-native';
  *
  * How to retune
  * -------------
- * 1. Replace `map_board.png` (keep the filename / WORLD_ART path).
+ * 1. Replace `map_board.webp` (keep the filename / WORLD_ART path).
  * 2. Update `MAP_INTRINSIC` if the pixel size changed (portrait corridor).
  * 3. Nudge pin `x` / `y` and fog seeds below. 0.01 ≈ 1% of the still.
  *    Fog is one runtime veil — never paint it into the PNG. Seeds are
@@ -21,13 +23,15 @@ import type { ImageSourcePropType } from 'react-native';
  * ----------
  * Cursor chat PNG attachments cap at **768KB** (exactly 786432 bytes) and arrive
  * truncated (full IHDR, black lower canvas, no IEND). Ship **JPEG/WebP under
- * ~700KB** so the whole frame lands when attaching in chat. Production
- * `map_board.png` is the live corridor board (941×1672).
+ * ~700KB** so the whole frame lands when attaching in chat.
+ *
+ * Live board: `map_board.webp` (1536×7237, stitched folds, **no** scripted sea pad).
+ * Old corridor playground: `map_board-corridor-941x1672.png`.
  */
 
 export const WORLD_ART = {
   /** Tall upward corridor travel map (Crownhaven at bottom → Ananiel at top). */
-  map: require('@/assets/images/map_board.png') as ImageSourcePropType,
+  map: require('@/assets/images/map_board.webp') as ImageSourcePropType,
   hub: require('@/assets/images/world/hub-crownhaven.jpg') as ImageSourcePropType,
   /**
    * Tavern Ground stand-in: Mentor hall still (landscape). Cover-crops to the
@@ -36,8 +40,8 @@ export const WORLD_ART = {
   tavernGround: require('@/assets/images/tavernsage.png') as ImageSourcePropType,
 };
 
-/** Production corridor board — portrait, pans mostly up. */
-export const MAP_INTRINSIC = { width: 941, height: 1672 } as const;
+/** Stitched fold strip, 1536 wide. Fit-width, pan only up. */
+export const MAP_INTRINSIC = { width: 1536, height: 7237 } as const;
 export const HUB_INTRINSIC = { width: 941, height: 1672 } as const;
 export const TAVERN_GROUND_INTRINSIC = { width: 1678, height: 937 } as const;
 
@@ -50,12 +54,14 @@ export type MapPinDef = {
   x: number;
   y: number;
   kind: MapPinKind;
+  /** Landmark sticker when the region is revealed. Hidden on locked / current. */
+  sticker: StickerName;
   /** Crownhaven opens the hub. Other pins open a location still. */
   opens?: 'hub' | 'location';
 };
 
 /**
- * Corridor pins (portrait board, Crownhaven at the bottom).
+ * Strip pins (stitched folds, Crownhaven at the bottom). Anchor = landmark tip.
  *
  * Crownhaven is the only hub pin. Side pins start locked and become landmarks
  * once their fog region is revealed. Gutterjack is the tavern cellar — not a
@@ -69,88 +75,99 @@ export const KINGDOM_PINS: MapPinDef[] = [
     id: 'crownhaven',
     label: 'Crownhaven',
     x: 0.5,
-    y: 0.86,
+    y: 0.91,
     kind: 'home',
+    sticker: 'castle',
     opens: 'hub',
   },
   {
     id: 'crown-approaches',
     label: 'Crown Approaches',
-    x: 0.51,
-    y: 0.68,
+    x: 0.5,
+    y: 0.82,
     kind: 'locked',
+    sticker: 'helmet',
     opens: 'location',
   },
   {
     id: 'smugglers-teeth',
     label: "Smuggler's Teeth",
-    x: 0.18,
-    y: 0.52,
+    x: 0.2,
+    y: 0.735,
     kind: 'locked',
+    sticker: 'dagger',
     opens: 'location',
   },
   {
     id: 'anvil-glade',
     label: 'Anvil Glade',
     x: 0.8,
-    y: 0.55,
+    y: 0.735,
     kind: 'locked',
+    sticker: 'hammer',
     opens: 'location',
   },
   {
     id: 'closed-way',
     label: 'The Closed Way',
     x: 0.5,
-    y: 0.455,
+    y: 0.64,
     kind: 'locked',
+    sticker: 'leaf',
     opens: 'location',
   },
   {
     id: 'water-temple',
     label: 'Water Temple',
     x: 0.2,
-    y: 0.375,
+    y: 0.51,
     kind: 'locked',
+    sticker: 'droplet',
     opens: 'location',
   },
   {
     id: 'pallglass',
     label: 'Pallglass Spire',
-    x: 0.83,
-    y: 0.33,
+    x: 0.8,
+    y: 0.51,
     kind: 'locked',
+    sticker: 'crystalBall',
     opens: 'location',
   },
   {
     id: 'raven-castle',
     label: 'Raven Castle',
     x: 0.5,
-    y: 0.255,
+    y: 0.415,
     kind: 'locked',
+    sticker: 'blackbird',
     opens: 'location',
   },
   {
     id: 'vampire-house',
     label: 'Vampire House',
-    x: 0.74,
-    y: 0.175,
+    x: 0.78,
+    y: 0.3,
     kind: 'locked',
+    sticker: 'bat',
     opens: 'location',
   },
   {
     id: 'pyramid',
     label: "Osiris' Pyramid",
     x: 0.5,
-    y: 0.125,
+    y: 0.175,
     kind: 'locked',
+    sticker: 'desert',
     opens: 'location',
   },
   {
     id: 'ananiel',
     label: "Ananiel's Spire",
     x: 0.5,
-    y: 0.045,
+    y: 0.055,
     kind: 'locked',
+    sticker: 'mage',
     opens: 'location',
   },
 ];
@@ -203,44 +220,44 @@ export type MapFogSeedDef = {
 };
 
 export const MAP_FOG_SEEDS: MapFogSeedDef[] = [
-  // Crownhaven — full walled city + fields; stops short of the river
-  { id: 'ch-city', regionId: 'crownhaven', cx: 0.5, cy: 0.885, rx: 0.48, ry: 0.125 },
-  { id: 'ch-south', regionId: 'crownhaven', cx: 0.5, cy: 0.975, rx: 0.52, ry: 0.085 },
-  { id: 'ch-plaza', regionId: 'crownhaven', cx: 0.5, cy: 0.83, rx: 0.4, ry: 0.075 },
-  // Approaches — river belt (tower + camp); short of Teeth / Anvil
-  { id: 'ca-center', regionId: 'crown-approaches', cx: 0.5, cy: 0.695, rx: 0.44, ry: 0.095 },
-  { id: 'ca-west', regionId: 'crown-approaches', cx: 0.14, cy: 0.7, rx: 0.28, ry: 0.095 },
-  { id: 'ca-east', regionId: 'crown-approaches', cx: 0.86, cy: 0.7, rx: 0.28, ry: 0.095 },
-  // Smuggler's Teeth — west coast cove + wreck
-  { id: 'st-cove', regionId: 'smugglers-teeth', cx: 0.16, cy: 0.54, rx: 0.28, ry: 0.12 },
-  { id: 'st-west', regionId: 'smugglers-teeth', cx: 0.04, cy: 0.5, rx: 0.18, ry: 0.13 },
-  // Anvil Glade — east forest smithy
-  { id: 'ag-forge', regionId: 'anvil-glade', cx: 0.84, cy: 0.54, rx: 0.28, ry: 0.12 },
-  { id: 'ag-east', regionId: 'anvil-glade', cx: 0.96, cy: 0.5, rx: 0.18, ry: 0.13 },
-  // Closed Way — dark gate on the spine
-  { id: 'cw-gate', regionId: 'closed-way', cx: 0.5, cy: 0.45, rx: 0.4, ry: 0.11 },
-  { id: 'cw-path', regionId: 'closed-way', cx: 0.5, cy: 0.52, rx: 0.3, ry: 0.08 },
-  // Water Temple — west portal island
-  { id: 'wt-portal', regionId: 'water-temple', cx: 0.14, cy: 0.355, rx: 0.28, ry: 0.11 },
-  { id: 'wt-west', regionId: 'water-temple', cx: 0.04, cy: 0.34, rx: 0.18, ry: 0.125 },
-  // Pallglass — east wizard tower
-  { id: 'pg-spire', regionId: 'pallglass', cx: 0.86, cy: 0.315, rx: 0.28, ry: 0.12 },
-  { id: 'pg-east', regionId: 'pallglass', cx: 0.96, cy: 0.3, rx: 0.18, ry: 0.13 },
-  // Raven Castle — dark forest keep
-  { id: 'rc-keep', regionId: 'raven-castle', cx: 0.5, cy: 0.25, rx: 0.42, ry: 0.11 },
-  { id: 'rc-path', regionId: 'raven-castle', cx: 0.5, cy: 0.33, rx: 0.3, ry: 0.08 },
-  // Vampire House — NE vineyard
-  { id: 'vh-manor', regionId: 'vampire-house', cx: 0.78, cy: 0.165, rx: 0.36, ry: 0.1 },
-  { id: 'vh-east', regionId: 'vampire-house', cx: 0.95, cy: 0.14, rx: 0.2, ry: 0.1 },
-  // Pyramid — desert belt (incl. NW corner fill)
-  { id: 'py-center', regionId: 'pyramid', cx: 0.5, cy: 0.11, rx: 0.5, ry: 0.1 },
-  { id: 'py-belt', regionId: 'pyramid', cx: 0.5, cy: 0.155, rx: 0.46, ry: 0.07 },
-  { id: 'py-west', regionId: 'pyramid', cx: 0.1, cy: 0.12, rx: 0.2, ry: 0.1 },
-  // Ananiel — void tower + top sky
-  { id: 'an-tower', regionId: 'ananiel', cx: 0.5, cy: 0.035, rx: 0.5, ry: 0.1 },
-  { id: 'an-sky', regionId: 'ananiel', cx: 0.5, cy: 0.0, rx: 0.56, ry: 0.085 },
-  { id: 'an-nw', regionId: 'ananiel', cx: 0.08, cy: 0.03, rx: 0.18, ry: 0.08 },
-  { id: 'an-ne', regionId: 'ananiel', cx: 0.92, cy: 0.03, rx: 0.18, ry: 0.08 },
+  // Crownhaven — harbor blob; stops short of the bridge
+  { id: 'ch-city', regionId: 'crownhaven', cx: 0.5, cy: 0.91, rx: 0.48, ry: 0.07 },
+  { id: 'ch-south', regionId: 'crownhaven', cx: 0.5, cy: 0.97, rx: 0.52, ry: 0.055 },
+  { id: 'ch-plaza', regionId: 'crownhaven', cx: 0.5, cy: 0.87, rx: 0.4, ry: 0.05 },
+  // Approaches — bridge / watchtower row
+  { id: 'ca-center', regionId: 'crown-approaches', cx: 0.5, cy: 0.82, rx: 0.44, ry: 0.055 },
+  { id: 'ca-west', regionId: 'crown-approaches', cx: 0.14, cy: 0.82, rx: 0.28, ry: 0.055 },
+  { id: 'ca-east', regionId: 'crown-approaches', cx: 0.86, cy: 0.82, rx: 0.28, ry: 0.055 },
+  // Smuggler's Teeth — west cove
+  { id: 'st-cove', regionId: 'smugglers-teeth', cx: 0.18, cy: 0.735, rx: 0.28, ry: 0.07 },
+  { id: 'st-west', regionId: 'smugglers-teeth', cx: 0.04, cy: 0.73, rx: 0.18, ry: 0.075 },
+  // Anvil Glade — east cottage
+  { id: 'ag-forge', regionId: 'anvil-glade', cx: 0.84, cy: 0.735, rx: 0.28, ry: 0.07 },
+  { id: 'ag-east', regionId: 'anvil-glade', cx: 0.96, cy: 0.73, rx: 0.18, ry: 0.075 },
+  // Closed Way — gate on the spine
+  { id: 'cw-gate', regionId: 'closed-way', cx: 0.5, cy: 0.64, rx: 0.4, ry: 0.06 },
+  { id: 'cw-path', regionId: 'closed-way', cx: 0.5, cy: 0.69, rx: 0.28, ry: 0.05 },
+  // Water Temple — west shrine
+  { id: 'wt-portal', regionId: 'water-temple', cx: 0.18, cy: 0.51, rx: 0.28, ry: 0.065 },
+  { id: 'wt-west', regionId: 'water-temple', cx: 0.04, cy: 0.5, rx: 0.18, ry: 0.07 },
+  // Pallglass — east glass tower
+  { id: 'pg-spire', regionId: 'pallglass', cx: 0.84, cy: 0.51, rx: 0.28, ry: 0.07 },
+  { id: 'pg-east', regionId: 'pallglass', cx: 0.96, cy: 0.5, rx: 0.18, ry: 0.075 },
+  // Raven Castle — keep
+  { id: 'rc-keep', regionId: 'raven-castle', cx: 0.5, cy: 0.415, rx: 0.42, ry: 0.065 },
+  { id: 'rc-path', regionId: 'raven-castle', cx: 0.5, cy: 0.47, rx: 0.28, ry: 0.05 },
+  // Vampire House — right wing
+  { id: 'vh-manor', regionId: 'vampire-house', cx: 0.78, cy: 0.3, rx: 0.36, ry: 0.06 },
+  { id: 'vh-east', regionId: 'vampire-house', cx: 0.95, cy: 0.29, rx: 0.2, ry: 0.06 },
+  // Pyramid — desert belt
+  { id: 'py-center', regionId: 'pyramid', cx: 0.5, cy: 0.175, rx: 0.5, ry: 0.065 },
+  { id: 'py-belt', regionId: 'pyramid', cx: 0.5, cy: 0.22, rx: 0.46, ry: 0.05 },
+  { id: 'py-west', regionId: 'pyramid', cx: 0.1, cy: 0.18, rx: 0.2, ry: 0.06 },
+  // Ananiel — tower + sky
+  { id: 'an-tower', regionId: 'ananiel', cx: 0.5, cy: 0.055, rx: 0.5, ry: 0.065 },
+  { id: 'an-sky', regionId: 'ananiel', cx: 0.5, cy: 0.0, rx: 0.56, ry: 0.055 },
+  { id: 'an-nw', regionId: 'ananiel', cx: 0.08, cy: 0.04, rx: 0.18, ry: 0.05 },
+  { id: 'an-ne', regionId: 'ananiel', cx: 0.92, cy: 0.04, rx: 0.18, ry: 0.05 },
 ];
 
 /** Native Skia veil is unrolled — keep this in lockstep with `fogShader.ts`. */

@@ -1,12 +1,13 @@
+import { LevelNav } from '@/ui/LevelNav';
+
 import BossApproach from './BossApproach';
-import FloorLift from './FloorLift';
 import {
   GUTTERJACK_ART,
   GUTTERJACK_ART_INTRINSIC,
   GUTTERJACK_CHALLENGE,
   GUTTERJACK_LOOT_TABLE,
 } from './content';
-import { TAVERN_INTERIOR } from './interiors';
+import { isFloorOpen, TAVERN_INTERIOR } from './interiors';
 import { useTavernLift } from './useTavernLift';
 import { useWorldStore } from './store';
 
@@ -15,6 +16,7 @@ export default function GutterjackLocation() {
   const markGutterjackCleared = useWorldStore((s) => s.markGutterjackCleared);
   const alreadyCleared = useWorldStore((s) => s.gutterjackCleared);
   const { floorId, onPickFloor, whisper } = useTavernLift();
+  const floor = TAVERN_INTERIOR.floors.find((entry) => entry.id === floorId);
 
   return (
     <BossApproach
@@ -28,7 +30,22 @@ export default function GutterjackLocation() {
       sipWine
       onBack={openHub}
       onCleared={markGutterjackCleared}
-      headerExtra={<FloorLift floors={TAVERN_INTERIOR.floors} currentId={floorId} onSelect={onPickFloor} />}
+      sceneKicker={TAVERN_INTERIOR.name}
+      sceneName={floor?.label ?? 'Cellar'}
+      levelNav={
+        <LevelNav
+          floors={TAVERN_INTERIOR.floors.map((entry) => ({
+            id: entry.id,
+            label: entry.label,
+            locked: !isFloorOpen(entry),
+          }))}
+          currentId={floorId}
+          onSelect={(next) => {
+            const target = TAVERN_INTERIOR.floors.find((entry) => entry.id === next.id);
+            if (target) onPickFloor(target);
+          }}
+        />
+      }
       whisper={whisper}
     />
   );

@@ -1,26 +1,26 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Image, Platform, StyleSheet, Text, View, type LayoutChangeEvent, type ViewStyle } from 'react-native';
+import { Image, Platform, StyleSheet, View, type LayoutChangeEvent, type ViewStyle } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import Colors from '@/constants/colors';
-import { notificationAsync, NotificationFeedbackType } from '@/lib/hapticsGate';
+import { impactAsync, notificationAsync, ImpactFeedbackStyle, NotificationFeedbackType } from '@/lib/hapticsGate';
+import { MapPin } from '@/ui/MapPin';
+import { PeekCard } from '@/ui/PeekCard';
+import { SceneHead } from '@/ui/SceneHead';
+import { SeamDock } from '@/ui/Seam';
+import { tokens } from '@/ui/tokens';
 
 import FogOverlay from './FogOverlay';
-import MapPinMarker from './MapPinMarker';
-import OverlayHud from './OverlayHud';
-import { isFogRegionRevealed, KINGDOM_PINS, MAP_INTRINSIC, WORLD_ART, type MapPinKind } from './layout';
-import { isMapLocationId } from './locations';
+import { HUB_HOTSPOTS, isFogRegionRevealed, KINGDOM_PINS, MAP_INTRINSIC, WORLD_ART, type MapPinKind } from './layout';
+import { MAP_LOCATIONS, isMapLocationId } from './locations';
 import { useFogReveal } from './useFogReveal';
 import { useWorldStore } from './store';
+import { WorldNotice } from './WorldNotice';
 
 /**
- * One product camera. Closer than cover so Crownhaven fills the phone;
- * the player pans up the corridor. No pinch and no zoom controls.
+ * Product camera: the board is the screen width. Pan only up the corridor.
+ * No pinch, no zoom controls, no horizontal drag.
  */
-const MAP_SCALE = 1.85;
-
 const MAP_ASPECT = MAP_INTRINSIC.width / MAP_INTRINSIC.height;
 
 function clamp(n: number, min: number, max: number): number {
@@ -29,7 +29,6 @@ function clamp(n: number, min: number, max: number): number {
 }
 
 function clampOffsets(
-  nextTx: number,
   nextTy: number,
   mapW: number,
   mapH: number,
@@ -40,21 +39,17 @@ function clampOffsets(
   if (mapW <= 0 || mapH <= 0 || viewW <= 0 || viewH <= 0) {
     return { tx: 0, ty: 0 };
   }
-  const scaledW = mapW * MAP_SCALE;
-  const scaledH = mapH * MAP_SCALE;
-  const minX = Math.min(0, viewW - scaledW);
-  const maxX = 0;
-  const minY = Math.min(0, viewH - scaledH);
-  const maxY = 0;
-  return { tx: clamp(nextTx, minX, maxX), ty: clamp(nextTy, minY, maxY) };
+  if (mapH <= viewH) {
+    return { tx: 0, ty: 0 };
+  }
+  const minY = viewH - mapH;
+  return { tx: 0, ty: clamp(nextTy, minY, 0) };
 }
 
-/** Cover layout: both axes ≥ viewport at scale 1 (no letterbox). */
-function mapContentSize(viewW: number, viewH: number): { mapW: number; mapH: number } {
-  if (viewW <= 0 || viewH <= 0) return { mapW: 0, mapH: 0 };
-  const mapW = Math.max(viewW, viewH * MAP_ASPECT);
-  const mapH = mapW / MAP_ASPECT;
-  return { mapW, mapH };
+/** Fit-width: the board is exactly the viewport wide. Height follows the art. */
+function mapContentSize(viewW: number): { mapW: number; mapH: number } {
+  if (viewW <= 0) return { mapW: 0, mapH: 0 };
+  return { mapW: viewW, mapH: viewW / MAP_ASPECT };
 }
 
 type Viewport = { width: number; height: number };
@@ -65,23 +60,21 @@ function pinKindFor(id: string, designKind: MapPinKind, discoveredRegionIds: str
 }
 
 export default function KingdomMap() {
-  const insets = useSafeAreaInsets();
   const openHub = useWorldStore((s) => s.openHub);
   const openLocation = useWorldStore((s) => s.openLocation);
   const { progress, discoveredRegionIds, discoverRegion, unveilNextRegion } = useFogReveal();
 
   const [viewport, setViewport] = useState<Viewport>({ width: 0, height: 0 });
-  const [placeHint, setPlaceHint] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState('crownhaven');
+  const [cameraReady, setCameraReady] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const titleTaps = useRef(0);
+  const focusedSize = useRef({ w: 0, h: 0 });
 
-  const { mapW, mapH } = useMemo(
-    () => mapContentSize(viewport.width, viewport.height),
-    [viewport.height, viewport.width],
-  );
+  const { mapW, mapH } = useMemo(() => mapContentSize(viewport.width), [viewport.width]);
 
-  const tx = useSharedValue(0);
   const ty = useSharedValue(0);
-  const savedTx = useSharedValue(0);
   const savedTy = useSharedValue(0);
   const vw = useSharedValue(0);
   const vh = useSharedValue(0);
@@ -90,9 +83,9 @@ export default function KingdomMap() {
 
   const whisper = useCallback((message: string | null) => {
     if (hintTimer.current) clearTimeout(hintTimer.current);
-    setPlaceHint(message);
+    setNotice(message);
     if (message) {
-      hintTimer.current = setTimeout(() => setPlaceHint(null), 2200);
+      hintTimer.current = setTimeout(() => setNotice(null), 2200);
     }
   }, []);
 
@@ -106,8 +99,7 @@ export default function KingdomMap() {
     (width: number, height: number, view: Viewport) => {
       const home = KINGDOM_PINS.find((p) => p.id === 'crownhaven');
       const next = clampOffsets(
-        view.width / 2 - (home?.x ?? 0.5) * width * MAP_SCALE,
-        view.height / 2 - (home?.y ?? 0.86) * height * MAP_SCALE,
+        view.height / 2 - (home?.y ?? 0.91) * height,
         width,
         height,
         view.width,
@@ -117,45 +109,50 @@ export default function KingdomMap() {
       vh.value = view.height;
       contentW.value = width;
       contentH.value = height;
-      tx.value = next.tx;
       ty.value = next.ty;
-      savedTx.value = next.tx;
       savedTy.value = next.ty;
     },
-    [contentH, contentW, savedTx, savedTy, tx, ty, vh, vw],
+    [contentH, contentW, savedTy, ty, vh, vw],
   );
 
   useEffect(() => {
-    if (mapW <= 0 || mapH <= 0 || viewport.width <= 0) return;
-    focusCrownhaven(mapW, mapH, viewport);
-  }, [focusCrownhaven, mapH, mapW, viewport]);
+    if (mapW <= 0 || mapH <= 0 || viewport.width <= 0 || viewport.height <= 0) return;
+    const sizeChanged = focusedSize.current.w !== mapW || focusedSize.current.h !== mapH;
+    vw.value = viewport.width;
+    vh.value = viewport.height;
+    contentW.value = mapW;
+    contentH.value = mapH;
+    if (sizeChanged) {
+      focusCrownhaven(mapW, mapH, viewport);
+      focusedSize.current = { w: mapW, h: mapH };
+    } else {
+      const next = clampOffsets(ty.value, mapW, mapH, viewport.width, viewport.height);
+      ty.value = next.ty;
+    }
+    setCameraReady(true);
+  }, [contentH, contentW, focusCrownhaven, mapH, mapW, ty, viewport, vh, vw]);
 
   const pan = Gesture.Pan()
     .minDistance(10)
     .onStart(() => {
-      savedTx.value = tx.value;
       savedTy.value = ty.value;
     })
     .onUpdate((e) => {
       const next = clampOffsets(
-        savedTx.value + e.translationX,
         savedTy.value + e.translationY,
         contentW.value,
         contentH.value,
         vw.value,
         vh.value,
       );
-      tx.value = next.tx;
       ty.value = next.ty;
     })
     .onEnd(() => {
-      savedTx.value = tx.value;
       savedTy.value = ty.value;
     });
 
   const animatedStyle = useAnimatedStyle(() => {
     const next = clampOffsets(
-      tx.value,
       ty.value,
       contentW.value,
       contentH.value,
@@ -164,7 +161,7 @@ export default function KingdomMap() {
     );
     return {
       transformOrigin: 'top left',
-      transform: [{ translateX: next.tx }, { translateY: next.ty }, { scale: MAP_SCALE }],
+      transform: [{ translateX: 0 }, { translateY: next.ty }],
     };
   });
 
@@ -187,19 +184,37 @@ export default function KingdomMap() {
   const onPin = (id: string) => {
     const pin = KINGDOM_PINS.find((p) => p.id === id);
     if (!pin) return;
-    const kind = pinKindFor(id, pin.kind, discoveredRegionIds);
+    impactAsync(ImpactFeedbackStyle.Medium);
+    setSelectedId(id);
+  };
+
+  const onEnter = () => {
+    const pin = KINGDOM_PINS.find((p) => p.id === selectedId);
+    if (!pin) return;
+    const kind = pinKindFor(pin.id, pin.kind, discoveredRegionIds);
     if (kind === 'locked') return;
+    impactAsync(ImpactFeedbackStyle.Medium);
     if (pin.opens === 'hub') {
-      whisper(null);
       openHub();
       return;
     }
     if (pin.opens === 'location' && isMapLocationId(pin.id)) {
-      whisper(null);
       openLocation(pin.id);
+    }
+  };
+
+  const onTitlePress = () => {
+    if (!__DEV__) return;
+    titleTaps.current += 1;
+    if (hintTimer.current) clearTimeout(hintTimer.current);
+    if (titleTaps.current >= 3) {
+      titleTaps.current = 0;
+      onDevUnveilNext();
       return;
     }
-    whisper(pin.label);
+    hintTimer.current = setTimeout(() => {
+      titleTaps.current = 0;
+    }, 420);
   };
 
   const onDevUnveilNext = () => {
@@ -210,6 +225,8 @@ export default function KingdomMap() {
     whisper(pin?.label ?? null);
   };
 
+  const peek = peekFor(selectedId, discoveredRegionIds);
+
   return (
     <View style={styles.root}>
       <GestureDetector gesture={pan}>
@@ -217,7 +234,7 @@ export default function KingdomMap() {
           style={[styles.stage, Platform.OS === 'web' ? webPanLock : null]}
           onLayout={onLayout}
         >
-          {mapW > 0 && mapH > 0 ? (
+          {cameraReady && mapW > 0 && mapH > 0 ? (
             <Animated.View
               collapsable={false}
               style={[styles.mapLayer, { width: mapW, height: mapH }, animatedStyle]}
@@ -236,11 +253,13 @@ export default function KingdomMap() {
               </View>
               {KINGDOM_PINS.map((pin) => {
                 const kind = pinKindFor(pin.id, pin.kind, discoveredRegionIds);
+                const selected = pin.id === selectedId;
                 return (
-                  <MapPinMarker
+                  <MapPin
                     key={pin.id}
                     accessibilityLabel={pin.label}
-                    kind={kind}
+                    kind={selected ? 'current' : kind === 'locked' ? 'locked' : 'landmark'}
+                    sticker={pin.sticker}
                     left={pin.x * mapW}
                     top={pin.y * mapH}
                     onPress={() => onPin(pin.id)}
@@ -253,20 +272,50 @@ export default function KingdomMap() {
         </Animated.View>
       </GestureDetector>
 
-      <OverlayHud
-        insets={insets}
+      <SeamDock fade={90} />
+      <SceneHead
         kicker="Kingdom"
-        title="Map"
+        name="Map"
+        onTitlePress={__DEV__ ? onTitlePress : undefined}
         onTitleLongPress={__DEV__ ? onDevUnveilNext : undefined}
       />
-
-      {placeHint ? (
-        <View pointerEvents="none" style={styles.fogWrap}>
-          <Text style={styles.fogHint}>{placeHint}</Text>
-        </View>
+      {peek ? (
+        <PeekCard
+          still={peek.still}
+          kicker={peek.kicker}
+          name={peek.name}
+          meta={peek.meta}
+          onEnter={peek.enter ? onEnter : undefined}
+        />
       ) : null}
+      {notice ? <WorldNotice message={notice} /> : null}
     </View>
   );
+}
+
+function peekFor(id: string, discoveredRegionIds: string[]) {
+  const pin = KINGDOM_PINS.find((entry) => entry.id === id) ?? KINGDOM_PINS[0];
+  if (!pin) return null;
+  const kind = pinKindFor(pin.id, pin.kind, discoveredRegionIds);
+  if (pin.opens === 'hub') {
+    return {
+      still: WORLD_ART.hub,
+      kicker: 'You are here',
+      name: pin.label,
+      meta: `Capital · ${HUB_HOTSPOTS.length} places`,
+      enter: true,
+    };
+  }
+  const location = isMapLocationId(pin.id) ? MAP_LOCATIONS[pin.id] : undefined;
+  const locked = kind === 'locked';
+  const count = location?.hotspots.length ?? 0;
+  return {
+    still: locked ? undefined : location?.still,
+    kicker: locked ? 'Locked' : (location?.kicker ?? 'Kingdom'),
+    name: pin.label,
+    meta: locked ? 'Locked' : count === 1 ? '1 place' : `${count} places`,
+    enter: !locked && pin.opens === 'location',
+  };
 }
 
 /** Stops the browser from turning a pan into a page scroll or image drag. */
@@ -275,7 +324,7 @@ const webPanLock = { touchAction: 'none' } as ViewStyle;
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#070510',
+    backgroundColor: tokens.canvas,
     overflow: 'hidden',
   },
   stage: {
@@ -285,20 +334,5 @@ const styles = StyleSheet.create({
   },
   mapLayer: {
     transformOrigin: 'top left',
-  },
-  fogWrap: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    bottom: 16,
-    alignItems: 'center',
-  },
-  fogHint: {
-    color: Colors.dark.gold,
-    fontSize: 12,
-    fontWeight: '700',
-    textAlign: 'center',
-    textShadowColor: 'rgba(0,0,0,0.85)',
-    textShadowRadius: 6,
   },
 });

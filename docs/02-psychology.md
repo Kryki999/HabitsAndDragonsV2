@@ -23,9 +23,9 @@ Anty-grind: cap złota z nawyków, fatigue XP, limity ekonomiczne lochów.
 - Toksyczny FOMO / kara za miss → **KILL**; nie morning gold bat.
 - Spam 100 zadań → gold/XP **hard 0** po 10. odhaczeniu dnia.
 - Kasyno kluczy → hojny pierwszy drop (20%), potem spadek; sklep 100g = główna pewność.
+- Habit-police / ranking nawyków lub lvl na Social → **KILL na M1**. Flex = drip i status w świecie; nawyki ukryte nawet przed znajomymi ([`08`](08-social.md)).
 
 ## Otwarte
 
 - Streak UI (heatmapa): nagroda wizualna vs liczby — dograć.
 - Daily Flow V1: skrócić / wpleść w poranny reveal hex?
-- Social pressure: later ([`08`](08-social.md)).

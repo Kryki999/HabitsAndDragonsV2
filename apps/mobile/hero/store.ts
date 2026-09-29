@@ -130,9 +130,43 @@ export const useHeroStore = create<HeroStore>()(
         });
       },
 
+      sellOwnedItemForGold: (itemId, gold) => {
+        let sold = false;
+        set((state) => {
+          const owned = [...state.ownedItemIds];
+          const index = owned.indexOf(itemId);
+          if (index < 0 || gold < 0) return state;
+          owned.splice(index, 1);
+          sold = true;
+          let equippedOutfitId = state.equippedOutfitId;
+          let equippedRelicId = state.equippedRelicId;
+          if (equippedOutfitId === itemId && !owned.includes(itemId)) equippedOutfitId = null;
+          if (equippedRelicId === itemId && !owned.includes(itemId)) equippedRelicId = null;
+          return {
+            ownedItemIds: owned,
+            gold: state.gold + gold,
+            equippedOutfitId,
+            equippedRelicId,
+            heroShopPurchaseEver: true,
+          };
+        });
+        return sold;
+      },
+
       addGold: (amount) => {
         if (amount === 0) return;
         set((state) => ({ gold: Math.max(0, state.gold + amount) }));
+      },
+
+      spendGold: (amount) => {
+        if (amount <= 0) return false;
+        let spent = false;
+        set((state) => {
+          if (state.gold < amount) return state;
+          spent = true;
+          return { gold: state.gold - amount };
+        });
+        return spent;
       },
 
       addDungeonKeys: (amount) => {

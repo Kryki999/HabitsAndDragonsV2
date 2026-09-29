@@ -30,7 +30,7 @@ Produkt to **hybryda**: codziennie lekka apka nawyków + momenty immersji RPG. T
 | **Stan gry / nawyki** | Zustand **podzielony domenowo** (nie jeden god-store na prod) + persystencja | V1 god-store = dług techniczny; koncept: habits / world / hero / social osobno |
 | **Sync / backend** | **Supabase** (Auth, DB, storage) — KEEP kierunek | Profile, social, save; Storage na assety/video jeśli trzeba CDN later |
 | **AI Mentor** | LLM **tylko przez backend** (Edge Function / własny API) | Prod: zero kluczy w apce; karta gracza + rate limits |
-| **Mapa królestwa (zoom-out)** | Ilustracja + **Skia**/gesty + mgła + piny | Rive **nie** jest silnikiem mapy świata; duży pan/zoom + wiele pinów = własny runtime |
+| **Mapa królestwa (pasek)** | Ilustracja + gesty **pan Y** + mgła + piny. MVP = Image+Reanimated (**jest** 2026-09-25). Skia later (życie, maska). | Rive **nie** jest silnikiem mapy świata; pinch i pan X = PARK. [`24`](24-map-production.md) |
 | **Close-up lokacji (życie świata)** | **Rive living scene** (opcjonalnie) | Tu Rive się opłaca: mniejszy kadr, jedna całość art+ruch |
 | **Postacie / itemy / UI motion** | **Rive** | Menus, HUD, bohater, loot — native sweet spot Rive |
 | **Mikro-feel** | Reanimated + Haptics (+ Lottie tylko jeśli coś już jest / rare) | Odhacz nawyku, trajectory lootu — lekcje z V1 |
@@ -68,10 +68,10 @@ Produkt to **hybryda**: codziennie lekka apka nawyków + momenty immersji RPG. T
 ## Jak ugryźć „mapę wow” bez zmiany shellu
 
 ```text
-1. Art: jedna (lub strefowa) ilustracja królestwa w stylu cartoon
-2. Runtime: pan/zoom + warstwa mgły (odkryte = wycięte / fade)
+1. Art: pionowy pasek królestwa (graybox → 1536×~7550 WebP) — nie 16:9, nie kwadrat
+2. Runtime: pan Y + warstwa mgły (odkryte = wycięte / fade). Bez pinch.
 3. Piny / gesty: Discover once → timer wyprawy → reveal
-4. Tap pin → ekran CLOSE-UP lokacji (osobny art)
+4. Tap pin → PeekCard → Enter → CLOSE-UP lokacji (osobny art)
 5. Hotspoty na close-up → NPC window / loch tier 1 → tier 2
 ```
 
@@ -111,11 +111,11 @@ Rewrite **ekranów świata** = OK. Rewrite **całego frameworka** = nie, dopóki
 
 ## Otwarte (do decyzji)
 
-- [ ] Lock: **Expo shell + Skia mapa + Rive + pre-render video** jako domyślny kierunek 6–12 mies.?
+- [ ] Lock: **Expo shell + mapa ilustracyjna + Rive + pre-render video** jako domyślny kierunek 6–12 mies.?
 - [ ] Budżet MB na launch (ile video onboardingu vs stream)?
 - [ ] Czy close-up lokacji = zawsze bitmapa, czy czasem Rive scene?
 - [ ] Kto robi look-dev gate AI video (założyciel / art contractor)?
-- [ ] Skia vs prostszy Image+GestureHandler na MVP mapy (Skia later)?
+- [x] MVP mapy = **Image + Reanimated pan Y** (2026-09-25). Skia = later (mgła/życie), nie dzień 1.
 - [ ] Analytics vendor
 
 ---

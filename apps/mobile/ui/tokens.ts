@@ -1,0 +1,71 @@
+import type { TextStyle } from 'react-native';
+
+/** 1:1 with docs/reference/ui/lookdev/tokens.css. Names match the CSS variables. */
+export const tokens = {
+  canvas: '#91A2F2',
+  canvasHi: '#A9BBFB',
+  canvasDeep: '#7483DC',
+  canvasInk: '#3B479E',
+  surface: '#FFFFFF',
+  surface2: '#ECEFFC',
+  surface3: '#DDE2FB',
+  ink: '#151638',
+  ink2: '#5C6080',
+  ink3: '#9AA0C3',
+  onCanvas: '#FFFFFF',
+  brand: '#6570F6',
+  brandDeep: '#4A52D1',
+  brandSoft: '#DFE3FF',
+  gold: '#FDB43C',
+  goldDeep: '#E8870F',
+  goldSoft: '#FFF1D6',
+  success: '#5FCF8A',
+  successDeep: '#3AA866',
+  danger: '#F2685A',
+  rCommon: '#C9CEE6',
+  rUnique: '#5AA7F5',
+  rHeroic: '#A56BF5',
+  rArtifact: '#FDB43C',
+  rXs: 10,
+  rSm: 14,
+  rMd: 20,
+  rLg: 28,
+  rPill: 999,
+  s1: 4,
+  s2: 8,
+  s3: 12,
+  s4: 16,
+  s5: 20,
+  s6: 24,
+  s8: 32,
+  screenX: 16,
+  tabbarH: 96,
+  lipSurface: '#CFD5F5',
+  font700: 'Nunito_700Bold',
+  font800: 'Nunito_800ExtraBold',
+  font900: 'Nunito_900Black',
+  durPress: 90,
+  durUi: 220,
+  scrim: 'rgba(21, 22, 56, 0.4)',
+} as const;
+
+export const shadow = {
+  lipSurface: { offsetX: 0, offsetY: 4, blurRadius: 0, color: tokens.lipSurface },
+  lipBrand: { offsetX: 0, offsetY: 4, blurRadius: 0, color: tokens.brandDeep },
+  lipGold: { offsetX: 0, offsetY: 4, blurRadius: 0, color: tokens.goldDeep },
+  lipSuccess: { offsetX: 0, offsetY: 4, blurRadius: 0, color: tokens.successDeep },
+  /** btn-soft lip from components.css */
+  lipSoft: { offsetX: 0, offsetY: 4, blurRadius: 0, color: '#C3C9FB' },
+  dropSm: { offsetX: 0, offsetY: 6, blurRadius: 14, color: 'rgba(40, 50, 140, 0.16)' },
+  dropMd: { offsetX: 0, offsetY: 10, blurRadius: 28, color: 'rgba(40, 50, 140, 0.18)' },
+  dropOnArt: { offsetX: 0, offsetY: 8, blurRadius: 18, color: 'rgba(12, 10, 30, 0.45)' },
+  cardLip: { offsetX: 0, offsetY: 3, blurRadius: 0, color: 'rgba(90, 100, 190, 0.14)' },
+  brandGlow: { offsetX: 0, offsetY: 10, blurRadius: 22, color: 'rgba(74, 82, 209, 0.35)' },
+} as const;
+
+/** Hard offset from --shadow-on-canvas. */
+export const shadowOnCanvas: TextStyle = {
+  textShadowColor: 'rgba(59, 71, 158, 0.28)',
+  textShadowOffset: { width: 0, height: 2 },
+  textShadowRadius: 0,
+};

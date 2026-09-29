@@ -1,70 +1,27 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Tabs, usePathname } from 'expo-router';
-import { type ColorValue, StyleSheet, View } from 'react-native';
+import { Tabs } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
 
-import AccountBar from '@/components/AccountBar';
-import Colors from '@/constants/colors';
-import { colors } from '@/theme/colors';
-
-function tabIcon(name: keyof typeof Ionicons.glyphMap) {
-  return ({ color, size }: { color: ColorValue; size: number }) => (
-    <Ionicons name={name} size={size} color={typeof color === 'string' ? color : colors.gold} />
-  );
-}
+import { DevToolsButton } from '@/components/DevToolsButton';
+import { TabBar } from '@/ui/TabBar';
+import { tokens } from '@/ui/tokens';
 
 export default function TabLayout() {
-  const pathname = usePathname();
-  const showAccountBar = pathname !== '/world';
-
   return (
     <View style={styles.shell}>
-      {showAccountBar ? <AccountBar /> : null}
       <Tabs
+        tabBar={(props) => <TabBar {...props} />}
         screenOptions={{
           headerShown: false,
-          tabBarActiveTintColor: colors.gold,
-          tabBarInactiveTintColor: colors.tabInactive,
-          tabBarStyle: styles.tabBar,
-          tabBarLabelStyle: styles.tabLabel,
-          sceneStyle: { backgroundColor: colors.background },
+          sceneStyle: { backgroundColor: tokens.canvas },
         }}
       >
-        <Tabs.Screen
-          name="index"
-          options={{
-            title: 'Questy',
-            tabBarIcon: tabIcon('checkbox-outline'),
-          }}
-        />
-        <Tabs.Screen
-          name="world"
-          options={{
-            title: 'World',
-            tabBarIcon: tabIcon('map-outline'),
-          }}
-        />
-        <Tabs.Screen
-          name="hero"
-          options={{
-            title: 'Hero',
-            tabBarIcon: tabIcon('person-outline'),
-          }}
-        />
-        <Tabs.Screen
-          name="social"
-          options={{
-            title: 'Społeczność',
-            tabBarIcon: tabIcon('people-outline'),
-          }}
-        />
-        <Tabs.Screen
-          name="mentor"
-          options={{
-            title: 'Mentor',
-            tabBarIcon: tabIcon('chatbubbles-outline'),
-          }}
-        />
+        <Tabs.Screen name="index" options={{ title: 'Quests' }} />
+        <Tabs.Screen name="world" options={{ title: 'World' }} />
+        <Tabs.Screen name="hero" options={{ title: 'Hero' }} />
+        <Tabs.Screen name="social" options={{ title: 'Social' }} />
+        <Tabs.Screen name="mentor" options={{ title: 'Path' }} />
       </Tabs>
+      <DevToolsButton />
     </View>
   );
 }
@@ -72,18 +29,6 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   shell: {
     flex: 1,
-    backgroundColor: Colors.dark.background,
-  },
-  tabBar: {
-    backgroundColor: colors.tabBar,
-    borderTopColor: colors.border,
-    borderTopWidth: 1,
-    height: 64,
-    paddingTop: 6,
-    paddingBottom: 8,
-  },
-  tabLabel: {
-    fontSize: 11,
-    fontWeight: '700',
+    backgroundColor: tokens.canvas,
   },
 });

@@ -1,36 +1,28 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Animated,
-  Easing,
-  Modal,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Animated, Easing, Modal, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ban, Gift, Sparkles, Trophy } from 'lucide-react-native';
 
-import Colors from '@/constants/colors';
-import { LOOT_RARITY_COLOR } from '@/constants/lootRarity';
-import { LootGlyph } from '@/lib/lootGlyph';
 import {
   impactAsync,
   notificationAsync,
   ImpactFeedbackStyle,
   NotificationFeedbackType,
 } from '@/lib/hapticsGate';
-import type { DungeonLootEntry, LootIconId, LootRarity } from '@/types/dungeonLoot';
+import { ButtonFlow } from '@/ui/Button';
+import { Card } from '@/ui/Card';
+import { Glyph } from '@/ui/Glyph';
+import { ItemTile, stickerForLootIcon } from '@/ui/ItemTile';
+import type { StickerName } from '@/ui/stickerRegistry';
+import { tokens } from '@/ui/tokens';
+import type { DungeonLootEntry, LootRarity } from '@/types/dungeonLoot';
 
+import { FightKicker, FightNote, FightSparks, FightTitle, FightWash } from './FightChrome';
 import { headlineLootId } from './engine';
 import type { FightLootPrize } from './types';
 
 const WIN_IDX = 34;
 const TOTAL_ITEMS = 40;
 const ITEM_WIDTH = 82;
-const ITEM_HEIGHT = 104;
 const ITEM_GAP = 8;
 const ITEM_TOTAL = ITEM_WIDTH + ITEM_GAP;
 const ROULETTE_ANIM_DURATION_MS = 5000;
@@ -43,7 +35,7 @@ const RARITY_LABEL: Record<LootRarity, string> = {
   legendary: 'Legendary',
 };
 
-type Phase = 'chest' | 'spinning' | 'reveal';
+type Phase = 'spinning' | 'reveal';
 
 type Props = {
   visible: boolean;
@@ -70,11 +62,33 @@ function prizeRarity(prize: FightLootPrize): LootRarity {
   return prize.entry.rarity;
 }
 
-function prizeName(prize: FightLootPrize): string {
-  if (prize.kind === 'gold') return `${prize.amount} gold`;
+function rewardTitle(prize: FightLootPrize): string {
+  if (prize.kind === 'gold') return prize.entry.name;
   if (prize.kind === 'item') return prize.item.name;
   if (prize.kind === 'items') return prize.headline.name;
   return prize.entry.name;
+}
+
+function rewardKicker(prize: FightLootPrize): string {
+  if (prize.kind === 'gold') return 'Gold';
+  if (prize.kind === 'empty') return 'Empty';
+  const item = prize.kind === 'items' ? prize.headline : prize.item;
+  const slot = item.itemSlot === 'relic' ? 'relic' : item.itemSlot === 'outfit' ? 'outfit' : '';
+  return slot ? `${RARITY_LABEL[item.rarity]} ${slot}` : RARITY_LABEL[item.rarity];
+}
+
+function rewardHint(prize: FightLootPrize): string | undefined {
+  if (prize.kind === 'item') return prize.item.combatHint;
+  if (prize.kind === 'items') return prize.headline.combatHint;
+  if (prize.kind === 'gold') return `+${prize.amount}`;
+  return undefined;
+}
+
+function rewardSticker(prize: FightLootPrize): StickerName | undefined {
+  if (prize.kind === 'gold') return 'coin';
+  if (prize.kind === 'item') return stickerForLootIcon(prize.item.icon);
+  if (prize.kind === 'items') return stickerForLootIcon(prize.headline.icon);
+  return undefined;
 }
 
 function prizeDescription(prize: FightLootPrize): string {
@@ -84,34 +98,39 @@ function prizeDescription(prize: FightLootPrize): string {
   return prize.entry.description;
 }
 
-function prizeIcon(prize: FightLootPrize): LootIconId | 'empty' {
-  if (prize.kind === 'gold') return 'coins';
-  if (prize.kind === 'item') return prize.item.icon;
-  if (prize.kind === 'items') return prize.headline.icon;
-  return 'empty';
+function cellSticker(entry: DungeonLootEntry): StickerName | undefined {
+  if (entry.kind === 'gold') return 'coin';
+  if (entry.kind === 'item') return stickerForLootIcon(entry.icon);
+  return undefined;
+}
+
+function cellQty(entry: DungeonLootEntry): string | undefined {
+  if (entry.kind !== 'gold') return undefined;
+  if (entry.goldMin === entry.goldMax) return `×${entry.goldMin}`;
+  return `${entry.goldMin}–${entry.goldMax}`;
+}
+
+function cellLabel(entry: DungeonLootEntry): string {
+  if (entry.kind === 'gold') return 'Gold';
+  if (entry.kind === 'empty') return 'Empty';
+  return entry.name;
 }
 
 export default function BossVictoryLootModal({
   visible,
   bossName,
-  dungeonName,
-  accentColor,
   lootTable,
   prize,
   onCollect,
 }: Props) {
   const { width: screenWidth } = useWindowDimensions();
-  const [phase, setPhase] = useState<Phase>('chest');
+  const [phase, setPhase] = useState<Phase>('spinning');
   const [strip, setStrip] = useState<DungeonLootEntry[]>([]);
 
-  const chestPulse = useRef(new Animated.Value(1)).current;
-  const chestOpacity = useRef(new Animated.Value(0)).current;
-  const headerFade = useRef(new Animated.Value(0)).current;
   const stripTX = useRef(new Animated.Value(0)).current;
   const rouletteFade = useRef(new Animated.Value(0)).current;
-  const revealScale = useRef(new Animated.Value(0.5)).current;
+  const revealScale = useRef(new Animated.Value(0.92)).current;
   const revealOpacity = useRef(new Animated.Value(0)).current;
-  const glowPulse = useRef(new Animated.Value(0.5)).current;
   const btnFade = useRef(new Animated.Value(0)).current;
 
   const wonId = prize ? headlineLootId(prize) : '';
@@ -119,122 +138,60 @@ export default function BossVictoryLootModal({
   useEffect(() => {
     if (!visible || !prize) return;
 
-    setPhase('chest');
-    chestOpacity.setValue(0);
-    headerFade.setValue(0);
+    setPhase('spinning');
+    setStrip(buildStrip(lootTable, wonId));
     stripTX.setValue(0);
     rouletteFade.setValue(0);
-    revealScale.setValue(0.5);
+    revealScale.setValue(0.92);
     revealOpacity.setValue(0);
-    glowPulse.setValue(0.5);
     btnFade.setValue(0);
-    setStrip(buildStrip(lootTable, wonId));
 
-    Animated.parallel([
-      Animated.timing(headerFade, { toValue: 1, duration: 500, useNativeDriver: true }),
-      Animated.timing(chestOpacity, { toValue: 1, duration: 400, delay: 200, useNativeDriver: true }),
-    ]).start();
-  }, [visible, prize, lootTable, wonId, btnFade, chestOpacity, glowPulse, headerFade, revealOpacity, revealScale, rouletteFade, stripTX]);
+    const fade = Animated.timing(rouletteFade, { toValue: 1, duration: 300, useNativeDriver: true });
+    fade.start();
 
-  useEffect(() => {
-    if (phase !== 'chest') {
-      chestPulse.setValue(1);
-      return;
-    }
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(chestPulse, {
-          toValue: 1.07,
-          duration: 1100,
-          easing: Easing.inOut(Easing.sin),
-          useNativeDriver: true,
-        }),
-        Animated.timing(chestPulse, {
-          toValue: 1,
-          duration: 1100,
-          easing: Easing.inOut(Easing.sin),
-          useNativeDriver: true,
-        }),
-      ]),
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [phase, chestPulse]);
+    const finalTX = screenWidth / 2 - WIN_IDX * ITEM_TOTAL - ITEM_WIDTH / 2;
+    const variance = (Math.random() - 0.5) * 36;
+    let hapticTick = 0;
+    const hapticId = setInterval(() => {
+      hapticTick += 1;
+      impactAsync(hapticTick % 5 === 0 ? ImpactFeedbackStyle.Heavy : ImpactFeedbackStyle.Light);
+    }, 120);
+    const stopHaptic = setTimeout(() => clearInterval(hapticId), 2200);
+    let landed: ReturnType<typeof setTimeout> | undefined;
+    let revealed: ReturnType<typeof setTimeout> | undefined;
 
-  useEffect(() => {
-    if (phase !== 'reveal') return;
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(glowPulse, { toValue: 1, duration: 1400, useNativeDriver: true }),
-        Animated.timing(glowPulse, { toValue: 0.4, duration: 1400, useNativeDriver: true }),
-      ]),
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [phase, glowPulse]);
-
-  const handleOpenChest = useCallback(() => {
-    if (phase !== 'chest') return;
-    impactAsync(ImpactFeedbackStyle.Heavy);
-
-    Animated.timing(chestOpacity, {
-      toValue: 0,
-      duration: 280,
+    const spin = Animated.timing(stripTX, {
+      toValue: finalTX + variance,
+      duration: ROULETTE_ANIM_DURATION_MS,
+      easing: Easing.out(Easing.poly(4)),
       useNativeDriver: true,
-    }).start(() => {
-      setPhase('spinning');
-      Animated.timing(rouletteFade, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-
-      const finalTX = screenWidth / 2 - WIN_IDX * ITEM_TOTAL - ITEM_WIDTH / 2;
-      const variance = (Math.random() - 0.5) * 36;
-
-      let hapticTick = 0;
-      const hapticId = setInterval(() => {
-        hapticTick += 1;
-        impactAsync(hapticTick % 5 === 0 ? ImpactFeedbackStyle.Heavy : ImpactFeedbackStyle.Light);
-      }, 120);
-      setTimeout(() => clearInterval(hapticId), 2200);
-
-      Animated.timing(stripTX, {
-        toValue: finalTX + variance,
-        duration: ROULETTE_ANIM_DURATION_MS,
-        easing: Easing.out(Easing.poly(4)),
-        useNativeDriver: true,
-      }).start(() => {
-        setTimeout(() => {
-          impactAsync(ImpactFeedbackStyle.Heavy);
-          notificationAsync(NotificationFeedbackType.Success);
-        }, 180);
-        setTimeout(() => {
-          setPhase('reveal');
-          Animated.parallel([
-            Animated.spring(revealScale, {
-              toValue: 1,
-              friction: 5,
-              tension: 70,
-              useNativeDriver: true,
-            }),
-            Animated.timing(revealOpacity, {
-              toValue: 1,
-              duration: 350,
-              useNativeDriver: true,
-            }),
-          ]).start(() => {
-            Animated.timing(btnFade, {
-              toValue: 1,
-              duration: 350,
-              delay: 300,
-              useNativeDriver: true,
-            }).start();
-          });
-        }, 500);
-      });
     });
-  }, [phase, screenWidth, chestOpacity, rouletteFade, stripTX, revealScale, revealOpacity, btnFade]);
+    spin.start(({ finished }) => {
+      if (!finished) return;
+      landed = setTimeout(() => {
+        impactAsync(ImpactFeedbackStyle.Heavy);
+        notificationAsync(NotificationFeedbackType.Success);
+      }, 180);
+      revealed = setTimeout(() => {
+        setPhase('reveal');
+        Animated.parallel([
+          Animated.spring(revealScale, { toValue: 1, friction: 5, tension: 70, useNativeDriver: true }),
+          Animated.timing(revealOpacity, { toValue: 1, duration: 350, useNativeDriver: true }),
+        ]).start(() => {
+          Animated.timing(btnFade, { toValue: 1, duration: 350, delay: 300, useNativeDriver: true }).start();
+        });
+      }, 500);
+    });
+
+    return () => {
+      clearInterval(hapticId);
+      clearTimeout(stopHaptic);
+      if (landed) clearTimeout(landed);
+      if (revealed) clearTimeout(revealed);
+      fade.stop();
+      spin.stop();
+    };
+  }, [visible, prize, lootTable, wonId, screenWidth, btnFade, revealOpacity, revealScale, rouletteFade, stripTX]);
 
   const extraNames = useMemo(() => {
     if (!prize || prize.kind !== 'items') return [];
@@ -243,215 +200,105 @@ export default function BossVictoryLootModal({
 
   if (!visible || !prize) return null;
 
-  const rarityColor = LOOT_RARITY_COLOR[prizeRarity(prize)];
-  const icon = prizeIcon(prize);
-  const cursorX = screenWidth / 2;
+  const hint = rewardHint(prize);
+  const sticker = rewardSticker(prize);
 
   return (
     <Modal
       visible={visible}
-      transparent
       animationType="fade"
       onRequestClose={phase === 'reveal' ? onCollect : undefined}
       statusBarTranslucent
     >
       <View style={styles.root}>
-        <View style={[StyleSheet.absoluteFill, styles.webBg]} />
-        <LinearGradient
-          colors={['rgba(5,2,12,0.75)', 'rgba(5,2,12,0.4)', 'rgba(5,2,12,0.82)']}
-          style={StyleSheet.absoluteFill}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-        />
+        {phase === 'reveal' ? <FightWash gold /> : <FightWash />}
+        {phase === 'reveal' ? <FightSparks /> : null}
 
-        <View style={[styles.bgOrb1, { backgroundColor: accentColor + '14' }]} />
-        <View style={[styles.bgOrb2, { backgroundColor: rarityColor + '10' }]} />
-
-        <Animated.View style={[styles.header, { opacity: headerFade }]}>
-          <View style={styles.headerBadge}>
-            <Trophy size={14} color={Colors.dark.gold} />
-            <Text style={styles.headerBadgeText}>{dungeonName}</Text>
-          </View>
-          <Text style={styles.victoryText}>VICTORY</Text>
-          <Text style={[styles.bossText, { color: accentColor }]}>{bossName} defeated</Text>
-        </Animated.View>
-
-        {phase === 'chest' && (
-          <Animated.View style={[styles.chestPhase, { opacity: chestOpacity }]}>
-            <View style={styles.chestGlowWrap}>
-              <Animated.View
-                style={[
-                  styles.chestGlowRing,
-                  {
-                    borderColor: accentColor + '55',
-                    shadowColor: accentColor,
-                    transform: [{ scale: chestPulse }],
-                  },
-                ]}
-              />
-              <Animated.View style={{ transform: [{ scale: chestPulse }] }}>
-                <View style={styles.chestGlyph}>
-                  <Gift size={88} color={Colors.dark.gold} strokeWidth={1.6} />
-                </View>
-              </Animated.View>
+        {phase === 'spinning' ? (
+          <Animated.View style={[styles.rollScreen, { opacity: rouletteFade }]}>
+            <View style={styles.rollHead}>
+              <FightKicker>{bossName}</FightKicker>
+              <FightTitle>Rolling</FightTitle>
             </View>
-
-            <Text style={styles.tapHint}>Tap to open</Text>
-
-            <Pressable
-              testID="open-boss-chest"
-              onPress={handleOpenChest}
-              style={({ pressed }) => [styles.openBtn, pressed && styles.openBtnPressed]}
-            >
-              <LinearGradient
-                colors={[accentColor + 'ee', accentColor + '99']}
-                style={styles.openBtnGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <Sparkles size={20} color="#fff" />
-                <Text style={styles.openBtnText}>Open Boss Chest</Text>
-              </LinearGradient>
-            </Pressable>
-          </Animated.View>
-        )}
-
-        {phase === 'spinning' && (
-          <Animated.View style={[styles.roulettePhase, { opacity: rouletteFade }]}>
-            <Text style={styles.spinningLabel}>Rolling loot…</Text>
-            <View style={styles.rouletteOuter}>
-              <LinearGradient
-                colors={['rgba(5,2,12,1)', 'transparent']}
-                start={{ x: 0, y: 0.5 }}
-                end={{ x: 1, y: 0.5 }}
-                style={styles.edgeFadeLeft}
-                pointerEvents="none"
-              />
-              <LinearGradient
-                colors={['transparent', 'rgba(5,2,12,1)']}
-                start={{ x: 0, y: 0.5 }}
-                end={{ x: 1, y: 0.5 }}
-                style={styles.edgeFadeRight}
-                pointerEvents="none"
-              />
-              <View style={[styles.cursorLine, { left: cursorX - 1, borderColor: Colors.dark.gold }]} pointerEvents="none" />
-              <View
-                style={[styles.cursorArrowTop, { left: cursorX - 7, borderBottomColor: Colors.dark.gold }]}
-                pointerEvents="none"
-              />
-              <View
-                style={[styles.cursorArrowBottom, { left: cursorX - 7, borderTopColor: Colors.dark.gold }]}
-                pointerEvents="none"
-              />
-              <View style={styles.rouletteClip}>
-                <Animated.View style={[styles.rouletteStrip, { transform: [{ translateX: stripTX }] }]}>
-                  {strip.map((entry, index) => {
-                    const rColor = LOOT_RARITY_COLOR[entry.rarity];
-                    const isWinner = index === WIN_IDX;
-                    return (
-                      <View
-                        key={`${entry.id}_${index}`}
-                        style={[
-                          styles.rouletteItem,
-                          {
-                            width: ITEM_WIDTH,
-                            height: ITEM_HEIGHT,
-                            marginRight: ITEM_GAP,
-                            borderColor: rColor + (isWinner ? 'ff' : '55'),
-                            backgroundColor: isWinner ? rColor + '22' : rColor + '0d',
-                          },
-                        ]}
-                      >
-                        <LinearGradient
-                          colors={[rColor + '18', 'transparent']}
-                          style={StyleSheet.absoluteFill}
-                          start={{ x: 0.5, y: 0 }}
-                          end={{ x: 0.5, y: 1 }}
+            <View style={styles.roll}>
+              <View style={styles.tickUp} />
+              <View style={styles.window}>
+                <Animated.View style={[styles.strip, { transform: [{ translateX: stripTX }] }]}>
+                  {strip.map((entry, index) => (
+                    <View key={`${entry.id}_${index}`} style={styles.cell}>
+                      {entry.kind === 'empty' ? (
+                        <View style={styles.empty}>
+                          <Glyph name="close" size={26} color={tokens.ink3} />
+                        </View>
+                      ) : (
+                        <ItemTile
+                          rarity={entry.rarity}
+                          sticker={cellSticker(entry)}
+                          qty={cellQty(entry)}
+                          size={78}
                         />
-                        {entry.kind === 'empty' ? (
-                          <Ban size={34} color={Colors.dark.textMuted} />
-                        ) : (
-                          <LootGlyph
-                            icon={entry.kind === 'gold' ? 'coins' : entry.icon}
-                            size={34}
-                            color={entry.kind === 'gold' ? Colors.dark.gold : rColor}
-                          />
-                        )}
-                        <Text style={[styles.rouletteItemName, { color: rColor + 'ee' }]} numberOfLines={2}>
-                          {entry.kind === 'gold' ? 'Gold' : entry.name}
-                        </Text>
-                        <View style={[styles.rarityDot, { backgroundColor: rColor }]} />
-                      </View>
-                    );
-                  })}
+                      )}
+                      <Text style={styles.cellName} numberOfLines={2}>
+                        {cellLabel(entry)}
+                      </Text>
+                    </View>
+                  ))}
                 </Animated.View>
-              </View>
-            </View>
-          </Animated.View>
-        )}
-
-        {phase === 'reveal' && (
-          <Animated.View
-            style={[styles.revealPhase, { opacity: revealOpacity, transform: [{ scale: revealScale }] }]}
-          >
-            <Animated.View
-              style={[
-                styles.revealGlowRing,
-                { borderColor: rarityColor + '55', shadowColor: rarityColor, opacity: glowPulse },
-              ]}
-            />
-            <View style={[styles.revealHalo, { borderColor: rarityColor + '99', shadowColor: rarityColor }]}>
+                <LinearGradient
+                pointerEvents="none"
+                colors={[tokens.canvas, 'rgba(145,162,242,0)']}
+                start={{ x: 0, y: 0.5 }}
+                end={{ x: 1, y: 0.5 }}
+                style={styles.fadeL}
+              />
               <LinearGradient
-                colors={[rarityColor + '40', Colors.dark.surface + 'dd']}
-                style={styles.revealHaloInner}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                {icon === 'empty' ? (
-                  <Ban size={60} color={Colors.dark.textMuted} />
-                ) : (
-                  <LootGlyph icon={icon} size={60} color={rarityColor} />
-                )}
-              </LinearGradient>
+                pointerEvents="none"
+                colors={['rgba(145,162,242,0)', tokens.canvas]}
+                start={{ x: 0, y: 0.5 }}
+                end={{ x: 1, y: 0.5 }}
+                style={styles.fadeR}
+              />
+              </View>
+              <View style={styles.tickDown} />
             </View>
-            <View
-              style={[
-                styles.revealRarityBadge,
-                { borderColor: rarityColor + 'aa', backgroundColor: rarityColor + '1e' },
-              ]}
-            >
-              <Text style={[styles.revealRarityText, { color: rarityColor }]}>
-                {RARITY_LABEL[prizeRarity(prize)].toUpperCase()}
-              </Text>
-            </View>
-            <Text style={[styles.revealName, { color: rarityColor }]}>{prizeName(prize)}</Text>
-            <Text style={styles.revealDescription}>{prizeDescription(prize)}</Text>
-            {extraNames.length > 0 ? (
-              <Text style={styles.extraDrop}>Also: {extraNames.join(', ')}</Text>
-            ) : null}
+            <FightNote>The strip slows onto one prize</FightNote>
+          </Animated.View>
+        ) : null}
 
-            <Animated.View style={[styles.collectWrap, { opacity: btnFade }]}>
-              <Pressable
+        {phase === 'reveal' ? (
+          <Animated.View style={[styles.reveal, { opacity: revealOpacity, transform: [{ scale: revealScale }] }]}>
+            <View style={styles.prize}>
+              {prize.kind === 'empty' || !sticker ? (
+                <View style={styles.emptyPrize}>
+                  <Glyph name="close" size={64} color={tokens.ink3} />
+                </View>
+              ) : (
+                <ItemTile rarity={prizeRarity(prize)} sticker={sticker} size={168} />
+              )}
+            </View>
+            <View style={styles.revealCopy}>
+              <FightKicker gold>{rewardKicker(prize)}</FightKicker>
+              <FightTitle>{rewardTitle(prize)}</FightTitle>
+            </View>
+            <Card style={styles.give}>
+              <Text style={styles.giveCaption}>What it does</Text>
+              {hint ? <Text style={styles.giveBold}>{hint}</Text> : null}
+              <Text style={styles.giveBody}>{prizeDescription(prize)}</Text>
+              {extraNames.length > 0 ? <Text style={styles.giveBody}>Also: {extraNames.join(', ')}</Text> : null}
+            </Card>
+            <Animated.View style={[styles.foot, { opacity: btnFade }]}>
+              <ButtonFlow
+                label="Collect"
+                block
                 testID="collect-loot"
                 onPress={() => {
                   impactAsync(ImpactFeedbackStyle.Medium);
                   onCollect();
                 }}
-                style={({ pressed }) => [styles.collectBtn, pressed && styles.collectBtnPressed]}
-              >
-                <LinearGradient
-                  colors={[...Colors.gradients.gold]}
-                  style={styles.collectGradient}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                >
-                  <Trophy size={18} color="#1a1228" strokeWidth={2.5} />
-                  <Text style={styles.collectText}>Collect Loot</Text>
-                </LinearGradient>
-              </Pressable>
+              />
             </Animated.View>
           </Animated.View>
-        )}
+        ) : null}
       </View>
     </Modal>
   );
@@ -460,319 +307,149 @@ export default function BossVictoryLootModal({
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: tokens.canvas,
   },
-  webBg: {
-    backgroundColor: 'rgba(5,2,12,0.97)',
-  },
-  bgOrb1: {
-    position: 'absolute',
-    top: '15%',
-    left: '10%',
-    width: 220,
-    height: 220,
-    borderRadius: 110,
-  },
-  bgOrb2: {
-    position: 'absolute',
-    bottom: '18%',
-    right: '8%',
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-  },
-  header: {
-    position: 'absolute',
-    top: 60,
-    left: 0,
-    right: 0,
+  rollScreen: {
+    flex: 1,
     alignItems: 'center',
   },
-  headerBadge: {
-    flexDirection: 'row',
+  rollHead: {
     alignItems: 'center',
-    gap: 6,
-    backgroundColor: Colors.dark.surface + 'cc',
-    paddingHorizontal: 14,
-    paddingVertical: 5,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: Colors.dark.gold + '44',
-    marginBottom: 10,
+    gap: 8,
+    marginTop: 108,
   },
-  headerBadgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: Colors.dark.gold,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-  },
-  victoryText: {
-    fontSize: 38,
-    fontWeight: '800',
-    color: Colors.dark.gold,
-    letterSpacing: 3,
-    textShadowColor: Colors.dark.gold + '88',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 18,
-  },
-  bossText: {
-    fontSize: 15,
-    fontWeight: '600',
-    marginTop: 4,
-    letterSpacing: 0.3,
-  },
-  chestPhase: {
-    alignItems: 'center',
-    paddingHorizontal: 32,
-    marginTop: 40,
-  },
-  chestGlowWrap: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 28,
-  },
-  chestGlowRing: {
-    position: 'absolute',
-    width: 250,
-    height: 250,
-    borderRadius: 125,
-    borderWidth: 2,
-    ...Platform.select({
-      ios: {
-        shadowOpacity: 0.6,
-        shadowRadius: 28,
-        shadowOffset: { width: 0, height: 0 },
-      },
-      default: {},
-    }),
-  },
-  chestGlyph: {
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(26,18,40,0.85)',
-    borderWidth: 2,
-    borderColor: Colors.dark.gold + '66',
-  },
-  tapHint: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.dark.textSecondary,
-    marginBottom: 22,
-    letterSpacing: 0.3,
-  },
-  openBtn: {
-    borderRadius: 18,
-    overflow: 'hidden',
-    width: 280,
-  },
-  openBtnPressed: {
-    opacity: 0.88,
-    transform: [{ scale: 0.97 }],
-  },
-  openBtnGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-  },
-  openBtnText: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: '#fff',
-    letterSpacing: 0.3,
-  },
-  roulettePhase: {
-    alignItems: 'center',
+  roll: {
     width: '100%',
-    marginTop: 30,
+    marginTop: 36,
+    alignItems: 'center',
   },
-  spinningLabel: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: Colors.dark.textMuted,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-    marginBottom: 18,
-  },
-  rouletteOuter: {
-    width: '100%',
-    height: ITEM_HEIGHT + 28,
-    justifyContent: 'center',
+  window: {
     position: 'relative',
-  },
-  rouletteClip: {
+    height: 116,
     width: '100%',
-    height: ITEM_HEIGHT,
     overflow: 'hidden',
+  },
+  strip: {
+    flexDirection: 'row',
     alignItems: 'flex-start',
   },
-  rouletteStrip: {
-    flexDirection: 'row',
+  cell: {
+    width: ITEM_WIDTH,
+    marginRight: ITEM_GAP,
     alignItems: 'center',
+    gap: 6,
   },
-  rouletteItem: {
-    borderRadius: 14,
-    borderWidth: 1.5,
+  cellName: {
+    fontFamily: tokens.font800,
+    fontSize: 11,
+    lineHeight: 13,
+    color: tokens.onCanvas,
+    textAlign: 'center',
+    textShadowColor: 'rgba(59, 71, 158, 0.28)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 0,
+  },
+  empty: {
+    width: 78,
+    height: 78,
+    borderRadius: 16,
+    backgroundColor: tokens.surface2,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 6,
-    gap: 6,
-    overflow: 'hidden',
+    boxShadow: [{ offsetX: 0, offsetY: 4, blurRadius: 0, color: tokens.lipSurface }],
   },
-  rouletteItemName: {
-    fontSize: 10,
-    fontWeight: '700',
-    textAlign: 'center',
-    lineHeight: 13,
-  },
-  rarityDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-  edgeFadeLeft: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: 64,
-    zIndex: 5,
-  },
-  edgeFadeRight: {
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    bottom: 0,
-    width: 64,
-    zIndex: 5,
-  },
-  cursorLine: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    width: 2,
-    borderWidth: 1.5,
-    borderRadius: 1,
-    zIndex: 10,
-  },
-  cursorArrowTop: {
-    position: 'absolute',
-    top: 0,
+  tickUp: {
     width: 0,
     height: 0,
-    borderLeftWidth: 7,
-    borderRightWidth: 7,
-    borderBottomWidth: 10,
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    zIndex: 11,
-  },
-  cursorArrowBottom: {
-    position: 'absolute',
-    bottom: 0,
-    width: 0,
-    height: 0,
-    borderLeftWidth: 7,
-    borderRightWidth: 7,
+    marginBottom: 6,
+    borderLeftWidth: 8,
+    borderRightWidth: 8,
     borderTopWidth: 10,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-    zIndex: 11,
+    borderTopColor: tokens.gold,
   },
-  revealPhase: {
-    alignItems: 'center',
-    paddingHorizontal: 28,
-    marginTop: 30,
-    maxWidth: 380,
-    width: '100%',
+  tickDown: {
+    width: 0,
+    height: 0,
+    marginTop: 6,
+    borderLeftWidth: 8,
+    borderRightWidth: 8,
+    borderBottomWidth: 10,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: tokens.gold,
   },
-  revealGlowRing: {
+  fadeL: {
     position: 'absolute',
-    top: -20,
-    width: 260,
-    height: 260,
-    borderRadius: 130,
-    borderWidth: 1.5,
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 36,
   },
-  revealHalo: {
-    width: 130,
-    height: 130,
-    borderRadius: 65,
-    borderWidth: 2,
+  fadeR: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: 36,
+  },
+  reveal: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  prize: {
+    marginTop: 120,
+  },
+  emptyPrize: {
+    width: 168,
+    height: 168,
+    borderRadius: 32,
+    backgroundColor: tokens.surface2,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 18,
   },
-  revealHaloInner: {
-    width: 114,
-    height: 114,
-    borderRadius: 57,
+  revealCopy: {
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: 6,
+    marginTop: 28,
+    paddingHorizontal: 24,
   },
-  revealRarityBadge: {
-    paddingHorizontal: 16,
-    paddingVertical: 5,
-    borderRadius: 999,
-    borderWidth: 1,
-    marginBottom: 12,
+  give: {
+    marginTop: 22,
+    marginHorizontal: 24,
+    alignSelf: 'stretch',
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+    alignItems: 'center',
   },
-  revealRarityText: {
+  giveCaption: {
+    fontFamily: tokens.font800,
     fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 1.6,
+    letterSpacing: 0.8,
     textTransform: 'uppercase',
+    color: tokens.brand,
+    marginBottom: 6,
   },
-  revealName: {
-    fontSize: 24,
-    fontWeight: '800',
-    textAlign: 'center',
-    marginBottom: 8,
-    letterSpacing: 0.3,
-  },
-  revealDescription: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: Colors.dark.textSecondary,
-    textAlign: 'center',
-    marginBottom: 14,
-  },
-  extraDrop: {
-    fontSize: 13,
-    color: Colors.dark.gold,
-    marginBottom: 12,
-    fontWeight: '700',
-  },
-  collectWrap: {
-    width: '100%',
-  },
-  collectBtn: {
-    borderRadius: 18,
-    overflow: 'hidden',
-  },
-  collectBtnPressed: {
-    opacity: 0.88,
-    transform: [{ scale: 0.97 }],
-  },
-  collectGradient: {
-    paddingVertical: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    gap: 10,
-  },
-  collectText: {
+  giveBold: {
+    fontFamily: tokens.font900,
     fontSize: 18,
-    fontWeight: '800',
-    color: '#1a1228',
-    letterSpacing: 0.4,
+    lineHeight: 22,
+    color: tokens.ink,
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  giveBody: {
+    fontFamily: tokens.font800,
+    fontSize: 15,
+    lineHeight: 20,
+    color: tokens.ink2,
+    textAlign: 'center',
+  },
+  foot: {
+    position: 'absolute',
+    left: 24,
+    right: 24,
+    bottom: 40,
   },
 });

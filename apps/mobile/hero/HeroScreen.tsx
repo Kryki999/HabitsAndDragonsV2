@@ -1,511 +1,174 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Pressable,
-  useWindowDimensions,
-} from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import * as Clipboard from "expo-clipboard";
-import { Copy, ScrollText } from "lucide-react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import Colors from "@/constants/colors";
-import { TITLE_DEFINITIONS } from "@/constants/titles";
-import HeroHexRadarChart from "@/components/HeroHexRadarChart";
-import BackpackInventoryBody from "@/components/BackpackInventoryBody";
-import ActivityHeatmap from "@/components/ActivityHeatmap";
-import DayQuestLogReadOnly from "@/components/DayQuestLogReadOnly";
-import ActivityChroniclesModal from "@/components/ActivityChroniclesModal";
-import CircularProgress from "@/components/CircularProgress";
-import HeroQuestTimeline from "@/components/HeroQuestTimeline";
-import { HERO_DAILY_RITUALS, HERO_EPIC_MILESTONES } from "@/constants/heroQuestSystem";
-import { impactAsync, ImpactFeedbackStyle } from "@/lib/hapticsGate";
-import { useHabitsStore } from "@/habits/store";
-import { useHeroStore } from "@/hero/store";
+import { useCallback, useMemo, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as Clipboard from 'expo-clipboard';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-/** Display-only labels from V1. Classes are KILL for V2 — always Wanderer. */
-type PlayerClass = "warrior" | "hunter" | "mage" | "paladin";
+import BackpackInventoryBody from '@/components/BackpackInventoryBody';
+import { ChroniclesSheet } from '@/hero/ChroniclesSheet';
+import { TITLE_DEFINITIONS } from '@/constants/titles';
+import { impactAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
+import { useHabitsStore } from '@/habits/store';
+import { useHeroStore } from '@/hero/store';
+import { useSocialStore } from '@/social/store';
+import { AccountBar } from '@/ui/AccountBar';
+import { BottomSheet } from '@/ui/BottomSheet';
+import { ButtonSoft } from '@/ui/Button';
+import { Card } from '@/ui/Card';
+import { Glyph } from '@/ui/Glyph';
+import { Heatmap } from '@/ui/Heatmap';
+import { Portrait } from '@/ui/Portrait';
+import { Progress } from '@/ui/Progress';
+import { SectionHead } from '@/ui/SectionHead';
+import { SegmentedControl } from '@/ui/SegmentedControl';
+import { StatHex } from '@/ui/StatHex';
+import { tokens } from '@/ui/tokens';
 
-const CLASS_EPITHET: Record<PlayerClass, string> = {
-  warrior: "The Iron Vanguard",
-  hunter: "The Shadowblade",
-  mage: "The Mindbinder",
-  paladin: "The Dawnwarden",
-};
+const TABS = ['Stats', 'Titles', 'Emotes'] as const;
 
-const CLASS_LABELS: Record<PlayerClass, string> = {
-  warrior: "Warrior",
-  hunter: "Hunter",
-  mage: "Mage",
-  paladin: "Paladin",
-};
-
-const CLASS_COLORS: Record<PlayerClass, string> = {
-  warrior: "#d87c4a",
-  hunter: "#58bf8a",
-  mage: "#9587ff",
-  paladin: "#f0c96f",
-};
-
-type StatsTab = "stats" | "overview";
-
-function bestUnlockedTitleName(unlockedIds: string[]): string | null {
-  const unlocked = new Set(unlockedIds);
-  let best: (typeof TITLE_DEFINITIONS)[number] | null = null;
-  let score = -1;
-  for (const def of TITLE_DEFINITIONS) {
-    if (!unlocked.has(def.id)) continue;
-    const s = (def.requiredStatLevel ?? 0) * 10 + (def.requiredCompletedQuests ?? 0);
-    if (s > score) {
-      score = s;
-      best = def;
-    }
-  }
-  return best?.name ?? null;
-}
-
-function formatDateKey(d: string): string {
-  try {
-    const [y, m, day] = d.split("-");
-    if (!y || !m || !day) return d;
-    const months = [
-      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-    ];
-    const mi = parseInt(m, 10) - 1;
-    return `${months[mi] ?? m} ${parseInt(day, 10)}, ${y}`;
-  } catch {
-    return d;
-  }
-}
-
-function daysSince(dateString: string): number {
-  const date = new Date(dateString);
-  if (Number.isNaN(date.getTime())) return 0;
-  const now = new Date();
-  const ms = now.getTime() - date.getTime();
-  return Math.max(0, Math.floor(ms / (1000 * 60 * 60 * 24)));
-}
-
-function toFriendCode(rawId: string | null | undefined): string {
-  if (!rawId) return "UNLINKED";
-  const compact = rawId.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
-  if (compact.length < 8) return compact || "UNLINKED";
-  const tail = compact.slice(-8);
-  return `${tail.slice(0, 4)}-${tail.slice(4)}`;
-}
-
-function calendarYesterdayKey(): string {
-  const y = new Date();
-  y.setDate(y.getDate() - 1);
-  return y.toISOString().split("T")[0]!;
-}
-
-function calendarTomorrowKey(): string {
-  const t = new Date();
-  t.setDate(t.getDate() + 1);
-  return t.toISOString().split("T")[0]!;
-}
-
-function formatRemainingToNextMidnight(now: Date): string {
-  const next = new Date(now);
-  next.setHours(24, 0, 0, 0);
-  const ms = Math.max(0, next.getTime() - now.getTime());
-  const totalMinutes = Math.floor(ms / 60000);
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
-}
-
-function seededOrderForDay<T extends { id: string }>(items: T[], dayKey: string): T[] {
-  const seed = dayKey
-    .split("")
-    .reduce((acc, ch) => (acc * 33 + ch.charCodeAt(0)) >>> 0, 5381);
-  return [...items]
-    .map((item) => {
-      const h = item.id
-        .split("")
-        .reduce((acc, ch) => (acc * 31 + ch.charCodeAt(0)) >>> 0, seed);
-      return { item, h };
-    })
-    .sort((a, b) => a.h - b.h)
-    .map((x) => x.item);
+function formatLogDate(dateKey: string): string {
+  const d = new Date(`${dateKey}T12:00:00`);
+  return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
 export default function HeroScreen() {
-  const { width } = useWindowDimensions();
-  const cardMaxW = Math.min(width - 32, 420);
-
   const playerLevel = useHeroStore((s) => s.playerLevel);
   const currentLevelXP = useHeroStore((s) => s.currentLevelXP);
   const xpForNext = useHeroStore((s) => s.xpForNextLevel);
   const hexStats = useHeroStore((s) => s.hexStats);
-  const createdAt = useHeroStore((s) => s.createdAt);
   const heroDisplayName = useHeroStore((s) => s.heroDisplayName);
   const unlockedTitleIds = useHeroStore((s) => s.unlockedTitleIds);
-  const bossesKilled = useHeroStore((s) => s.bossesDefeated);
-  const equippedRelicId = useHeroStore((s) => s.equippedRelicId);
-  const ownedItemIds = useHeroStore((s) => s.ownedItemIds);
-  const gold = useHeroStore((s) => s.gold);
-  const heroShopPurchaseEver = useHeroStore((s) => s.heroShopPurchaseEver);
-  const heroDailyQuestClaimsDate = useHeroStore((s) => s.heroDailyQuestClaimsDate);
-  const heroDailyQuestClaimedIds = useHeroStore((s) => s.heroDailyQuestClaimedIds);
-  const heroEpicMilestoneClaimedIds = useHeroStore((s) => s.heroEpicMilestoneClaimedIds);
-  const claimHeroDailyQuest = useHeroStore((s) => s.claimHeroDailyQuest);
-  const claimHeroEpicMilestone = useHeroStore((s) => s.claimHeroEpicMilestone);
 
   const activityByDate = useHabitsStore((s) => s.activityByDate);
   const completedHabitNamesByDate = useHabitsStore((s) => s.completedHabitNamesByDate);
-  const habits = useHabitsStore((s) => s.habits);
   const dailyReflectionByDate = useHabitsStore((s) => s.dailyReflectionByDate);
-  const planningDayOrderByDate = useHabitsStore((s) => s.planningDayOrderByDate);
-  const accountCreatedAtDateKey = useHabitsStore((s) => s.accountCreatedAtDateKey);
+  const myCode = useSocialStore((s) => s.myCode);
 
-  const [statsTab, setStatsTab] = useState<StatsTab>("stats");
+  const [tab, setTab] = useState<(typeof TABS)[number]>('Stats');
   const [chroniclesOpen, setChroniclesOpen] = useState(false);
-  const [chronicleHeatmapDate, setChronicleHeatmapDate] = useState<string | null>(null);
-  const [nowTick, setNowTick] = useState(() => new Date());
+  const [logDate, setLogDate] = useState<string | null>(null);
 
-  /** Classes are KILL — overview always shows Wanderer. */
-  const playerClass: PlayerClass | null = null;
-  const xpProgress = xpForNext > 0 ? currentLevelXP / xpForNext : 0;
-
-  const displayName = useMemo(() => {
-    const title = bestUnlockedTitleName(unlockedTitleIds);
-    if (title) return title;
-    const nick = heroDisplayName?.trim();
-    if (nick) return nick;
-    if (playerClass) return CLASS_EPITHET[playerClass];
-    return "The Wayfarer";
-  }, [unlockedTitleIds, heroDisplayName, playerClass]);
-
-  const firstActivityDateKey = useMemo(() => {
-    const keys = Object.keys(activityByDate).filter(Boolean).sort();
-    if (keys.length === 0) return null;
-    return keys[0]!;
-  }, [activityByDate]);
-
-  const joinedTheRealmLabel = useMemo(() => {
-    const joinDateRaw = createdAt || accountCreatedAtDateKey || firstActivityDateKey;
-    if (!joinDateRaw) return "Joined the Realm: today";
-    const elapsedDays = daysSince(joinDateRaw);
-    return `Joined the Realm: ${elapsedDays} day${elapsedDays === 1 ? "" : "s"} ago`;
-  }, [createdAt, accountCreatedAtDateKey, firstActivityDateKey]);
-
-  const className = playerClass ? CLASS_LABELS[playerClass] : "Wanderer";
-  const classColor = playerClass ? CLASS_COLORS[playerClass] : Colors.dark.textMuted;
-  const friendCode = useMemo(() => toFriendCode(null), []);
-
-  const questsCompleted = useMemo(
-    () =>
-      Object.values(completedHabitNamesByDate).reduce(
-        (sum, entries) => sum + entries.length,
-        0,
-      ),
-    [completedHabitNamesByDate],
-  );
-
-  const todayKey = useMemo(() => nowTick.toISOString().split("T")[0]!, [nowTick]);
-  const nextDailyResetCountdown = useMemo(() => formatRemainingToNextMidnight(nowTick), [nowTick]);
-
-  useEffect(() => {
-    const timer = setInterval(() => setNowTick(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const dailyQuestRows = useMemo(() => {
-    const visitedSage = false;
-    const habitToday = habits.some((h) => h.completedToday);
-    const reflectionToday = !!(dailyReflectionByDate[todayKey] ?? "").trim();
-    const yKey = calendarYesterdayKey();
-    const reflectionYesterday = !!(dailyReflectionByDate[yKey] ?? "").trim();
-    const reflectionAnyRecent = reflectionToday || reflectionYesterday;
-    const tomorrowKey = calendarTomorrowKey();
-    const plannedTomorrow =
-      (planningDayOrderByDate[tomorrowKey]?.length ?? 0) > 0 ||
-      habits.some((h) => h.isActive && h.scheduledDate === tomorrowKey);
-    const claimedIds =
-      heroDailyQuestClaimsDate === todayKey ? heroDailyQuestClaimedIds : [];
-
-    const completeById: Record<string, boolean> = {
-      daily_visit_sage: visitedSage,
-      daily_complete_quest: habitToday,
-      daily_affirmations: visitedSage,
-      daily_gratitude: visitedSage,
-      daily_mood: reflectionAnyRecent,
-      daily_reflection: reflectionAnyRecent,
-      daily_refresh_epic: false,
-      daily_plan_tomorrow: plannedTomorrow,
-      daily_spend_gold: heroShopPurchaseEver,
-      daily_save_progress: true,
-    };
-
-    const trackableDailyRituals = HERO_DAILY_RITUALS.filter((def) =>
-      Object.prototype.hasOwnProperty.call(completeById, def.id),
-    );
-    const rotatedDailyRituals = seededOrderForDay(trackableDailyRituals, todayKey).slice(0, 4);
-
-    return rotatedDailyRituals.map((def) => ({
-      def,
-      objectiveComplete: completeById[def.id] ?? false,
-      claimed: claimedIds.includes(def.id),
-    }));
-  }, [
-    habits,
-    dailyReflectionByDate,
-    planningDayOrderByDate,
-    heroShopPurchaseEver,
-    heroDailyQuestClaimsDate,
-    heroDailyQuestClaimedIds,
-    todayKey,
-  ]);
-
-  const epicQuestRows = useMemo(() => {
-    const completeById: Record<string, boolean> = {
-      epic_collect_items: ownedItemIds.length >= 1,
-      epic_castle_level: playerLevel >= 2,
-      epic_defeat_bosses: bossesKilled >= 1,
-      epic_add_friend: false,
-      epic_rare_item: false,
-      epic_bind_relic: equippedRelicId != null,
-      epic_first_market_trade: heroShopPurchaseEver,
-      epic_bind_email: false,
-    };
-
-    return HERO_EPIC_MILESTONES.map((def) => ({
-      def,
-      objectiveComplete: completeById[def.id] ?? false,
-      claimed: heroEpicMilestoneClaimedIds.includes(def.id),
-    }));
-  }, [
-    ownedItemIds.length,
-    playerLevel,
-    bossesKilled,
-    equippedRelicId,
-    heroShopPurchaseEver,
-    heroEpicMilestoneClaimedIds,
-  ]);
-
-  const onClaimDaily = useCallback(
-    (def: (typeof HERO_DAILY_RITUALS)[number]) => {
-      return claimHeroDailyQuest(def.id, def.rewardGold, def.rewardXP);
-    },
-    [claimHeroDailyQuest],
-  );
-
-  const onClaimEpic = useCallback(
-    (def: (typeof HERO_EPIC_MILESTONES)[number]) => {
-      return claimHeroEpicMilestone(def.id, def.rewardGold, def.rewardXP);
-    },
-    [claimHeroEpicMilestone],
-  );
+  const name = (heroDisplayName?.trim() || 'Wayfarer').slice(0, 48);
+  const unlocked = useMemo(() => new Set(unlockedTitleIds), [unlockedTitleIds]);
 
   const onCopyFriendCode = useCallback(async () => {
-    if (!friendCode || friendCode === "UNLINKED") return;
-    await Clipboard.setStringAsync(friendCode);
+    if (!myCode) return;
+    await Clipboard.setStringAsync(myCode);
     impactAsync(ImpactFeedbackStyle.Light);
-  }, [friendCode]);
+  }, [myCode]);
 
-  const radarChartSize = Math.min(240, cardMaxW - 36);
-  /**
-   * HeroHexRadarChart uses pad=36 → rendered frame is (size + 72) tall. Reserve that full height so Stats is never clipped.
-   * Overview shares the same box (absolute layers); extra vertical space centers the shorter overview content.
-   */
-  const radarFrameHeight = radarChartSize + 72;
-  const statsOverviewFixedHeight = Math.max(radarFrameHeight + 12, 260);
+  const logNames = logDate ? (completedHabitNamesByDate[logDate] ?? []) : [];
+  const logNote = logDate ? (dailyReflectionByDate[logDate] ?? '').trim() : '';
 
   return (
     <LinearGradient
-      colors={["#1a1228", "#120c1c", "#0a0810"]}
+      colors={[tokens.canvasHi, tokens.canvas]}
+      locations={[0, 0.28]}
       style={styles.gradient}
-      start={{ x: 0.5, y: 0 }}
-      end={{ x: 0.5, y: 1 }}
     >
-      <SafeAreaView style={styles.safe} edges={["left", "right"]}>
+      <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
         <ScrollView
           style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={styles.stack}
           showsVerticalScrollIndicator={false}
         >
-          {/* Module 1 — Character sheet (header + dynamic center + footer toggle) */}
-          <View style={[styles.card, { width: cardMaxW, alignSelf: "center" }]}>
-            <View style={styles.sheetHeaderRow}>
-              <CircularProgress
-                progress={xpProgress}
-                size={86}
-                strokeWidth={4}
-                color={Colors.dark.gold}
-                backgroundColor={Colors.dark.border}
-              >
-                <View style={styles.avatarRing}>
-                  <Text style={styles.avatarEmoji}>🧙‍♂️</Text>
-                </View>
-              </CircularProgress>
-              <View style={styles.sheetHeaderMeta}>
-                <Text style={styles.heroName} numberOfLines={2}>
-                  {displayName}
+          <AccountBar />
+
+          <Card style={styles.profile}>
+            <View style={styles.profileTop}>
+              <Portrait edit />
+              <View style={styles.profileCol}>
+                <Text style={styles.levelCaption}>Level {playerLevel}</Text>
+                <Text style={styles.heroName} numberOfLines={1}>
+                  {name}
                 </Text>
-                <Text style={styles.heroLevel}>Level {playerLevel}</Text>
+                <Progress value={currentLevelXP} max={xpForNext} unit="XP" />
               </View>
             </View>
 
-            <View style={[styles.statsOverviewBody, { height: statsOverviewFixedHeight }]}>
-              <View
-                style={[styles.statsOverviewLayer, statsTab === "stats" ? styles.statsOverviewLayerVisible : styles.statsOverviewLayerHidden]}
-                pointerEvents={statsTab === "stats" ? "auto" : "none"}
-              >
-                <View style={styles.statsTabPaneInner}>
-                  <HeroHexRadarChart size={radarChartSize} stats={hexStats} />
-                </View>
+            {tab === 'Stats' ? <StatHex stats={hexStats} /> : null}
+            {tab === 'Titles' ? (
+              <View style={styles.titles}>
+                {TITLE_DEFINITIONS.map((def) => {
+                  const open = unlocked.has(def.id);
+                  return (
+                    <View key={def.id} style={[styles.titleRow, !open && styles.titleLocked]}>
+                      <Glyph name={open ? 'check' : 'lock'} size={18} color={open ? tokens.success : tokens.ink3} />
+                      <View style={styles.titleCopy}>
+                        <Text style={styles.titleName}>{def.name}</Text>
+                        <Text style={styles.titleDesc}>{def.description}</Text>
+                      </View>
+                    </View>
+                  );
+                })}
               </View>
-              <View
-                style={[styles.statsOverviewLayer, statsTab === "overview" ? styles.statsOverviewLayerVisible : styles.statsOverviewLayerHidden]}
-                pointerEvents={statsTab === "overview" ? "auto" : "none"}
-              >
-                <View style={styles.overviewTabPaneInner}>
-                  <View style={styles.overviewPanel}>
-                    <View style={styles.overviewRow}>
-                      <Text style={styles.overviewLabel}>⏳ {joinedTheRealmLabel}</Text>
-                    </View>
-                    <View style={styles.overviewRow}>
-                      <Text style={styles.overviewLabel}>🛡 Class</Text>
-                      <Text style={[styles.overviewValue, { color: classColor }]}>{className}</Text>
-                    </View>
-                    <View style={styles.overviewRow}>
-                      <Text style={styles.overviewLabel}>🤝 Friend Code</Text>
-                      <View style={styles.friendCodeRow}>
-                        <Text style={styles.friendCodeValue}>{friendCode}</Text>
-                        <Pressable
-                          onPress={onCopyFriendCode}
-                          style={({ pressed }) => [
-                            styles.copyBtn,
-                            pressed && styles.copyBtnPressed,
-                          ]}
-                        >
-                          <Copy size={14} color={Colors.dark.emerald} strokeWidth={2.4} />
-                        </Pressable>
-                      </View>
-                    </View>
-
-                    <View style={styles.lifetimeGrid}>
-                      <View style={styles.lifetimeTile}>
-                        <Text style={styles.lifetimeLabel}>Bosses Defeated</Text>
-                        <Text style={styles.lifetimeValue}>{bossesKilled}</Text>
-                      </View>
-                      <View style={styles.lifetimeTile}>
-                        <Text style={styles.lifetimeLabel}>Total Gold Looted</Text>
-                        <Text style={styles.lifetimeValue}>{gold}</Text>
-                      </View>
-                      <View style={styles.lifetimeTile}>
-                        <Text style={styles.lifetimeLabel}>Quests Completed</Text>
-                        <Text style={styles.lifetimeValue}>{questsCompleted}</Text>
-                      </View>
-                    </View>
-                  </View>
-                </View>
+            ) : null}
+            {tab === 'Emotes' ? (
+              <View style={styles.emotes}>
+                <Text style={styles.emotesCopy}>No emotes yet.</Text>
               </View>
-            </View>
+            ) : null}
 
-            <View style={styles.toggleRow}>
-              <Pressable
-                onPress={() => {
-                  impactAsync(ImpactFeedbackStyle.Light);
-                  setStatsTab("stats");
-                }}
-                style={[
-                  styles.toggleBtn,
-                  statsTab === "stats" && styles.toggleBtnActive,
-                ]}
-              >
-                <Text style={[styles.toggleText, statsTab === "stats" && styles.toggleTextActive]}>
-                  Stats
-                </Text>
-              </Pressable>
-              <Pressable
-                onPress={() => {
-                  impactAsync(ImpactFeedbackStyle.Light);
-                  setStatsTab("overview");
-                }}
-                style={[
-                  styles.toggleBtn,
-                  statsTab === "overview" && styles.toggleBtnActive,
-                ]}
-              >
-                <Text
-                  style={[styles.toggleText, statsTab === "overview" && styles.toggleTextActive]}
-                >
-                  Overview
-                </Text>
-              </Pressable>
-            </View>
-          </View>
+            <SegmentedControl options={TABS} value={tab} onChange={(v) => setTab(v as (typeof TABS)[number])} />
+          </Card>
 
-          {/* Module 3 — Equipment */}
-          <View style={[styles.section, { width: cardMaxW, alignSelf: "center" }]}>
-            <Text style={styles.sectionTitle}>Equipment</Text>
-            <View style={styles.equipmentCard}>
-              <BackpackInventoryBody scrollable={false} contentWidth={cardMaxW - 28} />
-            </View>
-          </View>
+          <SectionHead label="Equipment" />
+          <Card style={styles.padCard}>
+            <BackpackInventoryBody scrollable={false} />
+          </Card>
 
-          {/* Module 4 — Hero quest timeline (daily rituals + epic milestones) */}
-          <View style={[styles.section, { width: cardMaxW, alignSelf: "center" }]}>
-            <Text style={styles.sectionTitle}>Hero's path</Text>
-            <Text style={styles.questIntro}>
-              Weave daily rituals and epic milestones — each node is a step through the dark toward power.
-            </Text>
-            <HeroQuestTimeline
-              dailyRows={dailyQuestRows}
-              epicRows={epicQuestRows}
-              onClaimDaily={onClaimDaily}
-              onClaimEpic={onClaimEpic}
-              dailyResetCountdown={nextDailyResetCountdown}
-            />
-          </View>
-
-          {/* Module 5 — Chronicles */}
-          <View style={[styles.section, styles.lastSection, { width: cardMaxW, alignSelf: "center" }]}>
-            <Text style={styles.sectionTitle}>Chronicles</Text>
-            <View style={styles.chroniclesCard}>
-              <ActivityHeatmap
-                activityByDate={activityByDate}
-                embedded
-                title="Habit map"
-                selectedDate={chronicleHeatmapDate}
-                onSelectDate={setChronicleHeatmapDate}
-              />
-              {chronicleHeatmapDate ? (
-                <View style={styles.chronicleQuestLog}>
-                  <DayQuestLogReadOnly dateKey={chronicleHeatmapDate} showTitle={false} />
-                </View>
-              ) : (
-                <Text style={styles.chronicleHeatmapHint}>
-                  Tap a day on the map to open its quest log.
-                </Text>
-              )}
+          <SectionHead label="Chronicles" />
+          <Card style={styles.chron}>
+            <View style={styles.chronHead}>
+              <Text style={styles.chronTitle}>Habit map</Text>
+              <Text style={styles.caption}>Last 12 weeks</Text>
             </View>
-            <Pressable
+            <Heatmap activityByDate={activityByDate} weeks={12} onSelectDate={setLogDate} />
+            <ButtonSoft
+              label="Open chronicles"
+              glyph="calendar"
+              block
               onPress={() => {
                 impactAsync(ImpactFeedbackStyle.Light);
                 setChroniclesOpen(true);
               }}
-              style={({ pressed }) => [styles.chroniclesCta, pressed && styles.chroniclesCtaPressed]}
-            >
-              <ScrollText size={20} color={Colors.dark.emerald} strokeWidth={2.2} />
-              <Text style={styles.chroniclesCtaText}>View detailed chronicles</Text>
-            </Pressable>
-          </View>
-        </ScrollView>
+            />
+          </Card>
 
-        <ActivityChroniclesModal
-          visible={chroniclesOpen}
-          onClose={() => setChroniclesOpen(false)}
-          activityByDate={activityByDate ?? {}}
-          completedHabitNamesByDate={completedHabitNamesByDate ?? {}}
-        />
+          <Card style={styles.friendCard}>
+            <Text style={styles.caption}>Friend code</Text>
+            <View style={styles.friendRow}>
+              <Text style={styles.friendCode} selectable>
+                {myCode}
+              </Text>
+              <Pressable onPress={onCopyFriendCode} accessibilityLabel="Copy friend code">
+                <Text style={styles.copy}>Copy</Text>
+              </Pressable>
+            </View>
+          </Card>
+        </ScrollView>
       </SafeAreaView>
+
+      <BottomSheet visible={chroniclesOpen} onClose={() => setChroniclesOpen(false)} fill>
+        <ChroniclesSheet activityByDate={activityByDate ?? {}} />
+      </BottomSheet>
+
+      <BottomSheet visible={logDate != null} onClose={() => setLogDate(null)}>
+        <Text style={styles.sheetTitle}>Quest log — {logDate ? formatLogDate(logDate) : ''}</Text>
+        {logNames.length === 0 && !logNote ? (
+          <Text style={styles.sheetMuted}>No quests recorded for this day.</Text>
+        ) : (
+          <View style={styles.logList}>
+            {logNames.map((n) => (
+              <View key={n} style={styles.logLine}>
+                <Glyph name="check" size={16} color={tokens.success} />
+                <Text style={styles.sheetBody}>{n}</Text>
+              </View>
+            ))}
+            {logNote ? <Text style={styles.sheetBody}>{logNote}</Text> : null}
+          </View>
+        )}
+      </BottomSheet>
     </LinearGradient>
   );
 }
@@ -520,274 +183,152 @@ const styles = StyleSheet.create({
   scroll: {
     flex: 1,
   },
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 32,
-    paddingTop: 8,
+  stack: {
+    paddingHorizontal: tokens.screenX,
+    paddingBottom: 28,
+    gap: 10,
+    maxWidth: 420,
+    width: '100%',
+    alignSelf: 'center',
   },
-  screenTitle: {
-    fontSize: 12,
-    fontWeight: "800" as const,
-    letterSpacing: 2,
-    color: Colors.dark.textMuted,
-    textTransform: "uppercase" as const,
-    textAlign: "center" as const,
-    marginBottom: 16,
-  },
-  avatarRing: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: Colors.dark.surfaceLight,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  avatarEmoji: {
-    fontSize: 34,
-  },
-  heroName: {
-    fontSize: 20,
-    fontWeight: "800" as const,
-    color: Colors.dark.text,
-    textAlign: "left" as const,
-    letterSpacing: 0.3,
-  },
-  heroLevel: {
-    marginTop: 4,
-    fontSize: 14,
-    fontWeight: "700" as const,
-    color: Colors.dark.gold,
-  },
-  card: {
-    borderRadius: 20,
+  profile: {
     padding: 16,
-    backgroundColor: Colors.dark.surface + "cc",
-    borderWidth: 1,
-    borderColor: Colors.dark.border + "aa",
-    marginBottom: 24,
+    gap: 12,
   },
-  sheetHeaderRow: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    gap: 14,
-    paddingBottom: 14,
-    marginBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.border + "66",
+  profileTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
   },
-  sheetHeaderMeta: {
+  profileCol: {
     flex: 1,
     minWidth: 0,
-  },
-  toggleRow: {
-    flexDirection: "row" as const,
-    gap: 8,
-    marginTop: 14,
-    padding: 4,
-    borderRadius: 14,
-    backgroundColor: Colors.dark.background + "cc",
-  },
-  toggleBtn: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 11,
-    alignItems: "center" as const,
-  },
-  toggleBtnActive: {
-    backgroundColor: Colors.dark.gold + "28",
-    borderWidth: 1,
-    borderColor: Colors.dark.gold + "55",
-  },
-  toggleText: {
-    fontSize: 13,
-    fontWeight: "700" as const,
-    color: Colors.dark.textMuted,
-  },
-  toggleTextActive: {
-    color: Colors.dark.gold,
-  },
-  statsOverviewBody: {
-    position: "relative" as const,
-    width: "100%" as const,
-    overflow: "hidden" as const,
-  },
-  statsOverviewLayer: {
-    ...StyleSheet.absoluteFill,
-  },
-  statsOverviewLayerVisible: {
-    opacity: 1,
-  },
-  statsOverviewLayerHidden: {
-    opacity: 0,
-  },
-  statsTabPaneInner: {
-    flex: 1,
-    alignItems: "center" as const,
-    justifyContent: "flex-start" as const,
-    paddingTop: 4,
-  },
-  overviewTabPaneInner: {
-    flex: 1,
-    justifyContent: "flex-start" as const,
-    paddingVertical: 8,
-  },
-  overviewPanel: {
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: Colors.dark.border + "66",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    backgroundColor: Colors.dark.background + "66",
-  },
-  overviewRow: {
-    flexDirection: "row" as const,
-    justifyContent: "space-between" as const,
-    alignItems: "center" as const,
-    gap: 12,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.border + "55",
-  },
-  overviewLabel: {
-    flex: 1,
-    fontSize: 12,
-    color: Colors.dark.textSecondary,
-    lineHeight: 17,
-  },
-  overviewValue: {
-    fontSize: 14,
-    fontWeight: "800" as const,
-    color: Colors.dark.text,
-  },
-  friendCodeRow: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
     gap: 8,
   },
-  friendCodeValue: {
-    fontSize: 12,
-    fontWeight: "800" as const,
-    color: Colors.dark.text,
-    letterSpacing: 0.4,
-  },
-  copyBtn: {
-    width: 24,
-    height: 24,
-    borderRadius: 7,
-    justifyContent: "center" as const,
-    alignItems: "center" as const,
-    borderWidth: 1,
-    borderColor: Colors.dark.emerald + "88",
-    backgroundColor: Colors.dark.emerald + "1f",
-  },
-  copyBtnPressed: {
-    opacity: 0.75,
-  },
-  lifetimeGrid: {
-    marginTop: 10,
-    flexDirection: "row" as const,
-    gap: 8,
-  },
-  lifetimeTile: {
-    flex: 1,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.dark.border + "66",
-    backgroundColor: Colors.dark.surfaceLight + "66",
-    paddingHorizontal: 8,
-    paddingVertical: 10,
-    minHeight: 74,
-    justifyContent: "space-between" as const,
-  },
-  lifetimeLabel: {
-    fontSize: 10,
-    lineHeight: 13,
-    color: Colors.dark.textMuted,
-    textTransform: "uppercase" as const,
-    letterSpacing: 0.6,
-    fontWeight: "700" as const,
-  },
-  lifetimeValue: {
-    fontSize: 18,
-    fontWeight: "900" as const,
-    color: Colors.dark.gold,
-    marginTop: 8,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  lastSection: {
-    marginBottom: 8,
-  },
-  sectionTitle: {
+  levelCaption: {
+    fontFamily: tokens.font800,
     fontSize: 11,
-    fontWeight: "800" as const,
-    letterSpacing: 1.4,
-    color: Colors.dark.gold,
-    textTransform: "uppercase" as const,
-    marginBottom: 12,
-    marginLeft: 4,
+    letterSpacing: 0.88,
+    textTransform: 'uppercase',
+    color: tokens.brand,
   },
-  equipmentCard: {
-    borderRadius: 20,
-    padding: 14,
-    backgroundColor: Colors.dark.background + "ee",
-    borderWidth: 1,
-    borderColor: Colors.dark.border + "88",
+  heroName: {
+    fontFamily: tokens.font900,
+    fontSize: 24,
+    lineHeight: 28,
+    color: tokens.ink,
   },
-  chroniclesCard: {
-    borderRadius: 20,
-    padding: 14,
-    paddingBottom: 10,
-    backgroundColor: Colors.dark.background + "ee",
-    borderWidth: 1,
-    borderColor: Colors.dark.border + "88",
-    gap: 12,
-  },
-  chronicleQuestLog: {
-    marginTop: 4,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: Colors.dark.border + "66",
-  },
-  chronicleHeatmapHint: {
-    fontSize: 12,
-    color: Colors.dark.textMuted,
-    fontStyle: "italic" as const,
-    lineHeight: 17,
-    marginTop: 4,
-  },
-  chroniclesCta: {
-    marginTop: 14,
-    width: "100%" as const,
-    flexDirection: "row" as const,
-    paddingVertical: 16,
-    paddingHorizontal: 18,
-    borderRadius: 16,
-    backgroundColor: Colors.dark.emerald + "22",
-    borderWidth: 1.5,
-    borderColor: Colors.dark.emerald + "55",
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
+  titles: {
     gap: 10,
   },
-  chroniclesCtaPressed: {
-    opacity: 0.9,
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
   },
-  chroniclesCtaText: {
+  titleLocked: {
+    opacity: 0.4,
+  },
+  titleCopy: {
+    flex: 1,
+    gap: 2,
+  },
+  titleName: {
+    fontFamily: tokens.font800,
+    fontSize: 16,
+    color: tokens.ink,
+  },
+  titleDesc: {
+    fontFamily: tokens.font700,
+    fontSize: 13,
+    color: tokens.ink2,
+  },
+  emotes: {
+    minHeight: 88,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: tokens.surface2,
+    borderRadius: tokens.rMd,
+    padding: 18,
+  },
+  emotesCopy: {
+    fontFamily: tokens.font800,
+    fontSize: 16,
+    color: tokens.ink2,
+  },
+  padCard: {
+    padding: 16,
+  },
+  chron: {
+    padding: 16,
+    gap: 12,
+  },
+  chronHead: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+  },
+  chronTitle: {
+    fontFamily: tokens.font900,
+    fontSize: 19,
+    color: tokens.ink,
+  },
+  caption: {
+    fontFamily: tokens.font800,
+    fontSize: 11,
+    letterSpacing: 0.88,
+    textTransform: 'uppercase',
+    color: tokens.ink3,
+  },
+  friendCard: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  friendRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  friendCode: {
+    fontFamily: tokens.font900,
+    fontSize: 16,
+    color: tokens.ink,
+    letterSpacing: 1,
+  },
+  copy: {
+    fontFamily: tokens.font800,
+    fontSize: 13,
+    color: tokens.brandDeep,
+  },
+  sheetTitle: {
+    fontFamily: tokens.font900,
+    fontSize: 22,
+    color: tokens.ink,
+    marginBottom: 12,
+  },
+  sheetMuted: {
+    fontFamily: tokens.font700,
     fontSize: 15,
-    fontWeight: "800" as const,
-    color: Colors.dark.emerald,
-    letterSpacing: 0.4,
-    textTransform: "uppercase" as const,
+    color: tokens.ink3,
+    marginBottom: 8,
   },
-  questIntro: {
-    fontSize: 12,
-    lineHeight: 18,
-    color: Colors.dark.textMuted,
-    fontWeight: "600" as const,
-    marginBottom: 18,
-    marginLeft: 4,
-    marginRight: 4,
+  sheetBody: {
+    fontFamily: tokens.font700,
+    fontSize: 16,
+    color: tokens.ink,
+    flex: 1,
+  },
+  logList: {
+    gap: 8,
+    marginBottom: 8,
+  },
+  logLine: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
 });

@@ -1,17 +1,19 @@
 import React, { useCallback } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ArrowDown } from 'lucide-react-native';
 
-import Colors from '@/constants/colors';
 import { impactAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
+import { LevelNav, type LevelFloor } from '@/ui/LevelNav';
+import { Nameplate } from '@/ui/Nameplate';
+import { SceneHead } from '@/ui/SceneHead';
+import { ScrimTop, SeamDock } from '@/ui/Seam';
+import { tokens } from '@/ui/tokens';
 
-import FloorLift from './FloorLift';
-import OverlayHud from './OverlayHud';
 import StillFrame from './StillFrame';
-import { TAVERN_INTERIOR } from './interiors';
+import { isFloorOpen, TAVERN_INTERIOR } from './interiors';
 import { useTavernLift } from './useTavernLift';
 import { useWorldStore } from './store';
+import { WorldNotice } from './WorldNotice';
 
 export default function TavernGround() {
   const insets = useSafeAreaInsets();
@@ -20,6 +22,7 @@ export default function TavernGround() {
 
   const floor = TAVERN_INTERIOR.floors.find((entry) => entry.id === floorId);
   const still = floor?.still ?? TAVERN_INTERIOR.floors.find((entry) => entry.id === 'ground')?.still;
+  const levels = toLevels(TAVERN_INTERIOR.floors);
 
   const stairTo = floor?.stairTo;
   const onStairs = useCallback(() => {
@@ -35,80 +38,61 @@ export default function TavernGround() {
   return (
     <View style={styles.root}>
       <StillFrame source={still.source} intrinsicWidth={still.width} intrinsicHeight={still.height}>
-        {(box) =>
-          stairTo ? (
-            <Pressable
+        {(box) => {
+          if (!stairTo) return null;
+          const target = TAVERN_INTERIOR.floors.find((entry) => entry.id === stairTo.to);
+          if (!target) return null;
+          return (
+            <Nameplate
               testID="tavern-stairs"
               accessibilityLabel={`Stairs to ${stairTo.to}`}
+              label={target.label}
+              sticker="swords"
+              featured={isFloorOpen(target)}
+              locked={!isFloorOpen(target)}
+              frameWidth={box.width}
+              left={stairTo.x * box.width}
+              top={stairTo.y * box.height}
               onPress={onStairs}
-              hitSlop={12}
-              style={({ pressed }) => [
-                styles.stairHotspot,
-                {
-                  left: stairTo.x * box.width - 18,
-                  top: stairTo.y * box.height - 18,
-                },
-                pressed && styles.pressed,
-              ]}
-            >
-              <ArrowDown size={16} color={Colors.dark.gold} strokeWidth={2.4} />
-            </Pressable>
-          ) : null
-        }
+            />
+          );
+        }}
       </StillFrame>
-
-      <OverlayHud
-        insets={insets}
-        kicker={TAVERN_INTERIOR.hubKicker}
-        title={TAVERN_INTERIOR.name}
-        left={{ icon: 'back', onPress: openHub, accessibilityLabel: 'Back' }}
-        right={
-          <FloorLift floors={TAVERN_INTERIOR.floors} currentId={floorId} onSelect={onPickFloor} />
-        }
-      />
-
-      {whisper ? (
-        <View pointerEvents="none" style={[styles.whisperWrap, { paddingBottom: 16 + insets.bottom }]}>
-          <Text style={styles.whisper}>{whisper}</Text>
-        </View>
-      ) : null}
+      <ScrimTop />
+      <SeamDock fade={90} />
+      <SceneHead kicker={TAVERN_INTERIOR.name} name={floor?.label ?? TAVERN_INTERIOR.name} onBack={openHub} />
+      <View pointerEvents="box-none" style={[styles.nav, { top: insets.top + 8 }]}>
+        <LevelNav
+          floors={levels}
+          currentId={floorId}
+          onSelect={(next) => {
+            const target = TAVERN_INTERIOR.floors.find((entry) => entry.id === next.id);
+            if (target) onPickFloor(target);
+          }}
+        />
+      </View>
+      {whisper ? <WorldNotice message={whisper} /> : null}
     </View>
   );
+}
+
+function toLevels(floors: typeof TAVERN_INTERIOR.floors): LevelFloor[] {
+  return floors.map((floor) => ({
+    id: floor.id,
+    label: floor.label,
+    locked: !isFloorOpen(floor),
+  }));
 }
 
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#070510',
+    backgroundColor: tokens.canvas,
   },
-  stairHotspot: {
+  nav: {
     position: 'absolute',
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 1.5,
-    borderColor: Colors.dark.gold + 'aa',
-    backgroundColor: 'rgba(13, 10, 20, 0.78)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 3,
-  },
-  pressed: {
-    opacity: 0.82,
-  },
-  whisperWrap: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    bottom: 0,
-    alignItems: 'center',
-  },
-  whisper: {
-    color: Colors.dark.gold,
-    fontSize: 12,
-    fontWeight: '700',
-    textAlign: 'center',
-    textShadowColor: 'rgba(0,0,0,0.85)',
-    textShadowRadius: 6,
+    top: 8,
+    right: tokens.screenX,
+    zIndex: 30,
   },
 });

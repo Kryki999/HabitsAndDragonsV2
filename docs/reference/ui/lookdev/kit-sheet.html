@@ -3,13 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=1000, initial-scale=1" />
+  <meta name="render-size" content="1000,3990" />
   <title>H&D — Kit sheet (components reference)</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="tokens.css" />
   <link rel="stylesheet" href="components.css" />
   <link rel="stylesheet" href="glyphs.css" />
   <style>
-    body { background: var(--canvas); }
+    html, body { background: var(--canvas); }
     .sheet { width: 1000px; padding: 36px 40px 48px; display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
     .full { grid-column: 1 / -1; }
     .blk { background: rgba(255,255,255,.18); border-radius: 28px; padding: 20px 22px 22px; }
@@ -32,8 +33,11 @@
     .card.habit { width: 100%; }
     .tabbar.demo { position: relative; border-radius: 28px; height: 78px; padding: 8px; }
     .scene-head.demo { position: relative; top: 0; left: 0; }
-    .loot { width: 330px; }
+    .tiles { width: 330px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
     .note { font: 800 12px/1.35 var(--font); color: #fff; opacity: .92; margin-top: 12px; text-shadow: var(--shadow-on-canvas); }
+    .soft-demo, .white-demo { background: #fff; border-radius: 22px; padding: 12px; }
+    .blk.scenes { background-position: center 70%; }
+    .blk.scenes .note { text-shadow: 0 1px 3px #000; }
   </style>
 </head>
 <body>
@@ -54,7 +58,7 @@
       <div class="sw"><i style="background:var(--gold)"></i><b>gold</b><span>#FDB43C</span></div>
       <div class="sw"><i style="background:var(--success)"></i><b>success</b><span>#5FCF8A</span></div>
       <div class="sw"><i style="background:var(--danger)"></i><b>danger</b><span>#F2685A</span></div>
-      <div class="sw"><i style="background:linear-gradient(90deg,var(--r-common) 25%,var(--r-rare) 25% 50%,var(--r-epic) 50% 75%,var(--r-legendary) 75%)"></i><b>rarity</b><span>items only</span></div>
+      <div class="sw"><i style="background:linear-gradient(90deg,var(--r-common) 25%,var(--r-unique) 25% 50%,var(--r-heroic) 50% 75%,var(--r-artifact) 75%)"></i><b>rarity</b><span>items only</span></div>
     </div>
   </div>
 
@@ -74,8 +78,10 @@
     <div style="height:14px"></div>
     <button class="btn btn-flow">Let's go!</button>
     <div style="height:14px"></div>
+    <div class="soft-demo"><button class="btn btn-soft"><span class="glyph g-cal"></span>Open chronicles</button></div>
+    <div style="height:14px"></div>
     <div class="row"><span class="icon-btn"><span class="glyph g-back"></span></span><span class="icon-btn"><span class="glyph g-settings"></span></span><span class="check-btn"><span class="glyph g-check"></span></span><span class="icon-btn ghost"><span class="glyph g-menu"></span></span></div>
-    <div class="note">Primary = in-app action (sheet or scene). Flow = fullscreen flows on canvas (onboarding, streak, level-up).</div>
+    <div class="note">Primary = the one main action (sheet, scene, onboarding). Flow = white CTA on celebrations. Soft = secondary, only on white cards.</div>
   </div>
 
   <div class="blk full">
@@ -100,19 +106,22 @@
       <div class="stk"><span class="avatar" style="width:40px;height:40px;border-width:2px"><img src="assets/avatar-hero.jpg" alt="" /></span>Hero</div>
       <div class="stk"><img class="sticker" src="assets/fe-handshake.svg" alt="" />Social</div>
       <div class="stk"><img class="sticker" src="assets/fe-man-mage.svg" alt="" />Mentor</div>
-      <div style="width:40px"></div>
-      <div class="stk"><img class="sticker" src="assets/fe-national-park.svg" alt="" />alt World</div>
-      <div class="stk"><img class="sticker" src="assets/fe-compass.svg" alt="" />alt World</div>
-      <div class="stk"><img class="sticker" src="assets/fe-people-hugging.svg" alt="" />alt Social</div>
-      <div class="stk"><img class="sticker" src="assets/fe-crystal-ball.svg" alt="" />alt Mentor</div>
-      <div class="stk"><img class="sticker" src="assets/fe-speech-balloon.svg" alt="" />alt Mentor</div>
+    </div>
+    <div class="h" style="margin-top:20px">Hero stat set (hex order)</div>
+    <div class="row">
+      <div class="stk"><img class="sticker" src="assets/fe-flexed-biceps.svg" alt="" />Strength</div>
+      <div class="stk"><img class="sticker" src="assets/fe-high-voltage.svg" alt="" />Agility</div>
+      <div class="stk"><img class="sticker" src="assets/fe-brain.svg" alt="" />Intelligence</div>
+      <div class="stk"><img class="sticker" src="assets/fe-red-heart.svg" alt="" />Vitality</div>
+      <div class="stk"><img class="sticker" src="assets/fe-sparkles.svg" alt="" />Spirit</div>
+      <div class="stk"><img class="sticker" src="assets/fe-bullseye.svg" alt="" />Discipline</div>
     </div>
   </div>
 
   <div class="blk">
     <div class="h">Glyphs — system only (MingCute, mono)</div>
     <div class="row">
-      <span class="gl"><span class="glyph g-back"></span></span><span class="gl"><span class="glyph g-close"></span></span><span class="gl"><span class="glyph g-check"></span></span><span class="gl"><span class="glyph g-lock"></span></span><span class="gl"><span class="glyph g-settings"></span></span><span class="gl"><span class="glyph g-filter"></span></span><span class="gl"><span class="glyph g-add"></span></span><span class="gl"><span class="glyph g-cal"></span></span>
+      <span class="gl"><span class="glyph g-back"></span></span><span class="gl"><span class="glyph g-close"></span></span><span class="gl"><span class="glyph g-check"></span></span><span class="gl"><span class="glyph g-lock"></span></span><span class="gl"><span class="glyph g-settings"></span></span><span class="gl"><span class="glyph g-filter"></span></span><span class="gl"><span class="glyph g-add"></span></span><span class="gl"><span class="glyph g-cal"></span></span><span class="gl"><span class="glyph g-up"></span></span><span class="gl"><span class="glyph g-down"></span></span><span class="gl"><span class="glyph g-refresh"></span></span><span class="gl"><span class="glyph g-edit"></span></span>
     </div>
     <div class="note">Never on art alone. Never as content (habits, places, items).</div>
   </div>
@@ -134,8 +143,8 @@
     <div class="row" style="align-items:flex-start;gap:22px">
       <div class="scene-head demo"><span class="back"><span class="glyph g-back"></span></span><span><div class="kicker">Capital</div><div class="name">Crownhaven</div></span></div>
       <div class="plate"><span class="body"><span class="medal"><img class="sticker" src="assets/fe-carrot.svg" alt="" /></span>Market</span><span class="tail"></span><span class="anchor"></span></div>
-      <div class="plate featured"><span class="body"><span class="medal"><img class="sticker" src="assets/fe-beer-mug.svg" alt="" /></span><span>Tavern<span class="sub">Boss inside</span></span></span><span class="tail"></span><span class="anchor"></span></div>
-      <div class="plate locked"><span class="body"><span class="medal"><span class="glyph g-lock" style="width:18px;height:18px"></span></span><span>Palace<span class="sub">After Act 1</span></span></span><span class="tail"></span><span class="anchor"></span></div>
+      <div class="plate featured"><span class="body"><span class="medal"><img class="sticker" src="assets/fe-beer-mug.svg" alt="" /></span>Tavern</span><span class="tail"></span><span class="anchor"></span></div>
+      <div class="plate locked"><span class="body"><span class="medal"><span class="glyph g-lock" style="width:18px;height:18px"></span></span>Palace</span><span class="tail"></span><span class="anchor"></span></div>
       <div class="pin-demo row" style="gap:18px">
         <div class="mpin current"><span class="head"><img src="assets/avatar-hero.jpg" alt="" /></span><span class="tip"></span></div>
         <div class="mpin"><span class="head"><img class="sticker" src="assets/fe-castle.svg" alt="" /></span><span class="tip"></span></div>
@@ -155,14 +164,127 @@
   </div>
 
   <div class="blk">
-    <div class="h">Item tiles — rarity frame (common · rare · epic · legendary)</div>
-    <div class="loot">
+    <div class="h">Item tiles — rarity frame (common · unique · heroic · artifact)</div>
+    <div class="tiles">
       <div class="item light"><img src="assets/hd-coin.svg" alt="" /><span class="qty">×40</span></div>
-      <div class="item light rare"><img src="assets/fe-wine-glass.svg" alt="" /></div>
-      <div class="item light epic"><img src="assets/fe-test-tube.svg" alt="" /></div>
-      <div class="item light legendary"><img src="assets/fe-gem-stone.svg" alt="" /></div>
+      <div class="item light unique"><img src="assets/fe-wine-glass.svg" alt="" /></div>
+      <div class="item light heroic"><img src="assets/fe-test-tube.svg" alt="" /></div>
+      <div class="item light artifact"><img src="assets/fe-gem-stone.svg" alt="" /></div>
     </div>
     <div class="note">Placeholder art. Final items = style-kit item portraits on transparent bg (bold outline, world style).</div>
+  </div>
+
+  <div class="blk dark full scenes">
+    <div class="h">Scene cards — encounter (boss) · ally (NPC). Max ~18% of screen, always above the tab bar</div>
+    <div class="row" style="align-items:flex-start;gap:24px">
+      <div class="scene-card encounter card demo">
+        <div class="row1"><span class="nm">Gutterjack</span><span class="tag boss">Boss</span><span class="spacer"></span><span class="win-pill">72%<small>win</small></span></div>
+        <div class="row2">
+          <div class="loot">
+            <div class="item light"><img src="assets/hd-coin.svg" alt="" /><span class="qty">×40</span></div>
+            <div class="item light unique"><img src="assets/fe-wine-glass.svg" alt="" /></div>
+            <div class="item light heroic"><img src="assets/fe-test-tube.svg" alt="" /></div>
+            <div class="item light artifact"><img src="assets/fe-gem-stone.svg" alt="" /></div>
+          </div>
+          <button class="btn btn-primary"><img class="sticker" src="assets/fe-crossed-swords.svg" alt="" />Fight</button>
+        </div>
+      </div>
+      <div class="scene-card ally card demo">
+        <div class="row1"><span class="nm">Torrik</span><span class="tag ally">Ally</span><span class="spacer"></span><span class="raise-chip"><img class="sticker" src="assets/fe-crown.svg" alt="" />Streak <b>7 / 10</b></span></div>
+        <div class="track">
+          <div class="bar"><span class="fill" style="width: 20%"></span></div>
+          <div class="lv done"><span class="node"><img class="sticker" src="assets/fe-hammer-and-wrench.svg" alt="" /></span><span class="badge"><span class="glyph g-check"></span></span><span class="lbl"><b>Lv 1 · 5 days</b>Repairs</span></div>
+          <div class="lv next"><span class="node"><img class="sticker" src="assets/fe-dagger.svg" alt="" /></span><span class="lbl"><b>Lv 2 · 10 days</b>Iron blade</span></div>
+          <div class="lv closed"><span class="node"><span class="glyph g-lock"></span></span><span class="lbl"><b>Lv 3 · 20 days</b>Masterwork</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="note">Encounter: who · win chance / loot · Fight. Ally: who · what raises it / 3 levels (done ✓ · next gold · closed lock). Details = tap → bottom sheet, never a taller card.</div>
+  </div>
+
+  <div class="blk">
+    <div class="h">Segmented · chip · step bar</div>
+    <div class="white-demo">
+      <div class="seg"><span class="on">Stats</span><span>Titles</span><span>Emotes</span></div>
+    </div>
+    <div style="height:14px"></div>
+    <div class="row"><div class="seg on-canvas" style="width:190px"><span class="on">Buy</span><span>Sell loot</span></div><span class="chip"><span class="glyph g-refresh"></span>New stock <b>3d</b></span></div>
+    <div style="height:14px"></div>
+    <div class="step-bar"><span class="icon-btn"><span class="glyph g-back"></span></span><span class="track-line"><i style="width: 30%"></i></span><span class="cnt">4 / 12</span></div>
+    <div class="note">Seg on white = surface-2 track. Seg on canvas = canvas-deep track, white active.</div>
+  </div>
+
+  <div class="blk">
+    <div class="h">NPC ask · speech bubble</div>
+    <div class="npc-ask">
+      <span class="face"><img src="assets/face-vendor.jpg" alt="" /></span>
+      <div class="bubble tail-left on-canvas"><div class="caption">Stall keeper</div><div class="q">So, stranger. What do you want to change first?</div></div>
+    </div>
+    <div style="height:16px"></div>
+    <div class="bubble tail-down-left on-canvas" style="width:280px"><div class="caption">Stall keeper</div>Keys, potions, a coat for the road.</div>
+    <div class="note" style="margin-top:22px">Onboarding questions are asked by an NPC, never by a form. Tail points at the speaker.</div>
+  </div>
+
+  <div class="blk">
+    <div class="h">Choice row — single answer (default · selected)</div>
+    <div class="choice"><span class="well"><img class="sticker" src="assets/fe-flexed-biceps.svg" alt="" /></span><span class="txt">Stronger body<small>Move, sleep, eat better</small></span><span class="mark"></span></div>
+    <div style="height:10px"></div>
+    <div class="choice on"><span class="well"><img class="sticker" src="assets/fe-brain.svg" alt="" /></span><span class="txt">Sharper mind<small>Focus, learn, read</small></span><span class="mark"><span class="glyph g-check"></span></span></div>
+  </div>
+
+  <div class="blk">
+    <div class="h">Choice tile — pick several (default · selected)</div>
+    <div class="choice-grid">
+      <div class="choice-tile"><span class="well"><img class="sticker" src="assets/fe-person-running.svg" alt="" /></span><b>Short walk</b><small>10 min</small><span class="mark"></span></div>
+      <div class="choice-tile on"><span class="well"><img class="sticker" src="assets/fe-open-book.svg" alt="" /></span><b>Read 10 pages</b><small>10 min</small><span class="mark"><span class="glyph g-check"></span></span></div>
+    </div>
+  </div>
+
+  <div class="blk full">
+    <div class="h">Shop tile — default · featured · can't afford · sold out</div>
+    <div class="shop-grid" style="grid-template-columns: repeat(4, 150px); gap: 16px">
+      <div class="card shop-tile"><div class="item light"><img src="assets/fe-old-key.svg" alt="" /></div><span class="nm">Dungeon key</span><span class="price"><img src="assets/hd-coin.svg" alt="" />100</span></div>
+      <div class="card shop-tile featured"><span class="corner">This week</span><div class="item light heroic"><img src="assets/fe-coat.svg" alt="" /></div><span class="nm">Traveler's coat</span><span class="price"><img src="assets/hd-coin.svg" alt="" />900</span></div>
+      <div class="card shop-tile short"><div class="item light heroic"><img src="assets/fe-nazar-amulet.svg" alt="" /></div><span class="nm">Seer's charm</span><span class="price"><img src="assets/hd-coin.svg" alt="" />1 400</span></div>
+      <div class="card shop-tile sold"><div class="item light"><img src="assets/fe-military-helmet.svg" alt="" /></div><span class="nm">Iron helm</span><span class="price">Sold out</span></div>
+    </div>
+  </div>
+
+  <div class="blk">
+    <div class="h">Streak week (done · today · ahead)</div>
+    <div class="card week">
+      <div class="days">
+        <span>M</span><span>T</span><span>W</span><span class="now">T</span><span>F</span><span>S</span><span>S</span>
+        <span class="line"><span class="fill" style="width: 50%"></span></span>
+        <span class="n done"><span class="glyph g-check"></span></span><span class="n done"><span class="glyph g-check"></span></span><span class="n done"><span class="glyph g-check"></span></span>
+        <span class="n now"><img class="sticker" src="assets/fe-crown.svg" alt="" /></span>
+        <span class="n"></span><span class="n"></span><span class="n"></span>
+      </div>
+    </div>
+    <div style="height:14px"></div>
+    <div class="h">Reward row (celebrations)</div>
+    <div class="card" style="padding:14px 16px">
+      <div class="rewards">
+        <div class="reward"><div class="item light" style="width:72px"><img src="assets/hd-coin.svg" alt="" /></div><span>150</span><small>Gold</small></div>
+        <div class="reward"><div class="item light" style="width:72px"><img src="assets/fe-old-key.svg" alt="" /></div><span>1</span><small>Key</small></div>
+        <div class="reward"><div class="item light unique" style="width:72px"><img src="assets/fe-dagger.svg" alt="" /></div><span>Iron dagger</span><small>Unique</small></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="blk">
+    <div class="h">Portrait · level badge · equip slot · heatmap</div>
+    <div class="row" style="align-items:flex-start;gap:22px">
+      <span class="portrait"><img src="assets/avatar-hero-lg.jpg" alt="" /><span class="edit"><span class="glyph g-edit"></span></span></span>
+      <span class="portrait" style="width:96px;height:96px;margin-bottom:24px"><img src="assets/avatar-hero-lg.jpg" alt="" /><span class="lv-badge" style="height:36px;padding:0 12px;font-size:18px;bottom:-18px;border-width:3px"><small>LV</small>5</span></span>
+      <div class="equip-slot"><div class="slot" style="width:84px"><img class="ghost" src="assets/fe-nazar-amulet.svg" alt="" /><span class="add"><span class="glyph g-add"></span></span></div><span class="nm">Relic</span></div>
+    </div>
+    <div class="white-demo" style="margin-top:16px">
+      <div class="heat" style="grid-template-columns: 30px repeat(12, 1fr)">
+        <span class="d">Mon</span><i></i><i class="l1"></i><i></i><i class="l2"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i><i class="l3"></i><i class="l4 today"></i>
+      </div>
+      <div class="heat-legend" style="margin-top:8px">Less<i style="background:var(--surface-2)"></i><i style="background:color-mix(in srgb,var(--success) 30%,#fff)"></i><i style="background:color-mix(in srgb,var(--success) 58%,#fff)"></i><i style="background:var(--success)"></i><i style="background:var(--success-deep)"></i>More</div>
+    </div>
   </div>
 
   <div class="blk full">

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=390, initial-scale=1" />
+  <title>H&D — Archetype C: Celebration (Crown Streak)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="tokens.css" />
+  <link rel="stylesheet" href="components.css" />
+  <link rel="stylesheet" href="glyphs.css" />
+  <style>
+    .rays { --ray-y: 250px; }
+    .medal-wrap { top: 150px; }
+    .count { top: 410px; }
+    .count .flow-title { margin-top: -4px; }
+    .week { position: absolute; left: 24px; right: 24px; top: 572px; z-index: 5; }
+    .note { position: absolute; left: 20px; right: 20px; top: 690px; z-index: 5; }
+  </style>
+</head>
+<body>
+  <div class="phone flow">
+    <div class="rays"></div>
+    <span class="spark gold" style="left: 62px; top: 130px; --s: 22px"></span>
+    <span class="spark" style="left: 318px; top: 118px; --s: 16px"></span>
+    <span class="spark" style="left: 44px; top: 330px; --s: 14px"></span>
+    <span class="spark gold" style="left: 324px; top: 300px; --s: 26px"></span>
+    <span class="spark" style="left: 290px; top: 196px; --s: 10px"></span>
+    <span class="spark" style="left: 96px; top: 226px; --s: 10px"></span>
+
+    <div class="status"><span>9:41</span><span class="sys"><span class="bars"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:11px"></i></span><span class="batt"></span></span></div>
+
+    <div class="flow-stage medal-wrap">
+      <span class="portrait xl"><img src="assets/avatar-hero-lg.jpg" alt="" /><span class="medal-badge"><img class="sticker" src="assets/fe-crown.svg" alt="" /></span></span>
+    </div>
+
+    <div class="flow-stage count">
+      <div class="hero-num">7</div>
+      <div class="flow-title">Day streak</div>
+    </div>
+
+    <div class="card week">
+      <div class="days">
+        <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span class="now">S</span>
+        <span class="line"><span class="fill" style="width: 100%"></span></span>
+        <span class="n done"><span class="glyph g-check"></span></span>
+        <span class="n done"><span class="glyph g-check"></span></span>
+        <span class="n done"><span class="glyph g-check"></span></span>
+        <span class="n done"><span class="glyph g-check"></span></span>
+        <span class="n done"><span class="glyph g-check"></span></span>
+        <span class="n done"><span class="glyph g-check"></span></span>
+        <span class="n now"><img class="sticker" src="assets/fe-crown.svg" alt="" /></span>
+      </div>
+    </div>
+
+    <div class="note flow-note">3 more days and Torrik forges<br />your <b>Iron blade</b>.</div>
+
+    <div class="flow-foot"><button class="btn btn-flow">Continue</button></div>
+    <div class="home-ind"></div>
+  </div>
+</body>
+</html>

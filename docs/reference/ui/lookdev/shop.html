@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=390, initial-scale=1" />
+  <title>H&D — Archetype A: Sheet + Vignette (Market stall shop)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="tokens.css" />
+  <link rel="stylesheet" href="components.css" />
+  <link rel="stylesheet" href="glyphs.css" />
+  <style>
+    .vignette { height: 360px; }
+    .vignette img { object-position: 18% 40%; }
+    .scrim-top { height: 120px; }
+    .seam { top: 250px; height: 110px; }
+    .top-row { position: absolute; top: 56px; left: var(--screen-x); right: var(--screen-x); z-index: 30; display: flex; align-items: center; gap: 8px; }
+    .top-row .spacer { flex: 1; }
+    .say { position: absolute; top: 122px; left: 188px; right: var(--screen-x); z-index: 20; }
+    .sheet { position: absolute; top: 322px; left: var(--screen-x); right: var(--screen-x); z-index: 20; }
+    .sheet-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .sheet-head .seg { width: 176px; }
+    .sheet-head .seg span { height: 36px; }
+    .sheet-head .spacer { flex: 1; }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="vignette"><img src="assets/vignette-stall.jpg" alt="" /></div>
+    <div class="scrim-top"></div>
+    <div class="seam"></div>
+
+    <div class="status"><span>9:41</span><span class="sys"><span class="bars"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:11px"></i></span><span class="batt"></span></span></div>
+
+    <div class="top-row">
+      <span class="icon-btn"><span class="glyph g-back"></span></span>
+      <span class="spacer"></span>
+      <span class="pill-currency"><img class="sticker" src="assets/hd-coin.svg" alt="" />1 240</span>
+      <span class="pill-currency"><img class="sticker" src="assets/fe-old-key.svg" alt="" />2</span>
+    </div>
+
+    <div class="say bubble tail-left"><div class="caption">Stall keeper</div>Keys, potions, a coat for the road. Take your pick, dear.</div>
+
+    <div class="sheet">
+      <div class="sheet-head">
+        <div class="seg on-canvas"><span class="on">Buy</span><span>Sell loot</span></div>
+        <span class="spacer"></span>
+        <span class="chip"><span class="glyph g-refresh"></span>New stock <b>3d</b></span>
+      </div>
+
+      <div class="shop-grid">
+        <div class="card shop-tile"><div class="item light"><img src="assets/fe-old-key.svg" alt="" /></div><span class="nm">Dungeon key</span><span class="price"><img src="assets/hd-coin.svg" alt="" />100</span></div>
+        <div class="card shop-tile"><div class="item light unique"><img src="assets/fe-ice.svg" alt="" /></div><span class="nm">Streak freeze</span><span class="price"><img src="assets/hd-coin.svg" alt="" />750</span></div>
+        <div class="card shop-tile"><div class="item light unique"><img src="assets/fe-four-leaf-clover.svg" alt="" /></div><span class="nm">Luck potion</span><span class="price"><img src="assets/hd-coin.svg" alt="" />120</span></div>
+        <div class="card shop-tile featured"><span class="corner">This week</span><div class="item light heroic"><img src="assets/fe-coat.svg" alt="" /></div><span class="nm">Traveler's coat</span><span class="price"><img src="assets/hd-coin.svg" alt="" />900</span></div>
+        <div class="card shop-tile short"><div class="item light heroic"><img src="assets/fe-nazar-amulet.svg" alt="" /></div><span class="nm">Seer's charm</span><span class="price"><img src="assets/hd-coin.svg" alt="" />1 400</span></div>
+        <div class="card shop-tile sold"><div class="item light"><img src="assets/fe-military-helmet.svg" alt="" /></div><span class="nm">Iron helm</span><span class="price">Sold out</span></div>
+      </div>
+    </div>
+
+    <nav class="tabbar">
+      <div class="tab"><img class="sticker" src="assets/fe-scroll.svg" alt="" />Quests</div>
+      <div class="tab active"><img class="sticker" src="assets/fe-world-map.svg" alt="" />World</div>
+      <div class="tab"><span class="avatar"><img src="assets/avatar-hero.jpg" alt="" /></span>Hero</div>
+      <div class="tab"><img class="sticker" src="assets/fe-handshake.svg" alt="" />Social</div>
+      <div class="tab"><img class="sticker" src="assets/fe-man-mage.svg" alt="" />Mentor</div>
+    </nav>
+    <div class="home-ind"></div>
+  </div>
+</body>
+</html>

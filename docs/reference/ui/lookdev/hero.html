@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=390, initial-scale=1" />
+  <meta name="render-size" content="390,1600" />
+  <title>H&D — Archetype B: Card stack (Hero)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="tokens.css" />
+  <link rel="stylesheet" href="components.css" />
+  <link rel="stylesheet" href="glyphs.css" />
+  <style>
+    .phone { height: 1600px; background: linear-gradient(180deg, var(--canvas-hi) 0, var(--canvas) 420px); }
+    .status { color: #fff; }
+    .stack { position: relative; z-index: 10; padding: 52px var(--screen-x) 0; display: flex; flex-direction: column; gap: 10px; }
+    .stack > .section-head { margin: 14px 4px 2px; }
+    .profile { padding: 16px; }
+    .profile .top { display: flex; align-items: center; gap: 16px; }
+    .profile .col { flex: 1; min-width: 0; }
+    .profile .nm { font: var(--t-h1); color: var(--ink); margin: 3px 0 10px; }
+    .profile .caption { color: var(--brand); }
+    .profile .seg { margin-top: 6px; }
+    .equip-card { padding: 16px 16px 18px; }
+    .divider { height: 2px; background: var(--surface-2); border-radius: 1px; margin: 18px 0 12px; }
+    .inv-head { display: flex; justify-content: space-between; margin-bottom: 10px; }
+    .chron { padding: 16px; }
+    .chron .hd { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+    .chron .hd b { font: 900 19px/1 var(--font); color: var(--ink); }
+    .chron .heat-legend { margin: 10px 0 14px; }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="status"><span>9:41</span><span class="sys"><span class="bars"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:11px"></i></span><span class="batt"></span></span></div>
+
+    <div class="stack">
+      <div class="account-bar">
+        <span class="avatar"><img src="assets/avatar-hero.jpg" alt="" /></span>
+        <span class="who"><b>Wanderer</b><span>Lv 4</span></span>
+        <span class="spacer"></span>
+        <span class="pill-currency"><img class="sticker" src="assets/hd-coin.svg" alt="" />320</span>
+        <span class="pill-currency"><img class="sticker" src="assets/fe-old-key.svg" alt="" />2</span>
+        <span class="icon-btn"><span class="glyph g-settings"></span></span>
+      </div>
+
+      <div class="card profile">
+        <div class="top">
+          <span class="portrait"><img src="assets/avatar-hero-lg.jpg" alt="" /><span class="edit"><span class="glyph g-edit"></span></span></span>
+          <div class="col">
+            <div class="caption">Level 4</div>
+            <div class="nm">Wanderer</div>
+            <div class="progress"><span class="fill" style="width: 40%"></span><span class="val">120 / 300 XP</span></div>
+          </div>
+        </div>
+
+        <!-- Order clockwise from top = HERO_HEX_STAT_AXIS_ORDER in apps/mobile/constants/heroHexStats.ts -->
+        <div class="stat-hex is-open">
+          <svg width="200" height="200" viewBox="0 0 200 200">
+            <g fill="none" stroke="#dde2fb" stroke-width="2">
+              <polygon points="100.0,30.0 160.6,65.0 160.6,135.0 100.0,170.0 39.4,135.0 39.4,65.0" fill="#f5f7fe" />
+              <polygon points="100.0,53.3 140.4,76.7 140.4,123.3 100.0,146.7 59.6,123.3 59.6,76.7" />
+              <polygon points="100.0,76.7 120.2,88.3 120.2,111.7 100.0,123.3 79.8,111.7 79.8,88.3" />
+              <line x1="100" y1="100" x2="100.0" y2="30.0"/><line x1="100" y1="100" x2="160.6" y2="65.0"/><line x1="100" y1="100" x2="160.6" y2="135.0"/><line x1="100" y1="100" x2="100.0" y2="170.0"/><line x1="100" y1="100" x2="39.4" y2="135.0"/><line x1="100" y1="100" x2="39.4" y2="65.0"/>
+            </g>
+            <polygon points="100.0,64.2 108.3,95.2 160.6,135.0 100.0,127.0 61.4,122.3 86.2,92.0" fill="rgba(101,112,246,.28)" stroke="#6570f6" stroke-width="3" stroke-linejoin="round" />
+            <g fill="#fff" stroke="#6570f6" stroke-width="2.5"><circle cx="100.0" cy="64.2" r="4"/><circle cx="108.3" cy="95.2" r="4"/><circle cx="160.6" cy="135.0" r="4"/><circle cx="100.0" cy="127.0" r="4"/><circle cx="61.4" cy="122.3" r="4"/><circle cx="86.2" cy="92.0" r="4"/></g>
+          </svg>
+          <button type="button" class="stat" data-name="Strength" data-value="45" style="left:50%;top:22px"><span class="well"><img class="sticker" src="assets/fe-flexed-biceps.svg" alt="" /></span></button>
+          <button type="button" class="stat" data-name="Agility" data-value="12" style="left:calc(50% + 79.7px);top:68px"><span class="well"><img class="sticker" src="assets/fe-high-voltage.svg" alt="" /></span></button>
+          <button type="button" class="stat is-on" data-name="Intelligence" data-value="88" style="left:calc(50% + 79.7px);top:160px"><span class="well"><img class="sticker" src="assets/fe-brain.svg" alt="" /></span></button>
+          <button type="button" class="stat" data-name="Vitality" data-value="34" style="left:50%;top:206px"><span class="well"><img class="sticker" src="assets/fe-red-heart.svg" alt="" /></span></button>
+          <button type="button" class="stat" data-name="Spirit" data-value="56" style="left:calc(50% - 79.7px);top:160px"><span class="well"><img class="sticker" src="assets/fe-sparkles.svg" alt="" /></span></button>
+          <button type="button" class="stat" data-name="Discipline" data-value="20" style="left:calc(50% - 79.7px);top:68px"><span class="well"><img class="sticker" src="assets/fe-bullseye.svg" alt="" /></span></button>
+          <div class="stat-tip"><span class="well"><img class="sticker" src="assets/fe-brain.svg" alt="" /></span><span class="nm">Intelligence</span><b>88</b></div>
+        </div>
+
+        <div class="seg"><span class="on">Stats</span><span>Titles</span><span>Emotes</span></div>
+      </div>
+
+      <div class="section-head">Equipment</div>
+      <div class="card equip-card">
+        <div class="equip">
+          <div class="equip-slot">
+            <div class="item light heroic"><img src="assets/fe-coat.svg" alt="" /></div>
+            <span class="nm">Traveler's Coat</span><span class="caption">Outfit · Heroic</span>
+          </div>
+          <div class="equip-slot">
+            <div class="slot"><img class="ghost" src="assets/fe-nazar-amulet.svg" alt="" /><span class="add"><span class="glyph g-add"></span></span></div>
+            <span class="nm">Relic</span><span class="caption">Empty slot</span>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="inv-head"><span class="caption">Inventory</span><span class="caption">6 / 16</span></div>
+        <div class="inv">
+          <div class="item light"><img src="assets/fe-old-key.svg" alt="" /><span class="qty">×2</span></div>
+          <div class="item light unique"><img src="assets/fe-ice.svg" alt="" /></div>
+          <div class="item light unique"><img src="assets/fe-test-tube.svg" alt="" /></div>
+          <div class="item light heroic"><img src="assets/fe-dagger.svg" alt="" /></div>
+          <div class="item light"><img src="assets/fe-military-helmet.svg" alt="" /></div>
+          <div class="item light"><img src="assets/fe-bread.svg" alt="" /><span class="qty">×3</span></div>
+          <div class="slot"></div><div class="slot"></div>
+          <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+          <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+        </div>
+      </div>
+
+      <div class="section-head">Chronicles</div>
+      <div class="card chron">
+        <div class="hd"><b>Habit map</b><span class="caption">Last 12 weeks</span></div>
+        <div class="heat" id="heat">
+          <span></span><span class="m">Jul</span><span class="m">Aug</span><span class="m">Sep</span>
+        </div>
+        <div class="heat-legend">Less<i style="background:var(--surface-2)"></i><i style="background:color-mix(in srgb,var(--success) 30%,#fff)"></i><i style="background:color-mix(in srgb,var(--success) 58%,#fff)"></i><i style="background:var(--success)"></i><i style="background:var(--success-deep)"></i>More</div>
+        <button class="btn btn-soft"><span class="glyph g-cal"></span>Open chronicles</button>
+      </div>
+    </div>
+
+    <nav class="tabbar">
+      <div class="tab"><img class="sticker" src="assets/fe-scroll.svg" alt="" />Quests</div>
+      <div class="tab"><img class="sticker" src="assets/fe-world-map.svg" alt="" />World</div>
+      <div class="tab active"><span class="avatar"><img src="assets/avatar-hero.jpg" alt="" /></span>Hero</div>
+      <div class="tab"><img class="sticker" src="assets/fe-handshake.svg" alt="" />Social</div>
+      <div class="tab"><img class="sticker" src="assets/fe-man-mage.svg" alt="" />Mentor</div>
+    </nav>
+    <div class="home-ind"></div>
+  </div>
+  <script src="stat-hex.js"></script>
+  <script>
+    // Deterministic demo data: activity grows over 12 weeks; last column = this week (today = Thu).
+    const heat = document.getElementById("heat");
+    const days = ["Mon", "", "Wed", "", "Fri", "", "Sun"];
+    for (let d = 0; d < 7; d++) {
+      heat.insertAdjacentHTML("beforeend", `<span class="d">${days[d]}</span>`);
+      for (let w = 0; w < 12; w++) {
+        const future = w === 11 && d > 3;
+        const n = (w * 7 + d * 3 + ((w * d) % 5)) % 11;
+        const lvl = future ? 0 : Math.max(0, Math.min(4, Math.floor((n + w * 1.1) / 4.2) - (w < 4 ? 1 : 0)));
+        const today = w === 11 && d === 3 ? " today" : "";
+        heat.insertAdjacentHTML("beforeend", `<i class="${lvl ? "l" + lvl : ""}${today}"></i>`);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -31,10 +31,15 @@
 | Palantir-Mag w T1 (nie kowal) | **KEEP** | Śmieszkowy early mirror (ekran); kowal → T2 |
 | Budżet M1 rozkład | T1 **6** · T2 **4** · T3–T4 **3–4** każdy; ~co 2 dni nowa lokacja (sumienny) | Retencja vs mięso na miesiąc |
 | Side kolejność | **Pula** (różna per gracz); Main ★ = stała chronologia | Agency + spójna fabuła |
-| Mapa żyje | Zoom-out diorama; living Rive na **close-up**; nie całe królestwo w Rive | Rive = HUD/aktorzy/sceny; `09`/`12` |
+| Mapa żyje | Pasek-diorama + living Rive na **close-up**; nie całe królestwo w Rive | `09`/`12`/`24` |
 | Tempo „tydzień” | Odnosi się do **sumiennego** gracza; gate = progres nie kalendarz | AFK / mało questów = dłużej w realu |
 | Eldenreach | Placeholder (średnie) | Zmienimy przy lore pass |
 | HUD | Questy · Świat · Bohater · Społeczność · Mentor | 5 tabów; D&D-karty zabite |
+| Tap pinu (2026-09-24) | **PeekCard** + „Enter” | LOCK founder. Piny bez nazw; szept po tapie = superseded. Lookdev `world-map` |
+| Mapa kamera + siatka (2026-09-25) | Pionowy pasek, lock X, bez pinch, Crownhaven na dole, B=200, środek-albo-para | LOCK founder. Graybox `world-map-gray`. Kwadrat 4:5 / hub w środku = superseded. `24` |
+| Sklep straganu (2026-09-24) | Winieta + katalog, zakładki **Buy / Sell** | LOCK founder. Gniazda SKU na stillu i dolny pasek sprzedaży = superseded. `06` §7, golden `shop` |
+| Piętra / poziomy lochu (2026-09-24) | **LevelNav** (strzałki + kłódka) | Lookdev = najnowsza wersja. Winda z etykietami = superseded. Przytrzymanie strzałki nie pokazuje nazwy |
+| Winieta straganu (2026-09-24) | Na razie wycinek Crownhaven | Dedykowany kadr babki = later. Nie blokuje sklepu |
 | Układ lokacji Akt 1 | **Rev B w `23`** nadpisuje tabelę L poniżej (draft) | Hub→R1×3→★1 las→R2→★2 zamek→pustynia/Osiris→Ananiel; „Kapusta”=stragan |
 | Main ★ NPC ally | **Brak na start** (Rev B) | Miejscówki walki Elite→Champ; ally na side/hub |
 | ★1 Closed Way (2026-08-18) | Mago-łowca Skarne; plotka „był dobry”; prawda: przynęta; ★2 dał rzemiosło roślin, nie origin zła | Margon przewodnik reuse; OUT: świątynia zepsuła dobrego |

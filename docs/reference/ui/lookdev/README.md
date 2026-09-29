@@ -7,9 +7,9 @@ HTML + CSS, z którego renderują się [`../golden/`](../golden/). Reguły: [`..
 | `tokens.css` | Jedyne wartości (kolor, typo, promień, cień). Kod RN kopiuje nazwy 1:1. |
 | `components.css` | Jeden selektor = jeden komponent z biblii (sekcja 4). |
 | `glyphs.css` | Generowany przez `build_glyphs.py` z `assets/mc-*.svg`. Nie edytować ręcznie. |
-| `*.html` | Ekrany wzorcowe (390×844) + `kit-sheet.html` (plansza komponentów). |
-| `render.ps1` | Renderuje wszystko (albo wskazane strony) do `../golden/*.png` w 2x przez headless Edge/Chrome. |
-| `assets/` | `fe-*.svg` Fluent Emoji Flat (MIT) · `mc-*.svg` MingCute (Apache-2.0) · `hd-coin.svg` (nasza moneta) · kopie stilli. |
+| `*.html` | Ekrany wzorcowe (390×844) + `kit-sheet.html` (plansza komponentów). Długie ekrany (Hero) i plansza mają `<meta name="render-size" content="W,H">`. `world-map-gray.html` = szara makieta mapy (siatka pinów, nie art). |
+| `render.ps1` | Renderuje wszystko (albo wskazane strony) do `../golden/*.png` w 2x przez headless Edge/Chrome. Rozmiar czyta z `render-size`, domyślnie 390×844. |
+| `assets/` | `fe-*.svg` Fluent Emoji Flat (MIT) · `mc-*.svg` MingCute (Apache-2.0) · `hd-coin.svg` (nasza moneta) · wycinki stilli (`still-*`, `vignette-*`, `avatar-hero*`, `face-vendor`). Tylko pliki użyte na stronach. |
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File docs/reference/ui/lookdev/render.ps1            # wszystko

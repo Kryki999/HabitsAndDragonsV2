@@ -1,33 +1,76 @@
-import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Animated,
-  ScrollView,
-  Pressable,
-  Modal,
-  TextInput,
-} from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import DraggableFlatList, { RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist';
-import { CalendarClock, ScrollText, SlidersHorizontal, GripVertical, Plus } from 'lucide-react-native';
-import { impactAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
-import Colors from '@/constants/colors';
-import { useHabitsStore } from '@/habits/store';
-import { StatType, TaskType, type Habit } from '@/habits/types';
-import HabitCard from '@/components/HabitCard';
-import AddHabitModal from '@/components/AddHabitModal';
-import HomeScenePanel from '@/components/HomeScenePanel';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
+import DraggableFlatList, { ScaleDecorator, type RenderItemParams } from 'react-native-draggable-flatlist';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import ActivityChroniclesModal from '@/components/ActivityChroniclesModal';
+import AddHabitModal from '@/components/AddHabitModal';
 import ExpeditionCalendarModal from '@/components/ExpeditionCalendarModal';
+import TaskCardOverlay, { type CardMetrics } from '@/components/TaskCardOverlay';
 import TaskSortBottomSheet from '@/components/TaskSortBottomSheet';
-import { getCastleTier } from '@/constants/kingdomTiers';
-import { orderDueHabitsForCastle } from '@/lib/castleQuestOrder';
-import { applyPlanningOrderForDate } from '@/lib/planningDayOrder';
 import { useHeroStore } from '@/hero/store';
+import { useHabitsStore } from '@/habits/store';
+import type { Habit, StatType, TaskType } from '@/habits/types';
+import { orderDueHabitsForCastle } from '@/lib/castleQuestOrder';
+import { displayRewardsForHabit } from '@/lib/economy';
+import { impactAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
+import { applyPlanningOrderForDate } from '@/lib/planningDayOrder';
+import { AccountBar, type AccountBarHandle } from '@/ui/AccountBar';
+import { BottomSheet } from '@/ui/BottomSheet';
+import { ButtonPrimary } from '@/ui/Button';
+import { Glyph } from '@/ui/Glyph';
+import { HabitRow, type RewardPoint } from '@/ui/HabitRow';
+import { PanelInset } from '@/ui/PanelInset';
+import { Progress } from '@/ui/Progress';
+import { RewardFlyer, type FlyPoint } from '@/ui/RewardFlyer';
+import { Seam, vignetteHeight } from '@/ui/Seam';
+import { SectionHead } from '@/ui/SectionHead';
+import { Sticker } from '@/ui/Sticker';
+import { shadowOnCanvas, tokens } from '@/ui/tokens';
+
+const VIGNETTE = require('../lookdev/assets/vignette-mage.jpg');
+
+type Fly = { id: number; sticker: 'coin' | 'key'; from: FlyPoint; to: FlyPoint };
+
+function todayKeyOf() {
+  return new Date().toISOString().split('T')[0]!;
+}
+
+function shiftDateKey(key: string, days: number) {
+  const dt = new Date(`${key}T00:00:00Z`);
+  dt.setUTCDate(dt.getUTCDate() + days);
+  return dt.toISOString().split('T')[0]!;
+}
+
+function crownDayCount(activity: Record<string, { completions: number } | undefined>, today: string) {
+  const has = (key: string) => (activity[key]?.completions ?? 0) > 0;
+  let cursor = has(today) ? today : shiftDateKey(today, -1);
+  let count = 0;
+  while (has(cursor)) {
+    count += 1;
+    cursor = shiftDateKey(cursor, -1);
+    if (count > 5000) break;
+  }
+  return count;
+}
+
+function crownBar(days: number) {
+  if (days >= 20) return { value: 20, target: 20 };
+  if (days >= 10) return { value: days, target: 20 };
+  if (days >= 5) return { value: days, target: 10 };
+  return { value: days, target: 5 };
+}
+
+function questsLeftLabel(left: number, focused: boolean) {
+  const noun = left === 1 ? 'quest' : 'quests';
+  return focused ? `${left} ${noun} left` : `${left} ${noun} left today`;
+}
 
 export default function QuestsScreen() {
+  const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
+  const vH = vignetteHeight(windowHeight);
+
   const profileCreatedAtDateKey = useHabitsStore((s) => s.accountCreatedAtDateKey);
   const resetDailyIfNeeded = useHabitsStore((s) => s.resetDailyIfNeeded);
   const [modalVisible, setModalVisible] = useState(false);
@@ -51,6 +94,7 @@ export default function QuestsScreen() {
     updateHabit,
     setHabitScheduledDate,
   } = useHabitsStore();
+
   const [rescheduleHabit, setRescheduleHabit] = useState<Habit | null>(null);
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const [editHabit, setEditHabit] = useState<Habit | null>(null);
@@ -61,22 +105,14 @@ export default function QuestsScreen() {
   const [editTaskType, setEditTaskType] = useState<Habit['taskType']>('daily');
   const [rescheduleDateInput, setRescheduleDateInput] = useState('');
 
-  const playerLevel = useHeroStore((s) => s.playerLevel);
-  const castleTier = getCastleTier(playerLevel);
+  const barRef = useRef<AccountBarHandle>(null);
+  const flyLayerRef = useRef<View>(null);
+  const flySeq = useRef(0);
+  const [flies, setFlies] = useState<Fly[]>([]);
 
   useEffect(() => {
     resetDailyIfNeeded();
   }, [resetDailyIfNeeded]);
-
-  const castleScaleAnim = useRef(new Animated.Value(0.8)).current;
-  const listHeaderAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.spring(castleScaleAnim, { toValue: 1, friction: 6, tension: 60, useNativeDriver: true }),
-      Animated.timing(listHeaderAnim, { toValue: 1, duration: 420, delay: 100, useNativeDriver: true }),
-    ]).start();
-  }, [castleScaleAnim, listHeaderAnim]);
 
   const handleAddHabit = useCallback(
     (habit: {
@@ -92,11 +128,52 @@ export default function QuestsScreen() {
     [addHabit],
   );
 
+  const launchFly = useCallback(async (sticker: 'coin' | 'key', source: RewardPoint) => {
+    const layer = flyLayerRef.current;
+    const bar = barRef.current;
+    if (!layer || !bar) return;
+    const origin = await new Promise<{ x: number; y: number } | null>((resolve) => {
+      layer.measureInWindow((x, y, width, height) => {
+        resolve(width === 0 && height === 0 ? null : { x, y });
+      });
+    });
+    const target = sticker === 'coin' ? await bar.goldCenter() : await bar.keyCenter();
+    if (!origin || !target) {
+      if (sticker === 'coin') bar.popGold();
+      else bar.popKey();
+      return;
+    }
+    const id = ++flySeq.current;
+    setFlies((list) => [
+      ...list,
+      {
+        id,
+        sticker,
+        from: { x: source.x - origin.x, y: source.y - origin.y },
+        to: { x: target.x - origin.x, y: target.y - origin.y },
+      },
+    ]);
+  }, []);
+
   const handleComplete = useCallback(
-    (id: string, _meta?: { source: { x: number; y: number } }) => {
+    (id: string, meta?: { source: RewardPoint }) => {
+      const before = useHabitsStore.getState().habits.find((h) => h.id === id);
+      if (!before || before.completedToday || before.isFrozen) return;
       completeHabit(id);
+      const today = todayKeyOf();
+      const rewards = displayRewardsForHabit({
+        habitId: id,
+        difficulty: before.difficulty ?? 'medium',
+        completedToday: true,
+        completionsToday: useHabitsStore.getState().activityByDate[today]?.completions ?? 0,
+        grantLog: useHeroStore.getState().habitGrantLogByDate ?? {},
+        date: today,
+      });
+      if (!meta?.source) return;
+      if (rewards.gold > 0) void launchFly('coin', meta.source);
+      if (rewards.keys > 0) void launchFly('key', meta.source);
     },
-    [completeHabit],
+    [completeHabit, launchFly],
   );
 
   const handleUncomplete = useCallback(
@@ -114,8 +191,7 @@ export default function QuestsScreen() {
   );
 
   const activeHabits = useMemo(() => habits.filter((h) => h.isActive), [habits]);
-  const todayKey = useMemo(() => new Date().toISOString().split('T')[0], []);
-  // Fall back to todayKey while profile is still loading, so past days stay blocked.
+  const todayKey = useMemo(() => todayKeyOf(), []);
   const minAccountKey = profileCreatedAtDateKey ?? todayKey;
   const effectiveKey = expeditionFocusDateKey ?? todayKey;
   const isCalendarFocusDay = expeditionFocusDateKey !== null;
@@ -154,29 +230,23 @@ export default function QuestsScreen() {
 
   const completedNamesForFocusedDay = completedHabitNamesByDate?.[effectiveKey];
 
-  const habitsDaily = useMemo(
-    () => orderedDueHabits.filter((h) => h.taskType === 'daily'),
-    [orderedDueHabits],
-  );
-  const habitsSide = useMemo(
-    () => orderedDueHabits.filter((h) => h.taskType === 'one-off'),
-    [orderedDueHabits],
-  );
-
   const [dragQuestData, setDragQuestData] = useState<Habit[]>(orderedDueHabits);
   useEffect(() => {
     setDragQuestData(orderedDueHabits);
   }, [orderedDueHabits]);
 
-  const completedCount = useMemo(() => dueHabits.filter((h) => h.completedToday).length, [dueHabits]);
+  const completedCount = useMemo(() => {
+    if (isCalendarFocusDay) {
+      return dueHabits.filter((h) => completedNamesForFocusedDay?.includes(h.name)).length;
+    }
+    return dueHabits.filter((h) => h.completedToday).length;
+  }, [dueHabits, isCalendarFocusDay, completedNamesForFocusedDay]);
   const totalCount = dueHabits.length;
-
+  const left = Math.max(0, totalCount - completedCount);
   const isCustomQuestOrder = castleQuestSortMode === 'custom' && totalCount > 0 && !isPastCastleView;
 
-  const progressLabel =
-    totalCount > 0
-      ? `${completedCount}/${totalCount} Quests completed`
-      : `${completedCount}/0 Quests completed`;
+  const crownDays = crownDayCount(activityByDate, todayKey);
+  const crown = crownBar(crownDays);
 
   const onQuestDragEnd = useCallback(
     ({ data }: { data: Habit[] }) => {
@@ -187,367 +257,174 @@ export default function QuestsScreen() {
     [setCastleQuestOrderIds],
   );
 
-  const renderDraggableQuest = useCallback(
-    ({ item, drag, isActive }: RenderItemParams<Habit>) => (
-      <ScaleDecorator>
-        <TouchableOpacity
-          activeOpacity={0.92}
-          onLongPress={drag}
-          disabled={isActive}
-          delayLongPress={180}
-          style={isActive ? styles.dragRowActive : undefined}
-        >
-          <View style={[styles.dragRowWrap, styles.dragRowPadded]}>
-            <View style={styles.dragHandle}>
-              <GripVertical size={18} color={Colors.dark.textMuted} strokeWidth={2} />
-            </View>
-            <View style={styles.dragCardFlex}>
-              <HabitCard
-                habit={item}
-                onComplete={handleComplete}
-                onUncomplete={handleUncomplete}
-                onDelete={handleRemove}
-                onEdit={(hh) => {
-                  setEditHabit(hh);
-                  setEditName(hh.name);
-                  setEditDesc(hh.description ?? '');
-                  setEditIcon(hh.icon ?? '⚔️');
-                  setEditTaskType(hh.taskType);
-                  setEditOpen(true);
-                }}
-                onReschedule={(hh) => {
-                  setRescheduleHabit(hh);
-                  setRescheduleDateInput(hh.scheduledDate ?? todayKey);
-                  setRescheduleOpen(true);
-                }}
-                readOnly={isPastCastleView}
-                historicalCompleted={!!completedNamesForFocusedDay?.includes(item.name)}
-              />
-            </View>
-          </View>
-        </TouchableOpacity>
-      </ScaleDecorator>
-    ),
-    [handleComplete, handleUncomplete, handleRemove, isPastCastleView, completedNamesForFocusedDay, todayKey],
+  const openEdit = useCallback((hh: Habit) => {
+    setEditHabit(hh);
+    setEditName(hh.name);
+    setEditDesc(hh.description ?? '');
+    setEditIcon(hh.icon ?? '⚔️');
+    setEditTaskType(hh.taskType);
+    setEditOpen(true);
+  }, []);
+
+  const openReschedule = useCallback(
+    (hh: Habit) => {
+      setRescheduleHabit(hh);
+      setRescheduleDateInput(hh.scheduledDate ?? todayKey);
+      setRescheduleOpen(true);
+    },
+    [todayKey],
   );
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.mainColumn}>
-        {isCustomQuestOrder ? (
-          <DraggableFlatList
-            data={dragQuestData}
-            keyExtractor={(item) => item.id}
-            renderItem={renderDraggableQuest}
-            onDragEnd={onQuestDragEnd}
-            activationDistance={6}
-            containerStyle={styles.scrollView}
-            showsVerticalScrollIndicator={false}
-            bounces={false}
-            ListHeaderComponent={
-              <>
-                <Animated.View style={{ transform: [{ scale: castleScaleAnim }] }}>
-                  <HomeScenePanel
-                    playerLevel={playerLevel}
-                    baseName={{ emoji: castleTier.emoji, name: castleTier.name }}
-                  />
-                </Animated.View>
+  const arrive = useCallback((fly: Fly) => {
+    if (fly.sticker === 'coin') barRef.current?.popGold();
+    else barRef.current?.popKey();
+    setFlies((list) => list.filter((item) => item.id !== fly.id));
+  }, []);
 
-                <Animated.View
-                  style={[
-                    styles.taskCommandHeader,
-                    {
-                      opacity: listHeaderAnim,
-                      transform: [
-                        {
-                          translateY: listHeaderAnim.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [12, 0],
-                          }),
-                        },
-                      ],
-                    },
-                  ]}
-                >
-                  <View style={styles.taskHeaderLead}>
-                    <Pressable
-                      onPress={() => {
-                        impactAsync(ImpactFeedbackStyle.Light);
-                        setCalendarOpen(true);
-                      }}
-                      style={({ pressed }) => [styles.taskIconBtn, pressed && styles.taskIconBtnPressed]}
-                      accessibilityRole="button"
-                      accessibilityLabel="Expedition calendar"
-                    >
-                      <CalendarClock size={20} color={Colors.dark.gold} strokeWidth={2.2} />
-                    </Pressable>
-                  </View>
-                  <View style={styles.taskHeaderCenter}>
-                    <Text style={styles.taskProgressText} numberOfLines={2}>
-                      {progressLabel}
-                    </Text>
-                  </View>
-                  <View style={styles.taskHeaderTail}>
-                    <Pressable
-                      onPress={() => {
-                        impactAsync(ImpactFeedbackStyle.Light);
-                        setChroniclesOpen(true);
-                      }}
-                      style={({ pressed }) => [styles.taskIconBtn, pressed && styles.taskIconBtnPressed]}
-                      accessibilityRole="button"
-                      accessibilityLabel="Chronicles"
-                    >
-                      <ScrollText size={20} color={Colors.dark.emerald} strokeWidth={2.2} />
-                    </Pressable>
-                    {!isPastCastleView ? (
-                      <Pressable
-                        onPress={() => {
-                          impactAsync(ImpactFeedbackStyle.Light);
-                          setSortMenuOpen(true);
-                        }}
-                        style={({ pressed }) => [styles.taskIconBtn, pressed && styles.taskIconBtnPressed]}
-                        accessibilityRole="button"
-                        accessibilityLabel="Sort quests"
-                      >
-                        <SlidersHorizontal size={20} color={Colors.dark.textSecondary} strokeWidth={2.2} />
-                      </Pressable>
-                    ) : (
-                      <View style={styles.taskIconBtn} />
-                    )}
-                  </View>
-                </Animated.View>
-              </>
-            }
-            ListFooterComponent={
-              !isPastCastleView ? (
-                <View style={styles.customFooter}>
-                  <Pressable
-                    onPress={() => {
-                      impactAsync(ImpactFeedbackStyle.Heavy);
-                      setModalVisible(true);
-                    }}
-                    style={({ pressed }) => [
-                      styles.addQuestCard,
-                      styles.addQuestCardCustomAligned,
-                      pressed && styles.addQuestCardPressed,
-                    ]}
-                    testID="add-habit-inline-card-custom"
-                    accessibilityRole="button"
-                    accessibilityLabel="Add new quest"
-                  >
-                    <View style={styles.addQuestRow}>
-                      <View style={styles.addQuestIconWrap}>
-                        <Plus size={22} color={Colors.dark.gold} strokeWidth={3.2} />
-                      </View>
-                      <Text style={styles.addQuestCardTitle}>Add New Quest</Text>
-                    </View>
-                  </Pressable>
-                </View>
-              ) : (
-                <View style={{ height: 20 }} />
-              )
-            }
-          />
-        ) : (
-          <ScrollView
-            style={styles.scrollView}
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-            bounces={false}
-          >
-            <Animated.View style={{ transform: [{ scale: castleScaleAnim }] }}>
-              <HomeScenePanel
-                playerLevel={playerLevel}
-                baseName={{ emoji: castleTier.emoji, name: castleTier.name }}
-              />
-            </Animated.View>
-
-            <Animated.View
-              style={[
-                styles.taskCommandHeader,
-                {
-                  opacity: listHeaderAnim,
-                  transform: [
-                    {
-                      translateY: listHeaderAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [12, 0],
-                      }),
-                    },
-                  ],
-                },
-              ]}
+  const listHeader = (
+    <View>
+      <View style={[styles.vignette, { height: vH }]}>
+        <Image source={VIGNETTE} style={[styles.vignetteImage, { height: vH * 1.35, marginTop: -vH * 0.1 }]} />
+        <Seam />
+        <View style={[styles.accountWrap, { top: Math.max(insets.top, 8) + 2 }]}>
+          <AccountBar ref={barRef} />
+        </View>
+      </View>
+      <View style={styles.belowArt}>
+        <PanelInset style={styles.crown}>
+          <View style={styles.crownBadge}>
+            <Sticker name="crown" size={44} />
+          </View>
+          <View style={styles.crownCol}>
+            <Text style={styles.crownTitle}>Crown Day {crownDays}</Text>
+            <Progress value={crown.value} max={crown.target} />
+          </View>
+        </PanelInset>
+        <SectionHead
+          label={questsLeftLabel(left, isCalendarFocusDay)}
+          leading={
+            <Pressable
+              onPress={() => {
+                impactAsync(ImpactFeedbackStyle.Light);
+                setCalendarOpen(true);
+              }}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel="Expedition calendar"
             >
-              <View style={styles.taskHeaderLead}>
+              <Glyph name="calendar" size={26} color={tokens.onCanvas} />
+            </Pressable>
+          }
+          trailing={
+            <View style={styles.headActions}>
+              <Pressable
+                onPress={() => {
+                  impactAsync(ImpactFeedbackStyle.Light);
+                  setChroniclesOpen(true);
+                }}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel="Chronicles"
+              >
+                <Sticker name="scroll" size={26} />
+              </Pressable>
+              {!isPastCastleView ? (
                 <Pressable
                   onPress={() => {
                     impactAsync(ImpactFeedbackStyle.Light);
-                    setCalendarOpen(true);
+                    setSortMenuOpen(true);
                   }}
-                  style={({ pressed }) => [styles.taskIconBtn, pressed && styles.taskIconBtnPressed]}
+                  hitSlop={8}
                   accessibilityRole="button"
-                  accessibilityLabel="Expedition calendar"
+                  accessibilityLabel="Sort quests"
                 >
-                  <CalendarClock size={20} color={Colors.dark.gold} strokeWidth={2.2} />
+                  <Glyph name="filter" size={26} color={tokens.onCanvas} />
                 </Pressable>
-              </View>
-              <View style={styles.taskHeaderCenter}>
-                <Text style={styles.taskProgressText} numberOfLines={2}>
-                  {progressLabel}
-                </Text>
-              </View>
-              <View style={styles.taskHeaderTail}>
-                <Pressable
-                  onPress={() => {
-                    impactAsync(ImpactFeedbackStyle.Light);
-                    setChroniclesOpen(true);
-                  }}
-                  style={({ pressed }) => [styles.taskIconBtn, pressed && styles.taskIconBtnPressed]}
-                  accessibilityRole="button"
-                  accessibilityLabel="Chronicles"
-                >
-                  <ScrollText size={20} color={Colors.dark.emerald} strokeWidth={2.2} />
-                </Pressable>
-                {!isPastCastleView ? (
-                  <Pressable
-                    onPress={() => {
-                      impactAsync(ImpactFeedbackStyle.Light);
-                      setSortMenuOpen(true);
-                    }}
-                    style={({ pressed }) => [styles.taskIconBtn, pressed && styles.taskIconBtnPressed]}
-                    accessibilityRole="button"
-                    accessibilityLabel="Sort quests"
-                  >
-                    <SlidersHorizontal size={20} color={Colors.dark.textSecondary} strokeWidth={2.2} />
-                  </Pressable>
-                ) : (
-                  <View style={styles.taskIconBtn} />
-                )}
-              </View>
-            </Animated.View>
-
-            <View style={styles.habitsSection}>
-              {totalCount === 0 ? (
-                <View style={styles.emptyState}>
-                  <Text style={styles.emptyEmoji}>⚔️</Text>
-                  <Text style={styles.emptyTitle}>No quests yet</Text>
-                  <Text style={styles.emptyDesc}>Tap Add new quest to create your first habit or side quest</Text>
-                </View>
-              ) : (
-                <>
-                  <View style={styles.taskSection}>
-                    <View style={styles.taskSectionHeaderRow}>
-                      <View style={styles.taskSectionAccent} />
-                      <Text style={styles.taskSectionTitle}>Habits</Text>
-                      <View style={styles.taskSectionLine} />
-                    </View>
-                    {habitsDaily.length === 0 ? (
-                      <Text style={styles.taskSectionEmpty}>No habits due today</Text>
-                    ) : (
-                      habitsDaily.map((habit) => (
-                        <HabitCard
-                          key={habit.id}
-                          habit={habit}
-                          onComplete={handleComplete}
-                          onUncomplete={handleUncomplete}
-                          onDelete={handleRemove}
-                          onEdit={(hh) => {
-                            setEditHabit(hh);
-                            setEditName(hh.name);
-                            setEditDesc(hh.description ?? '');
-                            setEditIcon(hh.icon ?? '⚔️');
-                            setEditTaskType(hh.taskType);
-                            setEditOpen(true);
-                          }}
-                          onReschedule={(hh) => {
-                            setRescheduleHabit(hh);
-                            setRescheduleDateInput(hh.scheduledDate ?? todayKey);
-                            setRescheduleOpen(true);
-                          }}
-                          readOnly={isPastCastleView}
-                          historicalCompleted={!!completedNamesForFocusedDay?.includes(habit.name)}
-                        />
-                      ))
-                    )}
-                  </View>
-
-                  <View style={styles.taskSectionSpacer} />
-
-                  <View style={styles.taskSection}>
-                    <View style={styles.taskSectionHeaderRow}>
-                      <View style={styles.taskSectionAccent} />
-                      <Text style={styles.taskSectionTitle}>Side quests</Text>
-                      <View style={styles.taskSectionLine} />
-                    </View>
-                    {habitsSide.length === 0 ? (
-                      <Text style={styles.taskSectionEmpty}>No side quests due today</Text>
-                    ) : (
-                      habitsSide.map((habit) => (
-                        <HabitCard
-                          key={habit.id}
-                          habit={habit}
-                          onComplete={handleComplete}
-                          onUncomplete={handleUncomplete}
-                          onDelete={handleRemove}
-                          onEdit={(hh) => {
-                            setEditHabit(hh);
-                            setEditName(hh.name);
-                            setEditDesc(hh.description ?? '');
-                            setEditIcon(hh.icon ?? '⚔️');
-                            setEditTaskType(hh.taskType);
-                            setEditOpen(true);
-                          }}
-                          onReschedule={(hh) => {
-                            setRescheduleHabit(hh);
-                            setRescheduleDateInput(hh.scheduledDate ?? todayKey);
-                            setRescheduleOpen(true);
-                          }}
-                          readOnly={isPastCastleView}
-                          historicalCompleted={!!completedNamesForFocusedDay?.includes(habit.name)}
-                        />
-                      ))
-                    )}
-                  </View>
-                </>
-              )}
+              ) : null}
               {!isPastCastleView ? (
                 <Pressable
                   onPress={() => {
                     impactAsync(ImpactFeedbackStyle.Heavy);
                     setModalVisible(true);
                   }}
-                  style={({ pressed }) => [styles.addQuestCard, pressed && styles.addQuestCardPressed]}
-                  testID="add-habit-inline-card"
+                  hitSlop={8}
                   accessibilityRole="button"
                   accessibilityLabel="Add new quest"
+                  testID="add-habit-inline-card"
                 >
-                  <View style={styles.addQuestRow}>
-                    <View style={styles.addQuestIconWrap}>
-                      <Plus size={22} color={Colors.dark.gold} strokeWidth={3.2} />
-                    </View>
-                    <Text style={styles.addQuestCardTitle}>Add New Quest</Text>
-                  </View>
+                  <Glyph name="add" size={26} color={tokens.onCanvas} />
                 </Pressable>
               ) : null}
-              <View style={{ height: isPastCastleView ? 220 : 36 }} />
             </View>
-          </ScrollView>
-        )}
+          }
+        />
+        {totalCount === 0 ? (
+          <View style={styles.empty}>
+            <Text style={styles.emptyTitle}>No quests yet</Text>
+            <Text style={styles.emptyDesc}>Tap add to create your first habit or side quest</Text>
+          </View>
+        ) : null}
+      </View>
+    </View>
+  );
+
+  const renderQuest = (item: Habit, drag?: () => void, isActive?: boolean) => (
+    <QuestRow
+      key={item.id}
+      habit={item}
+      drag={isCustomQuestOrder ? drag : undefined}
+      isActive={!!isActive}
+      readOnly={isPastCastleView}
+      historicalCompleted={!!completedNamesForFocusedDay?.includes(item.name)}
+      onComplete={handleComplete}
+      onUncomplete={handleUncomplete}
+      onDelete={handleRemove}
+      onEdit={openEdit}
+      onReschedule={openReschedule}
+    />
+  );
+
+  return (
+    <View style={styles.screen}>
+      {isCustomQuestOrder ? (
+        <DraggableFlatList
+          data={dragQuestData}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item, drag, isActive }: RenderItemParams<Habit>) => renderQuest(item, drag, isActive)}
+          onDragEnd={onQuestDragEnd}
+          activationDistance={10}
+          containerStyle={styles.list}
+          style={styles.list}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={listHeader}
+        />
+      ) : (
+        <ScrollView style={styles.list} contentContainerStyle={styles.listContent} showsVerticalScrollIndicator={false}>
+          {listHeader}
+          {orderedDueHabits.map((habit) => renderQuest(habit))}
+        </ScrollView>
+      )}
+
+      <View ref={flyLayerRef} pointerEvents="none" style={StyleSheet.absoluteFill}>
+        {flies.map((fly) => (
+          <RewardFlyer
+            key={fly.id}
+            from={fly.from}
+            to={fly.to}
+            sticker={fly.sticker}
+            onArrive={() => arrive(fly)}
+          />
+        ))}
       </View>
 
-      <AddHabitModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        onAddHabit={handleAddHabit}
-      />
-
+      <AddHabitModal visible={modalVisible} onClose={() => setModalVisible(false)} onAddHabit={handleAddHabit} />
       <ActivityChroniclesModal
         visible={chroniclesOpen}
         onClose={() => setChroniclesOpen(false)}
         activityByDate={activityByDate ?? {}}
         completedHabitNamesByDate={completedHabitNamesByDate ?? {}}
       />
-
       <ExpeditionCalendarModal
         visible={calendarOpen}
         onClose={() => {
@@ -559,444 +436,337 @@ export default function QuestsScreen() {
         profileCreatedAtDateKey={profileCreatedAtDateKey}
         userId={null}
       />
-
       <TaskSortBottomSheet visible={sortMenuOpen} onClose={() => setSortMenuOpen(false)} />
 
-      {rescheduleOpen ? (
-        <Modal visible transparent={false} animationType="slide" onRequestClose={() => setRescheduleOpen(false)}>
-          <View style={styles.fullModalShell}>
-            <View style={styles.fullModalHeader}>
-              <Pressable onPress={() => setRescheduleOpen(false)} style={styles.taskIconBtn}>
-                <Text style={styles.modalCloseGlyph}>×</Text>
-              </Pressable>
-              <Text style={styles.fullModalTitle}>Reschedule Quest</Text>
-              <View style={styles.taskIconBtn} />
-            </View>
-            <ScrollView contentContainerStyle={styles.fullModalBody}>
-              <Text style={styles.modalSub}>{rescheduleHabit?.name ?? ''}</Text>
-              <View style={styles.quickActionsRow}>
-                <Pressable
-                  style={styles.quickActionBtn}
-                  onPress={() => {
-                    if (!rescheduleHabit) return;
-                    const tomorrow = new Date();
-                    tomorrow.setDate(tomorrow.getDate() + 1);
-                    setHabitScheduledDate(rescheduleHabit.id, tomorrow.toISOString().split('T')[0]);
-                    setRescheduleOpen(false);
-                  }}
-                >
-                  <Text style={styles.quickActionText}>Tomorrow</Text>
-                </Pressable>
-                <Pressable
-                  style={styles.quickActionBtn}
-                  onPress={() => {
-                    if (!rescheduleHabit) return;
-                    const nextWeek = new Date();
-                    nextWeek.setDate(nextWeek.getDate() + 7);
-                    setHabitScheduledDate(rescheduleHabit.id, nextWeek.toISOString().split('T')[0]);
-                    setRescheduleOpen(false);
-                  }}
-                >
-                  <Text style={styles.quickActionText}>Next Week</Text>
-                </Pressable>
-              </View>
-              <TextInput
-                value={rescheduleDateInput}
-                onChangeText={setRescheduleDateInput}
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor={Colors.dark.textMuted}
-                style={styles.modalInput}
-              />
-              <Pressable
-                style={styles.modalPrimaryBtn}
-                onPress={() => {
-                  if (!rescheduleHabit) return;
-                  setHabitScheduledDate(rescheduleHabit.id, rescheduleDateInput.trim() || null);
-                  setRescheduleOpen(false);
-                }}
-              >
-                <Text style={styles.modalPrimaryText}>Apply Date</Text>
-              </Pressable>
-            </ScrollView>
-          </View>
-        </Modal>
-      ) : null}
+      <BottomSheet visible={rescheduleOpen} onClose={() => setRescheduleOpen(false)}>
+        <Text style={styles.sheetTitle}>Reschedule Quest</Text>
+        <Text style={styles.sheetSub}>{rescheduleHabit?.name ?? ''}</Text>
+        <View style={styles.quickRow}>
+          <Pressable
+            style={styles.quick}
+            onPress={() => {
+              if (!rescheduleHabit) return;
+              const tomorrow = new Date();
+              tomorrow.setDate(tomorrow.getDate() + 1);
+              setHabitScheduledDate(rescheduleHabit.id, tomorrow.toISOString().split('T')[0]!);
+              setRescheduleOpen(false);
+            }}
+          >
+            <Text style={styles.quickText}>Tomorrow</Text>
+          </Pressable>
+          <Pressable
+            style={styles.quick}
+            onPress={() => {
+              if (!rescheduleHabit) return;
+              const nextWeek = new Date();
+              nextWeek.setDate(nextWeek.getDate() + 7);
+              setHabitScheduledDate(rescheduleHabit.id, nextWeek.toISOString().split('T')[0]!);
+              setRescheduleOpen(false);
+            }}
+          >
+            <Text style={styles.quickText}>Next Week</Text>
+          </Pressable>
+        </View>
+        <TextInput
+          value={rescheduleDateInput}
+          onChangeText={setRescheduleDateInput}
+          placeholder="YYYY-MM-DD"
+          placeholderTextColor={tokens.ink3}
+          style={styles.input}
+        />
+        <ButtonPrimary
+          label="Apply Date"
+          onPress={() => {
+            if (!rescheduleHabit) return;
+            setHabitScheduledDate(rescheduleHabit.id, rescheduleDateInput.trim() || null);
+            setRescheduleOpen(false);
+          }}
+        />
+      </BottomSheet>
 
-      {editOpen ? (
-        <Modal visible transparent={false} animationType="slide" onRequestClose={() => setEditOpen(false)}>
-          <View style={styles.fullModalShell}>
-            <View style={styles.fullModalHeader}>
-              <Pressable onPress={() => setEditOpen(false)} style={styles.taskIconBtn}>
-                <Text style={styles.modalCloseGlyph}>×</Text>
-              </Pressable>
-              <Text style={styles.fullModalTitle}>Edit Quest</Text>
-              <View style={styles.taskIconBtn} />
-            </View>
-            <ScrollView contentContainerStyle={styles.fullModalBody}>
-              <TextInput
-                value={editName}
-                onChangeText={setEditName}
-                placeholder="Quest name"
-                placeholderTextColor={Colors.dark.textMuted}
-                style={styles.modalInput}
-              />
-              <TextInput
-                value={editDesc}
-                onChangeText={setEditDesc}
-                placeholder="Quest description"
-                placeholderTextColor={Colors.dark.textMuted}
-                multiline
-                textAlignVertical="top"
-                style={[styles.modalInput, styles.modalInputMulti]}
-              />
-              <TextInput
-                value={editIcon}
-                onChangeText={setEditIcon}
-                placeholder="Icon"
-                placeholderTextColor={Colors.dark.textMuted}
-                style={styles.modalInput}
-                maxLength={2}
-              />
-              <View style={styles.quickActionsRow}>
-                <Pressable
-                  style={[styles.quickActionBtn, editTaskType === 'daily' && styles.quickActionBtnActive]}
-                  onPress={() => setEditTaskType('daily')}
-                >
-                  <Text style={styles.quickActionText}>Daily</Text>
-                </Pressable>
-                <Pressable
-                  style={[styles.quickActionBtn, editTaskType === 'one-off' && styles.quickActionBtnActive]}
-                  onPress={() => setEditTaskType('one-off')}
-                >
-                  <Text style={styles.quickActionText}>One-off</Text>
-                </Pressable>
-              </View>
-              <Pressable
-                style={styles.modalPrimaryBtn}
-                onPress={() => {
-                  if (!editHabit || !editName.trim()) return;
-                  updateHabit(editHabit.id, {
-                    name: editName,
-                    description: editDesc,
-                    icon: editIcon.trim() || '⚔️',
-                    taskType: editTaskType,
-                  });
-                  setEditOpen(false);
-                }}
-              >
-                <Text style={styles.modalPrimaryText}>Save Changes</Text>
-              </Pressable>
-            </ScrollView>
-          </View>
-        </Modal>
-      ) : null}
+      <BottomSheet visible={editOpen} onClose={() => setEditOpen(false)}>
+        <Text style={styles.sheetTitle}>Edit Quest</Text>
+        <TextInput
+          value={editName}
+          onChangeText={setEditName}
+          placeholder="Quest name"
+          placeholderTextColor={tokens.ink3}
+          style={styles.input}
+        />
+        <TextInput
+          value={editDesc}
+          onChangeText={setEditDesc}
+          placeholder="Quest description"
+          placeholderTextColor={tokens.ink3}
+          multiline
+          textAlignVertical="top"
+          style={[styles.input, styles.inputMulti]}
+        />
+        <TextInput
+          value={editIcon}
+          onChangeText={setEditIcon}
+          placeholder="Icon"
+          placeholderTextColor={tokens.ink3}
+          style={styles.input}
+          maxLength={2}
+        />
+        <View style={styles.quickRow}>
+          <Pressable
+            style={[styles.quick, editTaskType === 'daily' && styles.quickOn]}
+            onPress={() => setEditTaskType('daily')}
+          >
+            <Text style={[styles.quickText, editTaskType === 'daily' && styles.quickTextOn]}>Daily</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.quick, editTaskType === 'one-off' && styles.quickOn]}
+            onPress={() => setEditTaskType('one-off')}
+          >
+            <Text style={[styles.quickText, editTaskType === 'one-off' && styles.quickTextOn]}>One-off</Text>
+          </Pressable>
+        </View>
+        <ButtonPrimary
+          label="Save Changes"
+          onPress={() => {
+            if (!editHabit || !editName.trim()) return;
+            updateHabit(editHabit.id, {
+              name: editName,
+              description: editDesc,
+              icon: editIcon.trim() || '⚔️',
+              taskType: editTaskType,
+            });
+            setEditOpen(false);
+          }}
+        />
+      </BottomSheet>
     </View>
   );
 }
 
+function QuestRow({
+  habit,
+  drag,
+  isActive,
+  readOnly,
+  historicalCompleted,
+  onComplete,
+  onUncomplete,
+  onDelete,
+  onEdit,
+  onReschedule,
+}: {
+  habit: Habit;
+  drag?: () => void;
+  isActive: boolean;
+  readOnly: boolean;
+  historicalCompleted: boolean;
+  onComplete: (id: string, meta?: { source: RewardPoint }) => void;
+  onUncomplete: (id: string) => void;
+  onDelete: (id: string) => void;
+  onEdit: (habit: Habit) => void;
+  onReschedule: (habit: Habit) => void;
+}) {
+  const [overlayOpen, setOverlayOpen] = useState(false);
+  const [cardMetrics, setCardMetrics] = useState<CardMetrics | null>(null);
+  const cardRef = useRef<View>(null);
+  const displayCompleted = readOnly ? historicalCompleted : habit.completedToday;
+  const today = todayKeyOf();
+  const completionsToday = useHabitsStore((s) => s.activityByDate[today]?.completions ?? 0);
+  const grantLog = useHeroStore((s) => s.habitGrantLogByDate ?? {});
+  const rewards = displayRewardsForHabit({
+    habitId: habit.id,
+    difficulty: habit.difficulty ?? 'medium',
+    completedToday: habit.completedToday,
+    completionsToday,
+    grantLog,
+    date: today,
+  });
+
+  const open = () => {
+    if (readOnly || habit.isFrozen) return;
+    impactAsync(ImpactFeedbackStyle.Light);
+    cardRef.current?.measureInWindow((x, y, width, height) => {
+      setCardMetrics({ x, y, width, height });
+      setOverlayOpen(true);
+    });
+  };
+
+  const body = (
+    <View>
+      <View ref={cardRef} collapsable={false} style={[styles.rowWrap, overlayOpen && styles.rowHidden, isActive && styles.rowDragging]}>
+        <HabitRow
+          title={habit.name}
+          icon={habit.icon}
+          gold={rewards.gold}
+          done={displayCompleted}
+          frozen={!!habit.isFrozen && !readOnly}
+          readOnly={readOnly}
+          onPress={open}
+          onDrag={drag}
+          onCheck={readOnly || habit.isFrozen ? undefined : (source) => onComplete(habit.id, { source })}
+          testID={`habit-card-${habit.id}`}
+        />
+      </View>
+      {overlayOpen ? (
+        <TaskCardOverlay
+          visible={overlayOpen}
+          habit={habit}
+          originMetrics={cardMetrics}
+          onClose={() => setOverlayOpen(false)}
+          onComplete={onComplete}
+          onUncomplete={onUncomplete}
+          onDelete={onDelete}
+          onEdit={onEdit}
+          onReschedule={onReschedule}
+          rewardGold={rewards.gold}
+          rewardXp={rewards.xp}
+        />
+      ) : null}
+    </View>
+  );
+
+  if (drag) return <ScaleDecorator>{body}</ScaleDecorator>;
+  return body;
+}
+
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    backgroundColor: Colors.dark.background,
+    backgroundColor: tokens.canvas,
   },
-  mainColumn: {
-    flex: 1,
-  },
-  scrollView: {
+  list: {
     flex: 1,
   },
-  scrollContent: {
-    paddingTop: 0,
+  listContent: {
+    paddingBottom: 28,
   },
-  draggableQuestList: {
+  vignette: {
+    overflow: 'hidden',
+    backgroundColor: tokens.canvas,
+  },
+  vignetteImage: {
+    width: '100%',
+  },
+  accountWrap: {
+    position: 'absolute',
+    left: tokens.screenX,
+    right: tokens.screenX,
+    zIndex: 5,
+  },
+  belowArt: {
+    marginTop: -58,
+    paddingHorizontal: tokens.screenX,
+    gap: 14,
+    marginBottom: 10,
+  },
+  crown: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 14,
+    paddingLeft: 12,
+    paddingRight: 16,
+  },
+  crownBadge: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: tokens.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 6px 14px rgba(40, 50, 140, 0.16)',
+  },
+  crownCol: {
     flex: 1,
-    minHeight: 120,
+    gap: 8,
   },
-  draggableQuestListInline: {
-    minHeight: 120,
-    marginTop: 4,
+  crownTitle: {
+    fontFamily: tokens.font900,
+    fontSize: 19,
+    lineHeight: 22,
+    color: tokens.onCanvas,
+    ...shadowOnCanvas,
   },
-  draggableQuestListInner: {
-    flex: 1,
+  headActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
-  draggableQuestListContent: {
-    paddingHorizontal: 20,
-    paddingTop: 4,
+  rowWrap: {
+    marginHorizontal: tokens.screenX,
+    marginBottom: 10,
   },
-  draggableQuestListContentInline: {
-    paddingHorizontal: 0,
-    paddingTop: 4,
+  rowHidden: {
+    opacity: 0,
   },
-  dragRowActive: {
+  rowDragging: {
     opacity: 0.95,
   },
-  dragRowWrap: {
-    flexDirection: 'row',
+  empty: {
     alignItems: 'center',
-  },
-  dragRowPadded: {
-    paddingHorizontal: 20,
-  },
-  dragHandle: {
-    width: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingBottom: 10,
-    opacity: 0.7,
-  },
-  dragCardFlex: {
-    flex: 1,
-  },
-  taskCommandHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    marginTop: 4,
-    marginBottom: 18,
-    gap: 8,
-  },
-  taskHeaderLead: {
-    width: 44,
-    flexShrink: 0,
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-  },
-  taskHeaderCenter: {
-    flex: 1,
-    minWidth: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 6,
-  },
-  taskHeaderTail: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
+    paddingVertical: 28,
     gap: 6,
-    flexShrink: 0,
-    width: 88,
-  },
-  taskProgressText: {
-    width: '100%',
-    fontSize: 13,
-    fontWeight: '800',
-    color: Colors.dark.text,
-    letterSpacing: 0.2,
-    textAlign: 'center',
-  },
-  taskIconBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: Colors.dark.surface,
-    borderWidth: 1,
-    borderColor: Colors.dark.border + 'aa',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  taskIconBtnPressed: {
-    opacity: 0.88,
-    transform: [{ scale: 0.96 }],
-  },
-  habitsSection: {
-    paddingHorizontal: 20,
-  },
-  taskSection: {
-    marginTop: 4,
-  },
-  taskSectionSpacer: {
-    height: 22,
-  },
-  taskSectionHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    gap: 10,
-  },
-  taskSectionAccent: {
-    width: 4,
-    height: 18,
-    borderRadius: 2,
-    backgroundColor: Colors.dark.gold + 'cc',
-  },
-  taskSectionTitle: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: Colors.dark.text,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-  },
-  taskSectionLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: Colors.dark.border + 'aa',
-  },
-  taskSectionEmpty: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: Colors.dark.textMuted,
-    fontStyle: 'italic',
-    paddingVertical: 8,
-    paddingLeft: 2,
-  },
-  emptyState: {
-    alignItems: 'center',
-    paddingVertical: 40,
-  },
-  emptyEmoji: {
-    fontSize: 48,
-    marginBottom: 12,
   },
   emptyTitle: {
+    fontFamily: tokens.font900,
     fontSize: 20,
-    fontWeight: '800',
-    color: Colors.dark.text,
-    marginBottom: 6,
+    color: tokens.onCanvas,
+    ...shadowOnCanvas,
   },
   emptyDesc: {
+    fontFamily: tokens.font700,
+    fontSize: 16,
+    color: tokens.onCanvas,
+    textAlign: 'center',
+    ...shadowOnCanvas,
+  },
+  sheetTitle: {
+    fontFamily: tokens.font900,
+    fontSize: 22,
+    color: tokens.ink,
+    marginBottom: 8,
+  },
+  sheetSub: {
+    fontFamily: tokens.font700,
     fontSize: 14,
-    color: Colors.dark.textSecondary,
-    textAlign: 'center',
-    maxWidth: 240,
+    color: tokens.ink2,
+    marginBottom: 12,
   },
-  addQuestCard: {
-    marginTop: 12,
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: Colors.dark.gold + '66',
-    backgroundColor: Colors.dark.gold + '14',
-    paddingVertical: 14,
-    paddingHorizontal: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  addQuestRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    minHeight: 30,
-    width: '100%',
-  },
-  addQuestIconWrap: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.dark.gold + '20',
-    borderWidth: 1,
-    borderColor: Colors.dark.gold + '66',
-  },
-  addQuestCardPressed: {
-    opacity: 0.9,
-    transform: [{ scale: 0.99 }],
-  },
-  addQuestCardCustomAligned: {
-    marginLeft: 28,
-  },
-  customFooter: {
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 36,
-  },
-  addQuestCardTitle: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: Colors.dark.gold,
-    letterSpacing: 0.35,
-    textAlign: 'center',
-    lineHeight: 21,
-    includeFontPadding: false,
-  },
-  addQuestCardSub: {
-    marginTop: 3,
-    fontSize: 12,
-    fontWeight: '600',
-    color: Colors.dark.textMuted,
-  },
-  fullModalShell: {
-    flex: 1,
-    backgroundColor: Colors.dark.background,
-  },
-  fullModalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.border + '66',
-  },
-  fullModalTitle: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: Colors.dark.text,
-  },
-  fullModalBody: {
-    padding: 16,
-    gap: 10,
-  },
-  modalSub: {
-    fontSize: 13,
-    color: Colors.dark.textMuted,
-    marginBottom: 2,
-  },
-  quickActionsRow: {
+  quickRow: {
     flexDirection: 'row',
     gap: 8,
+    marginBottom: 12,
   },
-  quickActionBtn: {
+  quick: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: Colors.dark.border + '99',
-    borderRadius: 12,
-    backgroundColor: Colors.dark.surface,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  quickActionBtnActive: {
-    borderColor: Colors.dark.gold + 'aa',
-    backgroundColor: Colors.dark.gold + '22',
-  },
-  quickActionText: {
-    color: Colors.dark.text,
-    fontWeight: '700',
-    fontSize: 13,
-  },
-  modalInput: {
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.dark.border + '99',
-    backgroundColor: Colors.dark.surface,
-    color: Colors.dark.text,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 14,
-  },
-  modalInputMulti: {
-    minHeight: 90,
-    maxHeight: 180,
-  },
-  modalPrimaryBtn: {
-    marginTop: 6,
-    borderRadius: 14,
-    backgroundColor: Colors.dark.gold,
+    height: 44,
+    borderRadius: tokens.rSm,
+    backgroundColor: tokens.surface2,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 13,
   },
-  modalPrimaryText: {
-    color: '#1a1228',
-    fontWeight: '800',
+  quickOn: {
+    backgroundColor: tokens.brandSoft,
+  },
+  quickText: {
+    fontFamily: tokens.font800,
     fontSize: 14,
+    color: tokens.ink,
   },
-  modalCloseGlyph: {
-    color: Colors.dark.text,
-    fontSize: 22,
-    lineHeight: 24,
-    fontWeight: '700',
+  quickTextOn: {
+    color: tokens.brandDeep,
+  },
+  input: {
+    borderRadius: tokens.rSm,
+    backgroundColor: tokens.surface2,
+    color: tokens.ink,
+    fontFamily: tokens.font700,
+    fontSize: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    marginBottom: 10,
+  },
+  inputMulti: {
+    minHeight: 90,
+    maxHeight: 180,
   },
 });

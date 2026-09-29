@@ -1,13 +1,20 @@
 import { useEffect } from 'react';
 import { BackHandler, StyleSheet, View } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import { usePathname } from 'expo-router';
 
+import { tokens } from '@/ui/tokens';
+
+import AllyStill from './AllyStill';
 import GutterjackLocation from './GutterjackLocation';
 import HubCrownhaven from './HubCrownhaven';
 import KingdomMap from './KingdomMap';
 import LocationStill from './LocationStill';
 import MapBossApproach from './MapBossApproach';
+import MarketShop from './MarketShop';
 import NpcStill from './NpcStill';
 import TavernGround from './TavernGround';
+import { MIRO_TRACK, TORRIK_TRACK } from './allyTracks';
 import {
   MAP_LOCATIONS,
   dungeonForHotspot,
@@ -18,6 +25,8 @@ import { INTERIORS, floorById } from './interiors';
 import { useWorldStore } from './store';
 
 export default function WorldScreen() {
+  const pathname = usePathname();
+  const focused = pathname === '/world' || pathname.endsWith('/world');
   const screen = useWorldStore((s) => s.currentScreen);
   const interiorId = useWorldStore((s) => s.currentInteriorId);
   const floorId = useWorldStore((s) => s.currentFloorId);
@@ -36,8 +45,9 @@ export default function WorldScreen() {
     interiorFloor?.kind === 'fight' &&
     interiorFloor.fightId === 'gutterjack';
   const tavernHall = interior?.id === 'tavern' && Boolean(interiorFloor) && !tavernFight;
+  const marketStall = interior?.id === 'market';
   const hubNpc =
-    interiorFloor?.kind === 'npc' && interiorFloor.npcId
+    !marketStall && interiorFloor?.kind === 'npc' && interiorFloor.npcId
       ? npcById(interiorFloor.npcId)
       : undefined;
 
@@ -48,6 +58,8 @@ export default function WorldScreen() {
   const encounterNpc =
     encounterHotspot?.kind === 'npc' ? npcById(encounterHotspot.npcId) : undefined;
   const encounterLocation = locationId ? MAP_LOCATIONS[locationId] : undefined;
+  const encounterAllyTrack =
+    encounterNpc?.id === 'torrik' ? TORRIK_TRACK : encounterNpc?.id === 'miro' ? MIRO_TRACK : null;
 
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -73,11 +85,13 @@ export default function WorldScreen() {
 
   return (
     <View style={styles.root}>
+      {focused ? <StatusBar style={screen === 'map' ? 'dark' : 'light'} /> : null}
       <View style={styles.stage}>
         {screen === 'map' ? <KingdomMap /> : null}
         {screen === 'hub' ? <HubCrownhaven /> : null}
         {tavernHall ? <TavernGround /> : null}
         {tavernFight ? <GutterjackLocation /> : null}
+        {marketStall ? <MarketShop onBack={openHub} /> : null}
         {hubNpc && interior ? (
           <NpcStill
             name={hubNpc.name}
@@ -91,7 +105,16 @@ export default function WorldScreen() {
         ) : null}
         {mapLocation && locationId ? <LocationStill locationId={locationId} /> : null}
         {encounterDungeon && locationId ? <MapBossApproach locationId={locationId} /> : null}
-        {encounterNpc && encounterLocation ? (
+        {encounterAllyTrack && encounterNpc ? (
+          <AllyStill
+            name={encounterNpc.name}
+            still={encounterNpc.still}
+            track={encounterAllyTrack}
+            stillAnchor={encounterNpc.stillAnchor}
+            onBack={closeEncounter}
+            testID={`ally-still-${encounterNpc.id}`}
+          />
+        ) : encounterNpc && encounterLocation ? (
           <NpcStill
             name={encounterNpc.name}
             kicker={encounterLocation.name}
@@ -110,7 +133,7 @@ export default function WorldScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#070510',
+    backgroundColor: tokens.canvas,
     alignItems: 'center',
   },
   stage: {

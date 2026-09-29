@@ -1,20 +1,15 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  Animated,
-  Easing,
-  Modal,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Animated, Easing, Modal, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { HelpCircle, ShieldOff, Sparkles, Sword } from 'lucide-react-native';
 
-import Colors from '@/constants/colors';
 import { impactAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
+import { ButtonFlow, ButtonPrimary } from '@/ui/Button';
+import { Card } from '@/ui/Card';
+import { Sticker } from '@/ui/Sticker';
+import { tokens } from '@/ui/tokens';
 
+import { FightKicker, FightNote, FightSparks, FightTitle, FightWash } from './FightChrome';
 import { BATTLE_CLASH_MS } from './engine';
 import type { FightResolution } from './types';
 
@@ -37,6 +32,8 @@ export default function BattleSimulationModal({
   onOpenChest,
   onRematch,
 }: Props) {
+  const insets = useSafeAreaInsets();
+  const clashBottom = 66 + Math.max(insets.bottom, 30) + 16;
   const [phase, setPhase] = useState<Phase>('idle');
   const swordL = useRef(new Animated.Value(0)).current;
   const swordR = useRef(new Animated.Value(0)).current;
@@ -175,103 +172,115 @@ export default function BattleSimulationModal({
     outputRange: [18, -8],
   });
 
+  const won = phase === 'result' && resolution?.won === true;
+  const lost = phase === 'result' && resolution != null && !resolution.won;
+
   return (
     <Modal visible={visible} transparent animationType="fade" statusBarTranslucent>
-      <View style={styles.root}>
-        <View style={[StyleSheet.absoluteFill, styles.webBackdrop]} />
-
-        <View style={styles.sheet} pointerEvents="box-none">
-          {phase === 'tension' && (
-            <LinearGradient colors={['#1a1028ee', '#0a0612f2']} style={styles.card}>
-              <Text style={styles.versusLabel}>{dungeonName}</Text>
-              <Text style={styles.bossHuge}>{bossName}</Text>
-              <Text style={styles.tensionHint}>Clash in progress…</Text>
-              <View style={styles.clashRow}>
-                <Animated.View style={{ transform: [{ translateX: translateXL }, { rotate: rotL }] }}>
-                  <Sword size={56} color="#c9b8e8" strokeWidth={2.2} />
+      <View style={styles.root} pointerEvents="box-none">
+        {phase === 'tension' ? (
+          <>
+            <LinearGradient
+              pointerEvents="none"
+              colors={['rgba(145,162,242,0)', 'rgba(145,162,242,0.55)', tokens.canvas]}
+              locations={[0.38, 0.62, 0.82]}
+              style={StyleSheet.absoluteFill}
+            />
+            <View style={[styles.clash, { bottom: clashBottom }]}>
+              <FightKicker>{dungeonName}</FightKicker>
+              <FightTitle>Clash</FightTitle>
+              <View style={styles.swords}>
+                <Animated.View style={{ transform: [{ rotate: '-26deg' }, { translateY: 6 }, { translateX: translateXL }, { rotate: rotL }] }}>
+                  <Sticker name="dagger" size={92} />
                 </Animated.View>
                 <Animated.View style={{ transform: [{ scale: pulse }] }}>
-                  <HelpCircle size={44} color={Colors.dark.gold} />
+                  <View style={styles.spark} />
                 </Animated.View>
-                <Animated.View style={{ transform: [{ translateX: translateXR }, { rotate: rotR }] }}>
-                  <View style={{ transform: [{ scaleX: -1 }] }}>
-                    <Sword size={56} color="#9aa0ff" strokeWidth={2.2} />
-                  </View>
+                <Animated.View
+                  style={{
+                    transform: [{ scaleX: -1 }, { rotate: '-26deg' }, { translateY: 6 }, { translateX: translateXR }, { rotate: rotR }],
+                  }}
+                >
+                  <Sticker name="dagger" size={92} />
                 </Animated.View>
               </View>
-            </LinearGradient>
-          )}
+              <FightNote>{bossName}</FightNote>
+            </View>
+          </>
+        ) : null}
 
-          {phase === 'result' && resolution?.won && (
-            <Animated.View
-              style={{
-                transform: [
-                  {
-                    scale: goldBurst.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0.92, 1],
-                    }),
-                  },
-                ],
-                opacity: goldBurst.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0.85, 1],
-                }),
-              }}
-            >
-              <LinearGradient colors={['#3d2e10f2', '#1a1228fa', '#0d0814ff']} style={[styles.card, styles.winCard]}>
-                <LinearGradient
-                  colors={[Colors.dark.gold + '55', 'transparent']}
-                  style={styles.winGlow}
-                  start={{ x: 0.5, y: 0 }}
-                  end={{ x: 0.5, y: 1 }}
-                />
-                <Sparkles size={28} color={Colors.dark.gold} />
-                <Text style={styles.winTitle}>Victory</Text>
-                <Text style={styles.winSub}>{dungeonName}</Text>
-                <Pressable
-                  testID="open-chest"
-                  onPress={() => {
-                    impactAsync(ImpactFeedbackStyle.Medium);
-                    onOpenChest();
-                  }}
-                  style={styles.collectBtn}
-                >
-                  <LinearGradient
-                    colors={[...Colors.gradients.gold]}
-                    style={styles.collectGradient}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                  >
-                    <Text style={styles.collectText}>Open Chest</Text>
-                  </LinearGradient>
-                </Pressable>
-              </LinearGradient>
-            </Animated.View>
-          )}
+        {won ? (
+          <Animated.View
+            style={[
+              styles.fill,
+              {
+                opacity: goldBurst.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1] }),
+                transform: [{ scale: goldBurst.interpolate({ inputRange: [0, 1], outputRange: [0.96, 1] }) }],
+              },
+            ]}
+          >
+            <FightWash gold />
+            <FightSparks />
+            <View style={styles.hero}>
+              <View style={styles.chest}>
+                <Sticker name="gift" size={96} bare />
+              </View>
+            </View>
+            <View style={styles.copy}>
+              <FightTitle>Victory</FightTitle>
+              <FightNote>{`${bossName} goes down`}</FightNote>
+            </View>
+            <View style={styles.foot}>
+              <ButtonFlow
+                label="Open chest"
+                sticker="gift"
+                block
+                testID="open-chest"
+                onPress={() => {
+                  impactAsync(ImpactFeedbackStyle.Medium);
+                  onOpenChest();
+                }}
+              />
+            </View>
+          </Animated.View>
+        ) : null}
 
-          {phase === 'result' && resolution && !resolution.won && (
-            <LinearGradient colors={['#2a2428f5', '#141016ff']} style={styles.card}>
-              <ShieldOff size={58} color="#6a5a62" />
-              <Text style={styles.failTitle}>Defeat</Text>
-              <Text style={styles.failBoss}>{bossName}</Text>
-              <Text style={styles.sageQuote}>Too strong this round. Take the coins and try again.</Text>
-              <Text style={styles.consolationGold}>
-                +{resolution.consolationGold} <Text style={styles.coinEmoji}>🪙</Text>
-              </Text>
-              <Pressable
+        {lost && resolution && !resolution.won ? (
+          <View style={styles.fill}>
+            <FightWash />
+            <View style={styles.markWrap}>
+              <View style={styles.mark}>
+                <View style={styles.markSticker}>
+                  <Sticker name="dagger" size={78} bare />
+                </View>
+              </View>
+            </View>
+            <View style={styles.copy}>
+              <FightKicker>{dungeonName}</FightKicker>
+              <FightTitle>Defeat</FightTitle>
+              <FightNote>{`${bossName} is still standing`}</FightNote>
+            </View>
+            <Card style={styles.pay}>
+              <Text style={styles.payCopy}>Too strong this round. Take the coins and try again.</Text>
+              <View style={styles.payRow}>
+                <Sticker name="coin" size={28} bare />
+                <Text style={styles.payGold}>+{resolution.consolationGold}</Text>
+              </View>
+            </Card>
+            <View style={styles.foot}>
+              <ButtonPrimary
+                label="Fight again"
+                sticker="swords"
+                block
                 testID="fight-again"
                 onPress={() => {
                   impactAsync(ImpactFeedbackStyle.Medium);
                   onRematch();
                 }}
-                style={styles.retreatBtn}
-              >
-                <Text style={styles.retreatBtnText}>Fight again</Text>
-              </Pressable>
-            </LinearGradient>
-          )}
-        </View>
+              />
+            </View>
+          </View>
+        ) : null}
       </View>
     </Modal>
   );
@@ -280,128 +289,108 @@ export default function BattleSimulationModal({
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    justifyContent: 'center',
+  },
+  fill: {
+    flex: 1,
+  },
+  clash: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
     alignItems: 'center',
-    padding: 20,
+    gap: 6,
   },
-  webBackdrop: {
-    backgroundColor: 'rgba(6,4,10,0.92)',
-  },
-  sheet: {
-    width: '100%',
-    maxWidth: 360,
-  },
-  card: {
-    borderRadius: 22,
-    paddingVertical: 28,
-    paddingHorizontal: 22,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.dark.borderGlow + '44',
-    overflow: 'hidden',
-  },
-  winCard: {
-    position: 'relative',
-  },
-  winGlow: {
-    ...StyleSheet.absoluteFill,
-    opacity: 0.9,
-  },
-  versusLabel: {
-    fontSize: 11,
-    fontWeight: '800',
-    letterSpacing: 1.4,
-    color: Colors.dark.textMuted,
-    textTransform: 'uppercase',
-    marginBottom: 6,
-  },
-  bossHuge: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: Colors.dark.text,
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  tensionHint: {
-    fontSize: 13,
-    color: Colors.dark.textSecondary,
-    marginBottom: 22,
-  },
-  clashRow: {
+  swords: {
     flexDirection: 'row',
     alignItems: 'center',
+    height: 120,
+    marginVertical: 4,
+  },
+  spark: {
+    width: 22,
+    height: 22,
+    marginHorizontal: -8,
+    borderRadius: 4,
+    backgroundColor: tokens.onCanvas,
+    transform: [{ rotate: '45deg' }],
+  },
+  hero: {
+    alignItems: 'center',
+    marginTop: 148,
+  },
+  chest: {
+    width: 168,
+    height: 168,
+    borderRadius: 84,
+    backgroundColor: tokens.surface,
+    alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
-    marginTop: 8,
+    borderWidth: 6,
+    borderColor: tokens.gold,
+    boxShadow: [
+      { offsetX: 0, offsetY: 7, blurRadius: 0, color: tokens.goldDeep },
+      { offsetX: 0, offsetY: 20, blurRadius: 50, color: 'rgba(40,50,140,0.35)' },
+    ],
   },
-  failTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#a898a0',
-    marginTop: 12,
-    marginBottom: 8,
+  markWrap: {
+    alignItems: 'center',
+    marginTop: 128,
   },
-  failBoss: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: Colors.dark.text,
-    marginBottom: 14,
-    textAlign: 'center',
+  mark: {
+    width: 148,
+    height: 148,
+    borderRadius: 74,
+    backgroundColor: tokens.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: [
+      { offsetX: 0, offsetY: 4, blurRadius: 0, color: tokens.lipSurface },
+      { offsetX: 0, offsetY: 10, blurRadius: 28, color: 'rgba(40, 50, 140, 0.18)' },
+    ],
   },
-  sageQuote: {
-    fontSize: 14,
-    lineHeight: 21,
-    color: Colors.dark.textSecondary,
-    textAlign: 'center',
-    marginBottom: 14,
+  markSticker: {
+    opacity: 0.72,
   },
-  consolationGold: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: Colors.dark.gold,
-    marginBottom: 20,
+  copy: {
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 28,
+    paddingHorizontal: 24,
   },
-  coinEmoji: {
-    fontSize: 18,
-  },
-  retreatBtn: {
-    alignSelf: 'stretch',
-    paddingVertical: 14,
-    borderRadius: 14,
-    backgroundColor: '#2a2428',
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
-  },
-  retreatBtnText: {
-    textAlign: 'center',
-    fontWeight: '800',
-    color: Colors.dark.text,
-    fontSize: 16,
-  },
-  winTitle: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: Colors.dark.gold,
-    marginTop: 8,
-    marginBottom: 4,
-  },
-  winSub: {
-    fontSize: 13,
-    color: Colors.dark.textMuted,
-    marginBottom: 18,
-  },
-  collectBtn: {
-    alignSelf: 'stretch',
-    borderRadius: 14,
-    overflow: 'hidden',
-  },
-  collectGradient: {
-    paddingVertical: 15,
+  pay: {
+    marginTop: 22,
+    marginHorizontal: 24,
+    paddingHorizontal: 18,
+    paddingVertical: 16,
     alignItems: 'center',
   },
-  collectText: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: '#1a1228',
+  payCopy: {
+    fontFamily: tokens.font800,
+    fontSize: 16,
+    lineHeight: 22,
+    color: tokens.ink2,
+    textAlign: 'center',
+  },
+  payGold: {
+    fontFamily: tokens.font900,
+    fontSize: 22,
+    color: tokens.ink,
+  },
+  payRow: {
+    marginTop: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    height: 44,
+    paddingLeft: 8,
+    paddingRight: 16,
+    borderRadius: tokens.rPill,
+    backgroundColor: tokens.goldSoft,
+  },
+  foot: {
+    position: 'absolute',
+    left: 24,
+    right: 24,
+    bottom: 40,
   },
 });

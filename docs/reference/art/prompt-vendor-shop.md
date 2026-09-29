@@ -1,8 +1,8 @@
 # Prompt — winieta straganu (portret babki)
 
-> **2026-09-24:** UI sklepu = sheet jak Home — winieta + **siatka itemów**. Mock: [`../ui/mocks/shop.png`](../ui/mocks/shop.png). UI: [`../ui/design-bible.md`](../ui/design-bible.md) (archetyp A).  
-> Ten plik zostaje **promptem malunku headera** (babka / lady), nie layoutem SKU. Puste gniazda L/R na stillu = **superseded**.  
-> Wejście: tap straganu na hubie → ekran sklepu (grid), nie inventory namalowane w JPEG.
+> **LOCK 2026-09-24 (UI Bible v2.3).** Sklep = archetyp A: winieta + dymek, pod spodem katalog chrome. Golden: [`../ui/golden/shop.png`](../ui/golden/shop.png) — **na razie wycinek Crownhaven**, founder: babkę dorabiamy później. Ten prompt czeka na ten kadr i nie blokuje portu UI. Reguły: [`../ui/design-bible.md`](../ui/design-bible.md) sekcja 7.  
+> **Malunek = tylko header.** Buy / Sell, ceny i karty itemów są w kodzie. Nie malować gniazd pod SKU.  
+> Układ z 2026-08-16 (6 pustych skrzynek L/R + „sprzedaj” na bruku) = **archiwum na dole**. Nie wklejać go w generator.
 
 **Ustawienia generatora:** **9:16** · 1080×1920 look-dev / 1440×2560 master · **nowy obraz** (nie „edytuj to zdjęcie”).
 
@@ -10,42 +10,32 @@
 
 ---
 
-## Layout (LOCK kierunku 2026-08-16)
+## Layout (LOCK 2026-09-24)
 
-Telefon, luka tabów. „Itemy po bokach” = **3 grube gniazda L + 3 R**, nie siatka 12 ikon.
-
-Ekonomia sklepu (`06` §7) to max ~6 kupna: klucz, freeze, 3–4 rotacja. Skup loot = **dolny pasek UI**, nie gniazdo z boku.
+Winieta zajmuje górne ~40–45% telefonu i rozpuszcza się w mgłę UI. Katalog (max 6 SKU, zakładki Buy / Sell) stoi pod spodem — [`06`](../../06-economy-loot.md) §7.
 
 ```text
-9:16  (action-safe ~środkowe 80%)
+9:16  (winieta = górne ~42% kadru; reszta telefonu = chrome, nie malować jako SKU)
 
 ┌─────────────────────────────────┐
-│ BLEED: niebo / dachy / pałac    │  ← może zniknąć na wysokim tel
-│   TINY, out of focus            │
+│  [back + pills — LUZ]           │  ← górne ~12%, spokojne
 │                                 │
-│  [dialog / imię — LUZ UI]       │  ← górne ~12%, puste powietrze
+│  BABKA          [LUZ NA DYMEK]  │  lewa połowa: ona, pas w górę
+│  (patrzy w kamerę)   ściana /   │  prawa góra: spokojna, ~50% × 35%
+│                      półka      │
 │                                 │
-│     ████ MARKIZA ████████       │  czerwono-białe pasy, bez liter
-│                                 │
-│ [gniazdo]   BABKA     [gniazdo] │
-│ [gniazdo]   (centrum) [gniazdo] │  ona patrzy W KAMERĘ
-│ [gniazdo]   lady      [gniazdo] │  gniazda = puste skrzynki
-│                                 │
-│     warzywa TYLKO na lady       │  set dressing, nie SKU sklepu
-│                                 │
-│ BLEED: bruk                     │  złoto + „sprzedaj loot” = UI
+│     lada / warzywa / bruk       │  ← dolne ~30% winiety, zniknie w mgle
+│░░░░░░░░ szew ░░░░░░░░░░░░░░░░░░│
+│  [Buy | Sell]   katalog 3×2     │  chrome — NIE w JPEG
 └─────────────────────────────────┘
-         taby (nie malować)
 ```
 
 | Strefa | Co malujesz | Czego NIE |
 |--------|-------------|-----------|
-| **Środek** | Ona (pas w górę / 3/4), lady, markiza, trochę warzyw na lady | Tłum, elf, krasnal, goblin, kenku |
-| **Boki** | 3 puste drewniane skrzynki / półki na stronę — **ciche**, równo, czytelne prostokąty | Warzywa, mikstury, klucze, cenniki w gniazdach |
-| **Góra** | Mało: skrawek nieba, dach stodoły za nią (Dom Lv1) | Pałac na 1/3 kadru, schody, fontanna |
-| **Dół** | Bruk + krawędź lady | HUD, złoto, napisy |
-
-**Gniazda:** puste wnętrze (cień), gruba belka, miejsce na kartę itemu ~jak kufel Mentora wielkością. 6 gniazd. Nie 12.
+| **Lewa połowa** | Ona, pas w górę, patrzy w kamerę. Twarz między 15% a 30% wysokości winiety | Tłum, elf, krasnal, goblin, kenku, druga postać |
+| **Prawa góra** | Spokojna ściana, niebo albo półka — miejsce na dymek | Twarz, kluczowy rekwizyt, cennik |
+| **Góra ~12%** | Spokojne powietrze (back i pills wejdą w kodzie) | Pałac na 1/3 kadru, schody, fontanna |
+| **Dół ~30% winiety** | Lada, trochę warzyw, bruk. Prosty dół, który zniknie w mgle | HUD, złoto, napis „sprzedaj”, karty itemów, puste skrzynki pod UI |
 
 **Ona = ta sama co na placu:** ciepła, ziemska, guide #1, lekki uśmiech. **Nie** nowa ładniejsza NPC. **Nie** papieros.
 
@@ -54,21 +44,19 @@ Ekonomia sklepu (`06` §7) to max ~6 kupna: klucz, freeze, 3–4 rotacja. Skup l
 ## SCENE / CONTENT — wklej w master (nie zamiast mastera)
 
 ```text
-NEW 9:16 mobile RPG SHOP SCREEN. Not a crop of the attached plaza. Not a restyle of that city layout.
+NEW 9:16 mobile RPG vignette, the TOP HALF of a shop screen. Not a crop of the attached plaza. Not a restyle of that city layout. The item catalog is added later in UI — do not paint slots, crates for cards, prices, or a sell bar.
 
 The attached image is STYLE + this woman's identity only. Copy her exactly: plump warm middle-aged vegetable vendor, tanned skin, brown hair in a red bandana, gold hoop earrings, white peasant blouse, deep red bodice, friendly face looking AT THE CAMERA, holding a big carrot. Same red-and-white striped awning, same dark wood stall. She is guide energy, warm, not pretty-generic, not half-lidded like a bored wizard. Graphic cartoon eyes, simple lids, slight smile.
 
-CAMERA: standing close at her stall. She is the only character, large, centered, waist-up behind the counter. Humble barn wall behind her. Outdoor daylight / golden hour (not tavern candles).
+CAMERA: standing close at her stall. She is the only character, waist-up behind the counter, on the LEFT half. Humble barn wall behind her. Outdoor daylight / golden hour (not tavern candles).
 
-COMPOSITION:
-- TOP ~12%: empty sky / air for a dialogue bubble. No palace landmark, no stairs, no fountain.
-- AWNING across the stall, no letters.
-- LEFT third: THREE empty wooden crates stacked. Quiet empty insides for UI item cards. NO food, potions, or keys in them.
-- RIGHT third: THREE matching empty wooden crates. Empty.
-- COUNTER center only: a few simple vegetables (carrot bunch, cabbage) as set dressing.
-- BOTTOM ~12%: empty cobbles.
+UI SAFE ZONES (do not paint UI, keep these calm):
+- Character on the LEFT half, waist-up, looking at camera. Face between 15% and 30% of vignette height.
+- RIGHT half upper area calm (wall, sky, shelf) about 50% width x 35% height: a speech bubble will sit here.
+- Top 12%: calm sky or plain wall. A back button and currency pills will sit here.
+- Bottom 30% of the vignette: counter and a few vegetables only (carrot bunch, cabbage). It fades into UI mist. No crates, no empty shelves waiting for item cards.
 
-Do NOT show the tavern, dwarf, elf, goblin, crow-person, lion fountain, or the hill city. No UI, no prices, no readable text. The 6 empty side crates are the gameplay point of this image.
+Do NOT show the tavern, dwarf, elf, goblin, crow-person, lion fountain, or the hill city. No UI, no prices, no readable text, no gold coins, no "sell loot" bar.
 ```
 
 ---
@@ -82,22 +70,20 @@ The attached picture is a STYLE + CHARACTER reference ONLY. Copy the drawing lan
 
 Do NOT copy the city layout. This is a NEW 9:16 shot, not a crop and not a redraw of the plaza. No tavern, no palace as a landmark, no fountain, no dwarf, no elf, no goblin, no crow-person. She is the only character.
 
-NEW SCENE — mobile game shop screen:
-- We stand close at her stall. She is large, centered, waist-up behind the counter.
-- TOP ~12%: empty sky / air for a dialogue bubble.
-- LEFT third: THREE empty wooden crates stacked, quiet empty insides, ready for item cards. NO food in them.
-- RIGHT third: THREE matching empty wooden crates. NO food in them.
-- Counter center only: a few vegetables as decoration (carrots, cabbage).
-- BOTTOM ~12%: empty cobbles.
+NEW SCENE — top vignette of a mobile shop (the catalog is UI, not part of this picture):
+- She is large, waist-up, on the LEFT half, behind the counter, looking at camera.
+- RIGHT half upper area: calm wall or sky, empty enough for a speech bubble.
+- TOP ~12%: calm air for a back button and currency.
+- BOTTOM ~30%: counter with a few vegetables (carrots, cabbage), simple cobbles that can fade out. No crates.
 - Humble barn wall behind her. Daylight.
 
-No UI, no text, no prices. The 6 empty side crates are the point of the picture.
+No UI, no text, no prices, no empty crates meant for item cards.
 ```
 
 **Negative:**
 
 ```text
-photoreal, UI, HUD, readable text, prices, gold coins as UI, inventory grid, 12 tiny slots, filled side crates, vegetables in the side shelves, potions, keys, bottles as stock, extra NPCs, tavern, fountain, palace filling the frame, crowd, Disney eyes, kids book, grimdark, cigarette, watermark, 16:9, character select poster, crop of a city square
+photoreal, UI, HUD, readable text, prices, gold coins as UI, inventory grid, empty wooden crates, item card slots, 6 side shelves, 12 tiny slots, filled side crates, vegetables in the side shelves, potions, keys, bottles as stock, sell bar, extra NPCs, tavern, fountain, palace filling the frame, crowd, Disney eyes, kids book, grimdark, cigarette, watermark, 16:9, character select poster, crop of a city square
 ```
 
 ---
@@ -105,24 +91,30 @@ photoreal, UI, HUD, readable text, prices, gold coins as UI, inventory grid, 12 
 ## Gate (odrzuć, jeśli)
 
 - [ ] Inna kobieta niż na placu (inna twarz / strój / markiza)
-- [ ] Gniazda pełne towaru albo niewidoczne
+- [ ] Skrzynki lub puste półki czekające na karty itemów
 - [ ] Tłum / tawerna / fontanna kradną kadr
 - [ ] Inna kreska niż A3 + stolica
-- [ ] Napisy, cennik, narysowane klucze/poty jako SKU
-- [ ] Ona nie patrzy w kamerę
-- [ ] Góra zapchana (brak miejsca na dialog)
+- [ ] Napisy, cennik, narysowane klucze/poty jako SKU, pasek „sprzedaj”
+- [ ] Ona nie patrzy w kamerę albo stoi na środku zamiast na lewej połowie
+- [ ] Prawa góra zapchana (brak miejsca na dymek)
 
-**Pass =** poznajesz *tę* babkę z rynku; po bokach da się położyć 6 kart itemów; góra pusta na kwestię.
+**Pass =** poznajesz *tę* babkę z rynku; stoi po lewej; po prawej u góry da się położyć dymek; dół jest prosty i może zniknąć w mgle.
 
 ---
 
 ## UI na wierzchu (nie malować)
 
-| Element | Gdzie (kod) |
-|---------|-------------|
-| Imię + kwestia | Górny luz |
-| 6 kart kupna | Gniazda L/R |
-| Złoto + sprzedaj loot | Dolny pasek |
-| Taby | Pod grafiką, jak na close-upie lokacji |
+| Element | Gdzie |
+|---------|--------|
+| Back + pills | Górny luz winiety |
+| Dymek (`SpeechBubble`) | Prawa góra, ogonek w jej stronę |
+| Buy / Sell + katalog 3×2 | Pod szwem, chrome (golden `shop`) |
+| Taby | Pod ekranem, jak na Home |
 
 Day 0: ten sam kadr, najpierw dialog („kim jesteś?”), sklep jako chrome. Nie drugi obraz.
+
+---
+
+## Archiwum — układ 2026-08-16 (nie wklejać)
+
+Starszy lock: babka na środku, 3 puste skrzynki L + 3 R jako gniazda kart, „sprzedaj loot” namalowane na dolnym bruku. Zastąpione lookdevem: katalog i sprzedaż są zakładkami pod winietą. Zostawione tylko po to, żeby nie wrócić do gniazd przy kolejnym prompcie.

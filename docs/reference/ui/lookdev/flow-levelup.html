@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=390, initial-scale=1" />
+  <title>H&D — Archetype C: Celebration (Level up)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="tokens.css" />
+  <link rel="stylesheet" href="components.css" />
+  <link rel="stylesheet" href="glyphs.css" />
+  <style>
+    .phone.flow { background: radial-gradient(120% 70% at 50% 28%, #fff1d6 0%, #c9d3ff 22%, var(--canvas-hi) 36%, var(--canvas) 64%, var(--canvas-deep) 120%); }
+    .rays { --ray-y: 220px; }
+    .medal-wrap { top: 118px; }
+    .head { top: 392px; gap: 8px; }
+    .rw { position: absolute; left: 24px; right: 24px; top: 494px; z-index: 5; padding: 14px 16px 16px; }
+    .rw .reward .item { width: 76px; }
+    .rw .caption { text-align: center; margin-bottom: 12px; }
+    .rw .point { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding: 9px 12px; border-radius: var(--r-sm); background: var(--gold-soft); font: 800 14px/1.2 var(--font); color: var(--ink-2); }
+    .rw .point b { color: var(--ink); font-weight: 900; }
+    .rw .point .sticker { width: 24px; height: 24px; filter: none; }
+  </style>
+</head>
+<body>
+  <div class="phone flow">
+    <div class="rays gold"></div>
+    <span class="spark gold" style="left: 58px; top: 128px; --s: 24px"></span>
+    <span class="spark" style="left: 322px; top: 114px; --s: 16px"></span>
+    <span class="spark gold" style="left: 36px; top: 318px; --s: 16px"></span>
+    <span class="spark gold" style="left: 328px; top: 290px; --s: 28px"></span>
+    <span class="spark" style="left: 296px; top: 200px; --s: 10px"></span>
+    <span class="spark" style="left: 88px; top: 230px; --s: 12px"></span>
+
+    <div class="status"><span>9:41</span><span class="sys"><span class="bars"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:11px"></i></span><span class="batt"></span></span></div>
+
+    <div class="flow-stage medal-wrap">
+      <span class="portrait xl"><img src="assets/avatar-hero-lg.jpg" alt="" /><span class="lv-badge"><small>LV</small>5</span></span>
+    </div>
+
+    <div class="flow-stage head">
+      <div class="flow-title cased">Level up!</div>
+      <div class="flow-note">Your hero reached <b>Level 5</b></div>
+    </div>
+
+    <div class="card rw">
+      <div class="caption">Rewards</div>
+      <div class="rewards">
+        <div class="reward"><div class="item light"><img src="assets/hd-coin.svg" alt="" /></div><span>150</span><small>Gold</small></div>
+        <div class="reward"><div class="item light"><img src="assets/fe-old-key.svg" alt="" /></div><span>1</span><small>Key</small></div>
+        <div class="reward"><div class="item light unique"><img src="assets/fe-dagger.svg" alt="" /></div><span>Iron dagger</span><small>Unique</small></div>
+      </div>
+      <div class="point"><img class="sticker" src="assets/fe-sparkles.svg" alt="" /><span><b>+1 path point</b> ready to spend</span></div>
+    </div>
+
+    <div class="flow-foot"><button class="btn btn-flow">Claim rewards</button></div>
+    <div class="home-ind"></div>
+  </div>
+</body>
+</html>

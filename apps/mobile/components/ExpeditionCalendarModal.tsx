@@ -13,24 +13,14 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import DraggableFlatList, { RenderItemParams, ScaleDecorator } from "react-native-draggable-flatlist";
-import {
-  X,
-  ChevronDown,
-  ChevronUp,
-  ChevronLeft,
-  ChevronRight,
-  Plus,
-  CalendarClock,
-  ArrowLeft,
-  ArrowRight,
-} from "lucide-react-native";
-import Colors from "@/constants/colors";
 import type { Habit } from "@/habits/types";
 import { useHabitsStore } from "@/habits/store";
 import AddHabitModal from "@/components/AddHabitModal";
 import DayQuestLogReadOnly from "@/components/DayQuestLogReadOnly";
 import DailyReflectionPanel from "@/components/DailyReflectionPanel";
-import FullscreenModal from "@/components/FullscreenModal";
+import { BottomSheet } from "@/ui/BottomSheet";
+import { Glyph } from "@/ui/Glyph";
+import { tokens } from "@/ui/tokens";
 import TaskCardOverlay, { type CardMetrics } from "@/components/TaskCardOverlay";
 import { applyPlanningOrderForDate } from "@/lib/planningDayOrder";
 import { impactAsync, ImpactFeedbackStyle } from "@/lib/hapticsGate";
@@ -280,6 +270,7 @@ function WeekPage({
           <Pressable
             key={key}
             disabled={isBlocked}
+            accessibilityLabel={key}
             onPress={() => {
               if (!isBlocked) {
                 impactAsync(ImpactFeedbackStyle.Light);
@@ -328,13 +319,13 @@ const wpStyles = StyleSheet.create({
     gap: 3,
   },
   cellSelected: {
-    backgroundColor: Colors.dark.gold + "28",
+    backgroundColor: tokens.gold + "28",
     borderWidth: 1.5,
-    borderColor: Colors.dark.gold + "aa",
+    borderColor: tokens.gold + "aa",
   },
   cellToday: {
     borderWidth: 1,
-    borderColor: Colors.dark.emerald + "88",
+    borderColor: tokens.success + "88",
   },
   cellDim: {
     opacity: 0.35,
@@ -342,24 +333,24 @@ const wpStyles = StyleSheet.create({
   dayLetter: {
     fontSize: 9,
     fontWeight: "800",
-    color: Colors.dark.textMuted,
+    color: tokens.ink3,
     letterSpacing: 0.4,
     textTransform: "uppercase",
   },
   dayLetterAccent: {
-    color: Colors.dark.gold,
+    color: tokens.gold,
   },
   dayNum: {
     fontSize: 15,
     fontWeight: "800",
-    color: Colors.dark.text,
+    color: tokens.ink,
     lineHeight: 18,
   },
   dayNumSelected: {
-    color: Colors.dark.gold,
+    color: tokens.gold,
   },
   dayNumToday: {
-    color: Colors.dark.emerald,
+    color: tokens.success,
   },
   dot: {
     width: 5,
@@ -368,7 +359,7 @@ const wpStyles = StyleSheet.create({
     backgroundColor: "transparent",
   },
   dotActive: {
-    backgroundColor: Colors.dark.gold,
+    backgroundColor: tokens.gold,
   },
 });
 
@@ -690,10 +681,10 @@ export default function ExpeditionCalendarModal({
   );
 
   return (
-    <FullscreenModal visible={visible} onRequestClose={onClose}>
+    <BottomSheet fill visible={visible} onClose={onClose}>
       <View style={styles.shell}>
         <LinearGradient
-          colors={["#1a0f2e", "#120a1c", "#080510"]}
+          colors={[tokens.surface, tokens.surface, tokens.surface]}
           style={[StyleSheet.absoluteFill, { pointerEvents: "none" }]}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
@@ -713,7 +704,7 @@ export default function ExpeditionCalendarModal({
               accessibilityRole="button"
               accessibilityLabel="Close planning center"
             >
-              <X size={24} color={Colors.dark.text} />
+              <Glyph name="close" size={24} color={tokens.ink} />
             </Pressable>
 
             {/* Month/year — dynamic, taps to expand/collapse full grid */}
@@ -728,9 +719,9 @@ export default function ExpeditionCalendarModal({
             >
               <Text style={styles.monthYearText}>{selectedDayLabel}</Text>
               {monthExpanded ? (
-                <ChevronUp size={18} color={Colors.dark.gold} style={styles.monthChevron} />
+                <Glyph name="up" size={18} color={tokens.gold} style={styles.monthChevron} />
               ) : (
-                <ChevronDown size={18} color={Colors.dark.gold} style={styles.monthChevron} />
+                <Glyph name="down" size={18} color={tokens.gold} style={styles.monthChevron} />
               )}
             </Pressable>
 
@@ -747,7 +738,7 @@ export default function ExpeditionCalendarModal({
                   hitSlop={10}
                   accessibilityLabel="Previous month"
                 >
-                  <ChevronLeft size={20} color={Colors.dark.gold} strokeWidth={2.4} />
+                  <Glyph name="back" size={20} color={tokens.gold} />
                 </Pressable>
                 <Text style={styles.monthGridLabel}>{monthYearLabel}</Text>
                 <Pressable
@@ -756,7 +747,7 @@ export default function ExpeditionCalendarModal({
                   hitSlop={10}
                   accessibilityLabel="Next month"
                 >
-                  <ChevronRight size={20} color={Colors.dark.gold} strokeWidth={2.4} />
+                  <Glyph name="next" size={20} color={tokens.gold} />
                 </Pressable>
               </View>
               <View style={styles.weekdayRow}>
@@ -780,6 +771,7 @@ export default function ExpeditionCalendarModal({
                       key={key}
                       onPress={() => selectDayFromGrid(day)}
                       disabled={blocked}
+                      accessibilityLabel={key}
                       style={[
                         styles.gridCellBtn,
                         isSelected && styles.gridCellBtnSelected,
@@ -861,7 +853,7 @@ export default function ExpeditionCalendarModal({
                     pressed && styles.reflectionBtnPressed,
                   ]}
                 >
-                  <Plus size={18} color={Colors.dark.gold} />
+                  <Glyph name="add" size={18} color={tokens.gold} />
                   <Text style={styles.reflectionBtnText}>Daily Reflection</Text>
                 </Pressable>
               </View>
@@ -906,7 +898,7 @@ export default function ExpeditionCalendarModal({
                     pressed && addAllowed && styles.addBtnPressed,
                   ]}
                 >
-                  <Plus size={18} color={Colors.dark.text} />
+                  <Glyph name="add" size={18} color={tokens.ink} />
                   <Text style={styles.addBtnText}>Add for this day</Text>
                 </Pressable>
                 {reflectionAllowed ? (
@@ -921,7 +913,7 @@ export default function ExpeditionCalendarModal({
                       { marginTop: 10 },
                     ]}
                   >
-                    <Plus size={18} color={Colors.dark.gold} />
+                    <Glyph name="add" size={18} color={tokens.gold} />
                     <Text style={styles.reflectionBtnText}>Daily Reflection</Text>
                   </Pressable>
                 ) : null}
@@ -944,10 +936,10 @@ export default function ExpeditionCalendarModal({
         ) : null}
 
         {rescheduleOpen ? (
-          <FullscreenModal visible onRequestClose={() => setRescheduleOpen(false)}>
+          <BottomSheet fill visible onClose={() => setRescheduleOpen(false)}>
             <View style={styles.fullModalShell}>
               <LinearGradient
-                colors={["#1a0f2e", "#120a1c", "#080510"]}
+                colors={[tokens.surface, tokens.surface, tokens.surface]}
                 style={[StyleSheet.absoluteFill, { pointerEvents: "none" }]}
                 start={{ x: 0.5, y: 0 }}
                 end={{ x: 0.5, y: 1 }}
@@ -958,7 +950,7 @@ export default function ExpeditionCalendarModal({
                   onPress={() => setRescheduleOpen(false)}
                   style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
                 >
-                  <X size={24} color={Colors.dark.text} />
+                  <Glyph name="close" size={24} color={tokens.ink} />
                 </Pressable>
                 <View style={styles.fullModalTitleBlock}>
                   <Text style={styles.fullModalTitle}>Reschedule Quest</Text>
@@ -999,7 +991,7 @@ export default function ExpeditionCalendarModal({
                       }
                       style={({ pressed }) => [styles.monthNavBtn, pressed && styles.monthNavBtnPressed]}
                     >
-                      <ChevronLeft size={20} color={Colors.dark.gold} strokeWidth={2.4} />
+                      <Glyph name="back" size={20} color={tokens.gold} />
                     </Pressable>
                     <Text style={styles.monthGridLabel}>{formatMonthYearLabel(rescheduleYM.y, rescheduleYM.m)}</Text>
                     <Pressable
@@ -1008,7 +1000,7 @@ export default function ExpeditionCalendarModal({
                       }
                       style={({ pressed }) => [styles.monthNavBtn, pressed && styles.monthNavBtnPressed]}
                     >
-                      <ChevronRight size={20} color={Colors.dark.gold} strokeWidth={2.4} />
+                      <Glyph name="next" size={20} color={tokens.gold} />
                     </Pressable>
                   </View>
                   <View style={styles.weekdayRow}>
@@ -1052,14 +1044,14 @@ export default function ExpeditionCalendarModal({
               </ScrollView>
               </SafeAreaView>
             </View>
-          </FullscreenModal>
+          </BottomSheet>
         ) : null}
 
         {editOpen ? (
-          <FullscreenModal visible onRequestClose={() => setEditOpen(false)}>
+          <BottomSheet fill visible onClose={() => setEditOpen(false)}>
             <View style={styles.fullModalShell}>
               <LinearGradient
-                colors={["#1a0f2e", "#120a1c", "#080510"]}
+                colors={[tokens.surface, tokens.surface, tokens.surface]}
                 style={[StyleSheet.absoluteFill, { pointerEvents: "none" }]}
                 start={{ x: 0.5, y: 0 }}
                 end={{ x: 0.5, y: 1 }}
@@ -1070,7 +1062,7 @@ export default function ExpeditionCalendarModal({
                   onPress={() => setEditOpen(false)}
                   style={({ pressed }) => [styles.headerIconBtn, pressed && styles.headerIconBtnPressed]}
                 >
-                  <X size={24} color={Colors.dark.text} />
+                  <Glyph name="close" size={24} color={tokens.ink} />
                 </Pressable>
                 <View style={styles.fullModalTitleBlock}>
                   <Text style={styles.fullModalTitle}>Edit Quest</Text>
@@ -1090,14 +1082,14 @@ export default function ExpeditionCalendarModal({
                   value={editName}
                   onChangeText={setEditName}
                   placeholder="Quest name"
-                  placeholderTextColor={Colors.dark.textMuted}
+                  placeholderTextColor={tokens.ink3}
                   style={styles.editInput}
                 />
                 <TextInput
                   value={editDesc}
                   onChangeText={setEditDesc}
                   placeholder="Quest description"
-                  placeholderTextColor={Colors.dark.textMuted}
+                  placeholderTextColor={tokens.ink3}
                   multiline
                   textAlignVertical="top"
                   style={[styles.editInput, styles.editInputMulti]}
@@ -1108,7 +1100,7 @@ export default function ExpeditionCalendarModal({
                   value={editIcon}
                   onChangeText={setEditIcon}
                   placeholder="Icon"
-                  placeholderTextColor={Colors.dark.textMuted}
+                  placeholderTextColor={tokens.ink3}
                   style={styles.editInput}
                   maxLength={2}
                 />
@@ -1152,7 +1144,7 @@ export default function ExpeditionCalendarModal({
               </ScrollView>
               </SafeAreaView>
             </View>
-          </FullscreenModal>
+          </BottomSheet>
         ) : null}
 
         {/* Return to Today floating button */}
@@ -1168,23 +1160,23 @@ export default function ExpeditionCalendarModal({
           >
             {isFutureFocusDay ? (
               <>
-                <ArrowLeft size={14} color={Colors.dark.gold} strokeWidth={2.4} />
+                <Glyph name="back" size={14} color={tokens.gold} />
                 <Text style={styles.returnTodayText}>Today</Text>
               </>
             ) : (
               <>
                 <Text style={styles.returnTodayText}>Today</Text>
-                <ArrowRight size={14} color={Colors.dark.gold} strokeWidth={2.4} />
+                <Glyph name="next" size={14} color={tokens.gold} />
               </>
             )}
           </Pressable>
         ) : null}
 
         {reflectionOpen ? (
-          <FullscreenModal visible onRequestClose={() => setReflectionOpen(false)}>
+          <BottomSheet fill visible onClose={() => setReflectionOpen(false)}>
             <View style={styles.reflectionModalShell}>
               <LinearGradient
-                colors={["#1a0f2e", "#120a1c", "#080510"]}
+                colors={[tokens.surface, tokens.surface, tokens.surface]}
                 style={[StyleSheet.absoluteFill, { pointerEvents: "none" }]}
                 start={{ x: 0.5, y: 0 }}
                 end={{ x: 0.5, y: 1 }}
@@ -1198,7 +1190,7 @@ export default function ExpeditionCalendarModal({
                   accessibilityRole="button"
                   accessibilityLabel="Close reflection"
                 >
-                  <X size={24} color={Colors.dark.text} />
+                  <Glyph name="close" size={24} color={tokens.ink} />
                 </Pressable>
                 <View style={styles.reflectionModalTitleBlock}>
                   <Text style={styles.reflectionModalTitle}>Daily Reflection</Text>
@@ -1223,17 +1215,17 @@ export default function ExpeditionCalendarModal({
               </ScrollView>
               </SafeAreaView>
             </View>
-          </FullscreenModal>
+          </BottomSheet>
         ) : null}
       </View>
-    </FullscreenModal>
+    </BottomSheet>
   );
 }
 
 const styles = StyleSheet.create({
   shell: {
     flex: 1,
-    backgroundColor: "#080510",
+    backgroundColor: tokens.surface,
   },
   safeFill: {
     flex: 1,
@@ -1252,11 +1244,11 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 14,
-    backgroundColor: Colors.dark.surface + "ee",
+    backgroundColor: tokens.surface2 + "ee",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: Colors.dark.border + "aa",
+    borderColor: tokens.surface3 + "aa",
   },
   headerIconBtnPressed: {
     opacity: 0.88,
@@ -1278,7 +1270,7 @@ const styles = StyleSheet.create({
   monthYearText: {
     fontSize: 17,
     fontWeight: "800" as const,
-    color: Colors.dark.text,
+    color: tokens.ink,
     letterSpacing: 0.2,
   },
   monthChevron: {
@@ -1292,9 +1284,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 12,
     marginBottom: 12,
-    backgroundColor: Colors.dark.surface + "99",
+    backgroundColor: tokens.surface2 + "99",
     borderWidth: 1,
-    borderColor: Colors.dark.gold + "33",
+    borderColor: tokens.gold + "33",
   },
   monthNavRow: {
     flexDirection: "row",
@@ -1308,9 +1300,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: Colors.dark.background + "99",
+    backgroundColor: tokens.surface + "99",
     borderWidth: 1,
-    borderColor: Colors.dark.gold + "44",
+    borderColor: tokens.gold + "44",
   },
   monthNavBtnPressed: {
     opacity: 0.75,
@@ -1320,7 +1312,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     fontWeight: "800" as const,
-    color: Colors.dark.gold,
+    color: tokens.gold,
     textAlign: "center" as const,
     letterSpacing: 0.5,
     textTransform: "uppercase" as const,
@@ -1334,7 +1326,7 @@ const styles = StyleSheet.create({
     textAlign: "center" as const,
     fontSize: 10,
     fontWeight: "800" as const,
-    color: Colors.dark.textMuted,
+    color: tokens.ink3,
     letterSpacing: 0.5,
   },
   gridCells: {
@@ -1355,13 +1347,13 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
   },
   gridCellBtnSelected: {
-    backgroundColor: Colors.dark.gold + "28",
+    backgroundColor: tokens.gold + "28",
     borderWidth: 1,
-    borderColor: Colors.dark.gold,
+    borderColor: tokens.gold,
   },
   gridCellBtnToday: {
     borderWidth: 1,
-    borderColor: Colors.dark.emerald + "66",
+    borderColor: tokens.success + "66",
   },
   gridCellBtnBlocked: {
     opacity: 0.35,
@@ -1369,22 +1361,22 @@ const styles = StyleSheet.create({
   gridCellText: {
     fontSize: 13,
     fontWeight: "700" as const,
-    color: Colors.dark.textSecondary,
+    color: tokens.ink2,
     textAlign: "center" as const,
     lineHeight: 16,
   },
   gridCellTextSelected: {
-    color: Colors.dark.gold,
+    color: tokens.gold,
   },
   gridCellTextBlocked: {
-    color: Colors.dark.textMuted,
+    color: tokens.ink3,
   },
   weekSwiperWrap: {
     height: 90,
     marginLeft: -16,
     marginRight: -16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.border + "44",
+    borderBottomColor: tokens.surface3 + "44",
     marginBottom: 6,
   },
   returnTodayBtn: {
@@ -1396,9 +1388,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: Colors.dark.gold + "22",
+    backgroundColor: tokens.gold + "22",
     borderWidth: 1.5,
-    borderColor: Colors.dark.gold + "88",
+    borderColor: tokens.gold + "88",
     zIndex: 30,
     bottom: 96,
   },
@@ -1415,7 +1407,7 @@ const styles = StyleSheet.create({
   returnTodayText: {
     fontSize: 11,
     fontWeight: "800" as const,
-    color: Colors.dark.gold,
+    color: tokens.gold,
     letterSpacing: 0.3,
     textTransform: "uppercase" as const,
   },
@@ -1433,14 +1425,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 10,
     borderRadius: 16,
-    backgroundColor: Colors.dark.surface + "dd",
+    backgroundColor: tokens.surface2 + "dd",
     borderWidth: 1,
-    borderColor: Colors.dark.border + "aa",
+    borderColor: tokens.surface3 + "aa",
   },
   taskRowActive: {
-    borderColor: Colors.dark.gold + "88",
+    borderColor: tokens.gold + "88",
     elevation: 4,
-    shadowColor: "#000",
+    shadowColor: "rgba(40, 50, 140, 0.18)",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 8,
@@ -1468,18 +1460,18 @@ const styles = StyleSheet.create({
   taskName: {
     fontSize: 15,
     fontWeight: "800" as const,
-    color: Colors.dark.text,
+    color: tokens.ink,
     lineHeight: 20,
     flexWrap: "wrap" as const,
   },
   taskNameCompleted: {
     textDecorationLine: "line-through" as const,
-    color: Colors.dark.textMuted,
+    color: tokens.ink3,
   },
   taskMeta: {
     marginTop: 2,
     fontSize: 11,
-    color: Colors.dark.textMuted,
+    color: tokens.ink3,
     fontWeight: "600" as const,
   },
   taskRowActions: {
@@ -1493,9 +1485,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: Colors.dark.background + "aa",
+    backgroundColor: tokens.surface + "aa",
     borderWidth: 1,
-    borderColor: Colors.dark.border + "88",
+    borderColor: tokens.surface3 + "88",
   },
   iconBtnDisabled: {
     opacity: 0.45,
@@ -1513,12 +1505,12 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 15,
     fontWeight: "700" as const,
-    color: Colors.dark.textSecondary,
+    color: tokens.ink2,
   },
   emptySub: {
     marginTop: 6,
     fontSize: 12,
-    color: Colors.dark.textMuted,
+    color: tokens.ink3,
   },
   footerBlock: {
     paddingTop: 8,
@@ -1531,9 +1523,9 @@ const styles = StyleSheet.create({
     gap: 8,
     borderRadius: 16,
     paddingVertical: 14,
-    backgroundColor: Colors.dark.gold + "22",
+    backgroundColor: tokens.gold + "22",
     borderWidth: 1.5,
-    borderColor: Colors.dark.gold + "66",
+    borderColor: tokens.gold + "66",
   },
   addBtnDisabled: {
     opacity: 0.45,
@@ -1544,14 +1536,14 @@ const styles = StyleSheet.create({
   addBtnText: {
     fontSize: 14,
     fontWeight: "800" as const,
-    color: Colors.dark.gold,
+    color: tokens.gold,
   },
   timelineReflectionCard: {
     marginBottom: 10,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: Colors.dark.gold + "44",
-    backgroundColor: Colors.dark.gold + "12",
+    borderColor: tokens.gold + "44",
+    backgroundColor: tokens.gold + "12",
     paddingHorizontal: 12,
     paddingVertical: 10,
     gap: 6,
@@ -1559,19 +1551,19 @@ const styles = StyleSheet.create({
   timelineReflectionKicker: {
     fontSize: 10,
     fontWeight: "800" as const,
-    color: Colors.dark.gold,
+    color: tokens.gold,
     letterSpacing: 1,
     textTransform: "uppercase" as const,
   },
   timelineReflectionText: {
     fontSize: 13,
     lineHeight: 19,
-    color: Colors.dark.textSecondary,
+    color: tokens.ink2,
     fontStyle: "italic" as const,
   },
   fullModalShell: {
     flex: 1,
-    backgroundColor: "#080510",
+    backgroundColor: tokens.surface,
   },
   fullModalHeader: {
     flexDirection: "row",
@@ -1580,7 +1572,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.border + "66",
+    borderBottomColor: tokens.surface3 + "66",
   },
   fullModalTitleBlock: {
     flex: 1,
@@ -1590,14 +1582,14 @@ const styles = StyleSheet.create({
   fullModalTitle: {
     fontSize: 17,
     fontWeight: "800" as const,
-    color: Colors.dark.text,
+    color: tokens.ink,
     letterSpacing: 0.2,
   },
   fullModalSubtitle: {
     marginTop: 2,
     fontSize: 11,
     fontWeight: "700" as const,
-    color: Colors.dark.gold,
+    color: tokens.gold,
     letterSpacing: 1,
     textTransform: "uppercase" as const,
   },
@@ -1608,7 +1600,7 @@ const styles = StyleSheet.create({
   modalSectionKicker: {
     fontSize: 10,
     fontWeight: "800" as const,
-    color: Colors.dark.gold,
+    color: tokens.gold,
     letterSpacing: 1.1,
     textTransform: "uppercase" as const,
     marginBottom: 8,
@@ -1621,32 +1613,32 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: Colors.dark.border + "88",
-    backgroundColor: Colors.dark.surface + "dd",
+    borderColor: tokens.surface3 + "88",
+    backgroundColor: tokens.surface2 + "dd",
     paddingHorizontal: 12,
     paddingVertical: 12,
     gap: 2,
   },
   quickTileActive: {
-    borderColor: Colors.dark.gold + "aa",
-    backgroundColor: Colors.dark.gold + "1a",
+    borderColor: tokens.gold + "aa",
+    backgroundColor: tokens.gold + "1a",
   },
   quickTileTitle: {
     fontSize: 13,
     fontWeight: "800" as const,
-    color: Colors.dark.text,
+    color: tokens.ink,
   },
   quickTileMeta: {
     fontSize: 11,
     fontWeight: "600" as const,
-    color: Colors.dark.textMuted,
+    color: tokens.ink3,
   },
   modalCalendarCard: {
     borderRadius: 16,
     padding: 12,
-    backgroundColor: Colors.dark.surface + "99",
+    backgroundColor: tokens.surface2 + "99",
     borderWidth: 1,
-    borderColor: Colors.dark.gold + "33",
+    borderColor: tokens.gold + "33",
   },
   rescheduleBackdrop: {
     flex: 1,
@@ -1659,9 +1651,9 @@ const styles = StyleSheet.create({
     top: "28%" as const,
     borderRadius: 20,
     padding: 18,
-    backgroundColor: "#1e1530",
+    backgroundColor: tokens.surface2,
     borderWidth: 1,
-    borderColor: Colors.dark.borderGlow + "55",
+    borderColor: tokens.brand + "55",
   },
   rescheduleSheetBottom: {
     position: "absolute",
@@ -1670,19 +1662,19 @@ const styles = StyleSheet.create({
     bottom: 14,
     borderRadius: 18,
     padding: 16,
-    backgroundColor: "#1b132b",
+    backgroundColor: tokens.surface2,
     borderWidth: 1,
-    borderColor: Colors.dark.borderGlow + "55",
+    borderColor: tokens.brand + "55",
   },
   rescheduleTitle: {
     fontSize: 18,
     fontWeight: "800" as const,
-    color: Colors.dark.text,
+    color: tokens.ink,
     marginBottom: 4,
   },
   rescheduleSub: {
     fontSize: 13,
-    color: Colors.dark.textMuted,
+    color: tokens.ink3,
     marginBottom: 14,
   },
   rescheduleActionBtn: {
@@ -1691,13 +1683,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: Colors.dark.border + "88",
-    backgroundColor: Colors.dark.surface + "d9",
+    borderColor: tokens.surface3 + "88",
+    backgroundColor: tokens.surface2 + "d9",
   },
   rescheduleActionText: {
     fontSize: 13,
     fontWeight: "800" as const,
-    color: Colors.dark.text,
+    color: tokens.ink,
     textAlign: "center" as const,
   },
   rescheduleRow: {
@@ -1709,22 +1701,22 @@ const styles = StyleSheet.create({
   rescheduleChip: {
     borderRadius: 12,
     borderWidth: 1.5,
-    borderColor: Colors.dark.border,
-    backgroundColor: Colors.dark.surface,
+    borderColor: tokens.surface3,
+    backgroundColor: tokens.surface2,
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
   rescheduleChipActive: {
-    borderColor: Colors.dark.gold,
-    backgroundColor: Colors.dark.gold + "12",
+    borderColor: tokens.gold,
+    backgroundColor: tokens.gold + "12",
   },
   rescheduleChipText: {
-    color: Colors.dark.textMuted,
+    color: tokens.ink3,
     fontWeight: "800" as const,
     fontSize: 11,
   },
   rescheduleChipTextActive: {
-    color: Colors.dark.gold,
+    color: tokens.gold,
   },
   rescheduleBtns: {
     flexDirection: "row",
@@ -1735,25 +1727,25 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     borderRadius: 14,
-    backgroundColor: Colors.dark.surface,
+    backgroundColor: tokens.surface2,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: Colors.dark.border,
+    borderColor: tokens.surface3,
   },
   rescheduleCancelText: {
     fontWeight: "800" as const,
-    color: Colors.dark.textMuted,
+    color: tokens.ink3,
   },
   rescheduleSaveBtn: {
     flex: 1,
     paddingVertical: 12,
     borderRadius: 14,
-    backgroundColor: Colors.dark.gold,
+    backgroundColor: tokens.gold,
     alignItems: "center",
   },
   rescheduleSaveText: {
     fontWeight: "800" as const,
-    color: "#1a1228",
+    color: tokens.ink,
   },
   editSheet: {
     position: "absolute",
@@ -1762,30 +1754,30 @@ const styles = StyleSheet.create({
     top: "14%" as const,
     borderRadius: 20,
     padding: 16,
-    backgroundColor: "#1b132b",
+    backgroundColor: tokens.surface2,
     borderWidth: 1,
-    borderColor: Colors.dark.gold + "44",
+    borderColor: tokens.gold + "44",
   },
   editTitle: {
     fontSize: 19,
     fontWeight: "800" as const,
-    color: Colors.dark.text,
+    color: tokens.ink,
   },
   editSubtitle: {
     marginTop: 4,
     marginBottom: 12,
     fontSize: 11,
     fontWeight: "700" as const,
-    color: Colors.dark.gold,
+    color: tokens.gold,
     textTransform: "uppercase" as const,
     letterSpacing: 1.2,
   },
   editInput: {
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: Colors.dark.border + "99",
-    backgroundColor: Colors.dark.surface + "dd",
-    color: Colors.dark.text,
+    borderColor: tokens.surface3 + "99",
+    backgroundColor: tokens.surface2 + "dd",
+    color: tokens.ink,
     paddingHorizontal: 12,
     paddingVertical: 10,
     marginBottom: 10,
@@ -1806,20 +1798,20 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: Colors.dark.border + "88",
-    backgroundColor: Colors.dark.surface + "cc",
+    borderColor: tokens.surface3 + "88",
+    backgroundColor: tokens.surface2 + "cc",
   },
   editTypeBtnActive: {
-    borderColor: Colors.dark.gold + "aa",
-    backgroundColor: Colors.dark.gold + "22",
+    borderColor: tokens.gold + "aa",
+    backgroundColor: tokens.gold + "22",
   },
   editTypeText: {
-    color: Colors.dark.textMuted,
+    color: tokens.ink3,
     fontWeight: "700" as const,
     fontSize: 12,
   },
   editTypeTextActive: {
-    color: Colors.dark.gold,
+    color: tokens.gold,
   },
   reflectionBtn: {
     flexDirection: "row",
@@ -1828,9 +1820,9 @@ const styles = StyleSheet.create({
     gap: 8,
     borderRadius: 16,
     paddingVertical: 14,
-    backgroundColor: Colors.dark.gold + "22",
+    backgroundColor: tokens.gold + "22",
     borderWidth: 1.5,
-    borderColor: Colors.dark.gold + "66",
+    borderColor: tokens.gold + "66",
   },
   reflectionBtnPressed: {
     opacity: 0.88,
@@ -1838,11 +1830,11 @@ const styles = StyleSheet.create({
   reflectionBtnText: {
     fontSize: 14,
     fontWeight: "800" as const,
-    color: Colors.dark.gold,
+    color: tokens.gold,
   },
   reflectionModalShell: {
     flex: 1,
-    backgroundColor: "#080510",
+    backgroundColor: tokens.surface,
   },
   reflectionModalHeader: {
     flexDirection: "row",
@@ -1851,7 +1843,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.border + "66",
+    borderBottomColor: tokens.surface3 + "66",
   },
   reflectionModalTitleBlock: {
     flex: 1,
@@ -1861,14 +1853,14 @@ const styles = StyleSheet.create({
   reflectionModalTitle: {
     fontSize: 17,
     fontWeight: "800" as const,
-    color: Colors.dark.text,
+    color: tokens.ink,
     letterSpacing: 0.2,
   },
   reflectionModalDate: {
     marginTop: 2,
     fontSize: 11,
     fontWeight: "700" as const,
-    color: Colors.dark.gold,
+    color: tokens.gold,
     letterSpacing: 1.2,
     textTransform: "uppercase" as const,
   },
@@ -1882,9 +1874,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 14,
     borderRadius: 14,
-    backgroundColor: Colors.dark.surface,
+    backgroundColor: tokens.surface2,
     borderWidth: 1,
-    borderColor: Colors.dark.border,
+    borderColor: tokens.surface3,
   },
   reflectionCancelBtnPressed: {
     opacity: 0.88,
@@ -1892,6 +1884,6 @@ const styles = StyleSheet.create({
   reflectionCancelText: {
     fontSize: 15,
     fontWeight: "700" as const,
-    color: Colors.dark.textMuted,
+    color: tokens.ink3,
   },
 });

@@ -20,6 +20,9 @@ web-build/
 # Metro
 .metro-health-check*
 
+# Junction to docs/reference/ui/lookdev (created by scripts/link-lookdev.js)
+/lookdev
+
 # debug
 npm-debug.*
 yarn-debug.*

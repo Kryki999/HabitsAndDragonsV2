@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=390, initial-scale=1" />
+  <title>H&D — Fight: clash</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../tokens.css" />
+  <link rel="stylesheet" href="../components.css" />
+  <link rel="stylesheet" href="../glyphs.css" />
+  <style>
+    .veil {
+      position: absolute; inset: 0; z-index: 4; pointer-events: none;
+      background: linear-gradient(180deg, rgba(145,162,242,0) 38%, rgba(145,162,242,.55) 62%, var(--canvas) 82%);
+    }
+    .stage {
+      position: absolute; left: 0; right: 0; bottom: 36px; z-index: 10;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+    }
+    .stage .kicker {
+      font: var(--t-caption); letter-spacing: var(--caption-track); text-transform: uppercase;
+      color: #fff; text-shadow: var(--shadow-on-canvas);
+    }
+    .swords { display: flex; align-items: center; gap: 6px; height: 120px; margin: 4px 0; }
+    .swords .sticker { width: 92px; height: 92px; }
+    .swords .a { transform: rotate(-26deg) translateY(6px); }
+    .swords .b { transform: scaleX(-1) rotate(-26deg) translateY(6px); }
+    .swords .spark { position: relative; width: 22px; height: 22px; margin: 0 -8px; }
+  </style>
+</head>
+<body>
+  <!-- Proposal. Kit classes only; page layout stays in this file. -->
+  <div class="phone">
+    <div class="art"><img src="../assets/still-gutterjack.jpg" alt="" /></div>
+    <div class="scrim-top"></div>
+    <div class="veil"></div>
+
+    <div class="status"><span>9:41</span><span class="sys"><span class="bars"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:11px"></i></span><span class="batt"></span></span></div>
+
+    <div class="stage">
+      <div class="kicker">Cellar</div>
+      <div class="flow-title">Clash</div>
+      <div class="swords">
+        <img class="sticker a" src="../assets/fe-dagger.svg" alt="" />
+        <span class="spark"></span>
+        <img class="sticker b" src="../assets/fe-dagger.svg" alt="" />
+      </div>
+      <div class="flow-note">Gutterjack</div>
+    </div>
+    <div class="home-ind"></div>
+  </div>
+</body>
+</html>

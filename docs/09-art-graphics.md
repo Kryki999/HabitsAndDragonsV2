@@ -90,31 +90,31 @@ Nie robimy pełnego flat R&M. Robimy: **painterly baza + graphic readable landma
 
 | Powierzchnia | Narzędzie | Dlaczego |
 |--------------|-----------|----------|
-| **Mapa królestwa (zoom-out)** | Ilustracja + runtime mapy (Skia/gesty, mgła, piny) | Duży kadr, pan/zoom, wiele lokacji — **nie** sweet spot Rive. Rive = UI/aktorzy/interaktywne sceny, nie „silnik mapy świata” |
+| **Mapa królestwa (pasek)** | Ilustracja + runtime mapy (Image+gesty teraz; Skia later, mgła, piny) | Pionowy pasek, pan Y, 11 pinów — **nie** sweet spot Rive. Rive = UI/aktorzy/interaktywne sceny, nie „silnik mapy świata” |
 | **Close-up lokacji** (targ, menelnia, kryjówka, las) | **Rive living scene** — tu się opłaca | Mniejszy kadr = jedna całość art+ruch (woda/dym/liście w tym samym pliku). Wow immersji bez gigantycznego `.riv` |
 | Bohater, itemy, loot, HUD micro | **Rive** — KEEP | Dokładnie to, do czego Rive jest stworzony |
 | Filmiki fabularne | Pre-render video | Poza Rive |
 
 ```text
-Zoom-out mapa  →  piękna diorama (ref), lekkość Finch, odkrycia
-Tap lokacji    →  CLOSE-UP living (Rive)  = „świat oddycha”
-Powrót         →  mapa
+Pasek mapa    →  piękna diorama (ref), lekkość Finch, odkrycia
+Tap → Enter   →  CLOSE-UP living (Rive)  = „świat oddycha”
+Powrót        →  mapa
 ```
 
 To spina Twoje „jedna całość” **tam, gdzie widać detal**, i nie wciska całego M1 w tool do HUD-ów.
 
 | Podejście | Werdykt |
 |-----------|---------|
-| Całe królestwo jako jeden wielki Rive | **PARK / raczej NIE** — koszt authoringu, MB, pan/zoom; Rive nie jest do tego pozycjonowany |
+| Całe królestwo jako jeden wielki Rive | **PARK / raczej NIE** — koszt authoringu, MB, pan; Rive nie jest do tego pozycjonowany |
 | PNG mapy + obce Lottie dymy | **KILL** — tandeta |
 | Close-up = living Rive (ten sam brush/światło) | **KEEP** — tu opłacalność jest realna |
-| Zoom-out: prawie still + ewentualnie *bardzo* subtelne życie później | **OK na MVP** — Tsushima-mapa też nie animuje każdego liścia z orbity |
+| Pasek: prawie still + ewentualnie *bardzo* subtelne życie później | **OK na MVP** — z daleka nie animujemy każdego liścia |
 | Full-map video | **PARK** jako default mapy |
 
 **AI Agent Rive:** sensowny przy close-upach / postaciach / HUD — nie jako „zrób mi mapę królestwa z Pinteresta”.
 
 **Przykład z marketplace (jak ludzie robią „mapy” w Rive):**  
-[Desu map](https://rive.app/marketplace/23473-44024-desu-map/) — flat **vector** wyspy, klik sekcji → highlight (state machine). To jest mapa-*UI* w natywnym języku Rive, **nie** painterly diorama typu nasz ref Crownhaven. Dowód: Rive ogarnia interaktywne mapki *w swoim stylu*; nie dowód, że cały nasz zoom-out królestwa trzeba pakować w `.riv`.
+[Desu map](https://rive.app/marketplace/23473-44024-desu-map/) — flat **vector** wyspy, klik sekcji → highlight (state machine). To jest mapa-*UI* w natywnym języku Rive, **nie** painterly diorama typu nasz ref Crownhaven. Dowód: Rive ogarnia interaktywne mapki *w swoim stylu*; nie dowód, że cały nasz pasek królestwa trzeba pakować w `.riv`.
 
 ### 4. Architektura Crownhaven (motyw przewodni)
 
@@ -133,7 +133,8 @@ Wtedy filmik isekai i mapa to **to samo miasto**, nie „inne IP”.
 
 ```text
 LOOK-DEV (1 lokacja = Crownhaven)
-  ├─ 1× fragment mapy w stylu ref
+  ├─ graybox 390×1920 = kłódka siatki (`24`) — nie AI
+  ├─ 1× crop paska w stylu ref (dachy stolicy)
   ├─ 1× close-up (targ + menelnia)
   ├─ 1× bohater Rive w TEJ SAMEJ palecie / świetle
   └─ 1× klip 10–15 s (przybycie na targ)
@@ -169,20 +170,20 @@ Każdy klip przechodzi **human gate** (`10`, `12`). Odrzut > „wystarczy że ł
 | „Cartoon” postaci | Graphic / expressive **w tym samym świecie**, nie osobne IP R&M |
 | Kolor produktu | Jasny pop-fantasy z ciepłym światłem (ref), nie ciemny comic V1 |
 | Ile unikalnych close-up na M1 | Dążyć do **unikalnych landmarków** na Main ★ + hub; side mogą dzielić biom + 1 landmark |
-| Mapa vs close-up | **Dwa kadry, jeden świat** — orbita ≠ zoom JPEG; pin → osobny obraz lokacji ([`24`](24-map-production.md)) |
+| Mapa vs close-up | **Dwa kadry, jeden świat** — pasek ≠ zoom JPEG; Enter → osobny obraz lokacji ([`24`](24-map-production.md)) |
 
 ---
 
 ## Otwarte
 
 - [ ] Zrobić oficjalną **1-pager look-dev** (palette swatch + 3 przykłady: mapa / Rive / klatka video)
-- [ ] Czy bohater na mapie = kropka/pin, czy mini-sprite w stylu Rive?
+- [x] Bohater na mapie = **pin-kursor** (awatar skacze na wybrany pin, LOCK 2026-09-25). Mini-sprite Rive = later.
 - [ ] Budżet: ile unikalnych close-up vs „biom + landmark” na launch
 - [ ] Kontraktor art vs AI+cleanup — kto trzyma gate
 - [ ] Wersja Crownhaven „gasnąca” (detale menelni) vs mapa „ładna z daleka”
 - [ ] Pipeline mapy (AI → stitch → kafelki vs jeden WebP) — plan w [`24`](24-map-production.md)
 - [ ] Look-dev Crownhaven: prompt w [`reference/art/prompt-crownhaven-closeup.md`](reference/art/prompt-crownhaven-closeup.md)
-- [x] UI Bible v2 + goldeny (Home, mapa, Crownhaven, Gutterjack, kit sheet) — [`reference/ui/design-bible.md`](reference/ui/design-bible.md) (2026-09-24)
+- [x] UI Bible v2.3 + goldeny (Home, mapa + PeekCard, Crownhaven, Gutterjack / LevelNav, sklep Buy/Sell, kit sheet) — [`reference/ui/design-bible.md`](reference/ui/design-bible.md) (2026-09-24)
 - [ ] Styl postaci w winietach: kreska świata (`mage.png`) vs miękki Wayfarer z mocków — rekomendacja: kreska świata
 
 ---

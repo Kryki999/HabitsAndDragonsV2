@@ -52,7 +52,7 @@ Prototyp **działa**. Jest też **inną grą**. Świadomie odchodzimy od „upgr
 | Walka | Energia / klucze, auto-resolve | **Darmowe CD per loch** + klucze; % wygranej widoczne |
 | Tożsamość | Klasa + smoki + 2 sloty | Dom, **outfit + atrybut**, emotki, hex, affinity NPC |
 | Mentor | Czat w tabie, klucz Groq **w kliencie** | Fullscreen z tawerny; **AI tylko przez backend** |
-| Social | Ranking + friends (szkielet) | Tab jest; **launch może być cienki** — later |
+| Social | Ranking + friends (szkielet) | **Hall of Heroes** — calling card, koło, dolina; peek = przycięty Hero. Launch cienki / later. [`08`](08-social.md) |
 | Store listing | Habit tracker w skórze fantasy | **Isekai wejście** — wypadasz do królestwa |
 
 **KEEP z V1 (jako UX / feel, nie jako architektura):** lista nawyków, kalendarz, cadence dnia, haptics / satysfakcja odhaczenia, kierunek Supabase, Expo jako shell.
@@ -169,7 +169,7 @@ Aukcje gracze↔gracze: **PARK** na miesiąc 1.
 
 Questy = czysta lista IRL + winieta **domu w stolicy**. Nie mieszamy nawyków z „jestem w lesie”. Świat = mapa wow, potem drill-in.
 
-Społeczność: soft gate ~L4 / D2 (nie zaśmiecać Day 0).
+Społeczność: **Hall of Heroes** ([`08`](08-social.md)). Soft gate ~L4 / D2 (nie zaśmiecać Day 0). Friend code + akceptacja; zero rankingu / podglądu nawyków.
 
 ### 5.7 Akt 1 — tempo (wzorowy sumienny)
 
@@ -219,7 +219,7 @@ Produkt to **hybryda**: lekka apka nawyków codziennie **+** momenty immersji RP
 | Stan klienta | Zustand **podzielony domenowo** (nie god-store V1) | do zaprojektowania |
 | Backend | **Supabase** (Auth, Postgres, Storage) | KEEP kierunku — **Twoja decyzja czy zostaje** |
 | AI Mentor | LLM **tylko przez backend** (Edge / własne API) | LOCK filozofii; vendor otwarty |
-| Mapa zoom-out | Ilustracja + pan/zoom + mgła (Skia lub Image+gesty na MVP) | kierunek |
+| Mapa pasek | Ilustracja + pan Y + mgła (Image+gesty na MVP; Skia later) | LOCK kamery 2026-09-25 (`24`) |
 | Close-up / postacie | **Rive** | kierunek art |
 | Cinematics | Pre-render video (batch + human gate), nie gen per user | kierunek |
 | Offline | Odhacz nawyku działa bez siatki; świat się dogrywa | zasada niefunkcjonalna |
@@ -242,9 +242,9 @@ Habit RPG + mapa + loot = raj na cheat, jeśli gold/XP/lochy żyją tylko w Asyn
 | Loadout + lock Atrybutu do resetu | Anti-swap |
 | Inventory / rarity | Sink straganu, później aukcje |
 | Mentor: kontekst + rate limit + brak klucza w apce | Koszt + prywatność („karta gracza”) |
-| Social (later) | Friends, ranking — V1 miał luźne RLS |
+| Social (later) | Hall of Heroes — friend code (nie nick search); V1 luźne RLS **KILL** |
 
-Klient może być **optymistyczny** na odhaczeniu (feel), z reconcile. Mapa pan/zoom, Rive, video = klient.
+Klient może być **optymistyczny** na odhaczeniu (feel), z reconcile. Mapa (pan Y), Rive, video = klient.
 
 ### 6.3 Szkic domen (nie schema — rozmowa)
 
@@ -263,7 +263,7 @@ Hub             dom tier, 3 hotspoty Crownhaven (stragan / menelnia / pałac)
 NPC             affinity 1/2/3, sklep, mikstury Maga
 Mentor          living-memory card, chat, granice kryzysu
 Content         lokacje, bossy, tabele dropu, beaty ★ — dane, nie hardcoded UI
-Social          later: friends, ranking; aukcje PARK M1
+Social          later: Hall of Heroes (friends + dolina); ranking PARK; aukcje PARK M1
 ```
 
 Treść świata (boss, drop, dialog) chcemy trzymać jako **katalog**, nie rozsypkę w ekranach — łatwiej LiveOps i Akt 2.
@@ -292,7 +292,7 @@ Nie musisz odpowiadać day 1. To lista, przy której chcielibyśmy Cię mieć w 
 6. **Mentor** — jeden pipeline LLM vs osobno chat / oracle / karta; vendor; budżet tokenów / user / dzień.
 7. **Content pipeline** — JSON w repo, CMS, czy coś innego, gdy designerzy dopisują dropy bez deployu apki?
 8. **Analytics** — Day 1/7, odkrycia mapy, clear ★ — vendor TBD.
-9. **Lock stacku na 6–12 mies.** — Expo + Skia/mapa + Rive + pre-render video: Twoje „tak / tak, ale / nie”.
+9. **Lock stacku na 6–12 mies.** — Expo + mapa ilustracyjna + Rive + pre-render video: Twoje „tak / tak, ale / nie”.
 
 Monetyzacja ([`14`](14-monetization-liveops.md)) jest **prawie pusta**. Fair-play (płatności nie kupują Aktu) musi być w ekonomii od początku, nawet jeśli IAP później.
 
@@ -319,7 +319,8 @@ Monetyzacja ([`14`](14-monetization-liveops.md)) jest **prawie pusta**. Fair-pla
 - Psychologia + pętla: [`02`](02-psychology.md), [`03`](03-core-loop.md)
 - Ekonomia / walka / loot: [`06`](06-economy-loot.md) (najgrubszy filar mechanik)
 - Journey Akt 1: [`17`](17-player-journey.md)
-- Lokacje Rev B: [`23`](23-act1-location-brainstorm.md)
+- Lokacje Rev B: [`23`](23-act1-location-brainstorm.md) (§C = graf + **telefon LOCK 2026-09-25**)
+- Mapa (kamera, pasek, produkcja): [`24`](24-map-production.md) **LOCK 2026-09-25**
 - Locklista produktu: [`20`](20-pre-world-locklist.md)
 - Tech szkic: [`12`](12-tech-stack.md)
 
@@ -328,11 +329,11 @@ Monetyzacja ([`14`](14-monetization-liveops.md)) jest **prawie pusta**. Fair-pla
 | Plik | Uwaga |
 |------|--------|
 | [`07-ai-sage.md`](07-ai-sage.md) | Mentor = ambicja; kontrakt Living World nie domknięty |
-| [`08-social.md`](08-social.md) | Pytania, mało decyzji |
+| [`08-social.md`](08-social.md) | **LOCK 2026-09-25** Hall of Heroes; Otwarte = lore-copy / mocki / look-dev |
 | [`13-game-systems.md`](13-game-systems.md) | Lista systemów V1; **cel V2 pusty** — Twój teren |
 | [`14-monetization-liveops.md`](14-monetization-liveops.md) | Otwarte |
 | [`15-onboarding-arrival.md`](15-onboarding-arrival.md) | Wizja isekai OK; klasy w `15` jeszcze jako pytanie — w `05`/`20` już **KILL** |
-| [`18-information-architecture.md`](18-information-architecture.md) | 5 tabów przyjęte w `00`/`20`; sam plik wciąż „propose” |
+| [`18-information-architecture.md`](18-information-architecture.md) | 5 tabów przyjęte w `00`/`20`; HUD wciąż „propose”. **Kamera mapy = LOCK 2026-09-25** |
 | [`19-screen-inventory.md`](19-screen-inventory.md) | Slice ekranów; koło menelni w `06` już unpark, tu może park — nie kanon |
 | [`21`](21-world-bible-mvp.md) §L | Stary układ T1 — **nadpisany** przez `23` Rev B; decision log na górze = świeży |
 | [`22`](22-universe-story-act1.md) | Ton i motyw KEEP; nazwy beatów (First Omen / Sandglass) = archiwum vs Rev B |
@@ -345,7 +346,7 @@ Art (kreska, prompty) jest w toku look-dev — nie blokuje zrozumienia mechanik.
 
 **30 minut** — ten plik + [`00`](00-final-picture.md) + odpal V1.
 
-**Wieczór** — `03` (pętla) → `06` (ekonomia, skanuj tabele LOCK, nie każdy afiks) → `17` (D0–D4 wystarczy) → `23` §B + mapa w §C.
+**Wieczór** — `03` (pętla) → `06` (ekonomia, skanuj tabele LOCK, nie każdy afiks) → `17` (D0–D4 wystarczy) → `23` §B + mapa w §C + `24` (pasek).
 
 **Gdy wchodzisz w fabułę** — `21` od **decision logu** (nie kasujemy historii decyzji) + `22` prolog.
 
@@ -387,7 +388,7 @@ Pytania, które są **cenniejsze** niż „czy mogę zacząć pisać serwis”:
 - Exact godziny CD
 - Side #6, imiona NPC, nazwa królestwa
 - Kontrakt Mentora / karta gracza
-- Social na launch
+- Social ship (look-dev + kod hallu) — koncept LOCK, nie slice Day 0
 - Monetization
 - Schema backendu, RLS, tick dnia, CMS treści
 - Czy close-up lokacji = always bitmapa, czy Rive scene

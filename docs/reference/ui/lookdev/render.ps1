@@ -1,4 +1,5 @@
 # Renders every look-dev page to ../golden/<name>.png at 2x (iPhone 390x844 logical).
+# A page can override its size with <meta name="render-size" content="W,H"> (long scroll screens, kit sheet).
 # Usage: powershell -File docs/reference/ui/lookdev/render.ps1 [page-name ...]
 param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Pages)
 
@@ -17,7 +18,8 @@ if (-not $Pages) { $Pages = Get-ChildItem $here -Filter *.html | ForEach-Object 
 foreach ($p in $Pages) {
   $src = "file:///" + ((Join-Path $here "$p.html") -replace '\\', '/')
   $png = Join-Path $out "$p.png"
-  $size = if ($p -like "kit-*") { "1000,2180" } else { "390,844" }
+  $meta = Select-String -Path (Join-Path $here "$p.html") -Pattern 'name="render-size" content="(\d+,\d+)"' | Select-Object -First 1
+  $size = if ($meta) { $meta.Matches[0].Groups[1].Value } else { "390,844" }
   $args = @("--headless=new", "--disable-gpu", "--hide-scrollbars", "--force-device-scale-factor=2",
     "--window-size=$size", "--virtual-time-budget=6000", "--user-data-dir=$env:TEMP\hd-lookdev-browser",
     "--screenshot=$png", $src)

@@ -1,11 +1,11 @@
 import React from 'react';
 import { StyleSheet, Text, View, type ImageSourcePropType } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import Colors from '@/constants/colors';
+import { Card } from '@/ui/Card';
+import { SceneHead } from '@/ui/SceneHead';
+import { ScrimTop, SeamDock } from '@/ui/Seam';
+import { tokens } from '@/ui/tokens';
 
-import OverlayHud from './OverlayHud';
 import StillFrame, { type CoverAnchor } from './StillFrame';
 import { LOCATION_STILL_INTRINSIC } from './content';
 
@@ -19,7 +19,7 @@ type Props = {
   stillAnchor?: CoverAnchor;
 };
 
-/** Ally / hub still — same World grammar as a location, no Fight. */
+/** Flavor still for hub NPCs (advisor) and map flavor cards (Pell). Allies use AllyStill. */
 export default function NpcStill({
   name,
   kicker,
@@ -29,8 +29,6 @@ export default function NpcStill({
   testID,
   stillAnchor = 'center',
 }: Props) {
-  const insets = useSafeAreaInsets();
-
   return (
     <View style={styles.root} testID={testID ?? `npc-still-${name}`}>
       <StillFrame
@@ -39,21 +37,12 @@ export default function NpcStill({
         intrinsicHeight={LOCATION_STILL_INTRINSIC.height}
         anchor={stillAnchor}
       />
-
-      <OverlayHud
-        insets={insets}
-        kicker={kicker}
-        title={name}
-        left={{ icon: 'back', onPress: onBack, accessibilityLabel: 'Back' }}
-      />
-
-      <View pointerEvents="none" style={[styles.veilWrap, { paddingBottom: 16 + insets.bottom }]}>
-        <LinearGradient
-          colors={['transparent', 'rgba(7,5,16,0.55)', 'rgba(7,5,16,0.92)']}
-          style={styles.fade}
-        />
+      <ScrimTop />
+      <SeamDock fade={60} />
+      <SceneHead kicker={kicker} name={name} onBack={onBack} />
+      <Card style={styles.card}>
         <Text style={styles.flavor}>{flavor}</Text>
-      </View>
+      </Card>
     </View>
   );
 }
@@ -61,26 +50,21 @@ export default function NpcStill({
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#070510',
+    backgroundColor: tokens.canvas,
   },
-  veilWrap: {
+  card: {
     position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  fade: {
-    height: 72,
+    left: tokens.screenX,
+    right: tokens.screenX,
+    bottom: 12,
+    zIndex: 30,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
   },
   flavor: {
-    marginTop: -8,
-    paddingHorizontal: 20,
-    paddingBottom: 8,
-    color: Colors.dark.textSecondary,
-    fontSize: 13,
-    lineHeight: 19,
-    textAlign: 'center',
-    textShadowColor: 'rgba(0,0,0,0.85)',
-    textShadowRadius: 6,
+    fontFamily: tokens.font800,
+    fontSize: 15,
+    lineHeight: 20,
+    color: tokens.ink,
   },
 });

@@ -56,7 +56,7 @@ Zamiast „rozwijaj swoją wioskę na pustkowiu”: **awans w stolicy** (rynnszt
 
 ## Zasady designu onboardingu
 
-1. Zero ściany 80 pytań na starcie (głębia później przez Mentora / świat).
+1. Zero ściany 80 pytań na starcie (głębia później przez Mentora / świat). Robocze założenie foundera (2026-09-24): **10–15 pytań**, bo to apka rozwoju osobistego — znośne tylko, gdy każde to 1 tap, pytanie zadaje NPC (stall keeper) i widać licznik kroków. Wzór karty: archetyp C2 w [`reference/ui/design-bible.md`](reference/ui/design-bible.md) ([jeden wybór](reference/ui/golden/onboarding-choice.png), [kilka](reference/ui/golden/onboarding-pick.png)). Lista pytań = Otwarte.
 2. Każdy krok = scena w świecie, nie ustawienia.
 3. Po 3 minutach gracz wie: *jestem w królestwie, mam zadanie, mapa istnieje*.
 4. Skip cinematic tylko jeśli absolutnie konieczne (dostępność) — default = immersja.

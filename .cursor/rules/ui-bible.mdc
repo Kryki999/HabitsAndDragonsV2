@@ -1,0 +1,21 @@
+---
+description: UI look of Habits & Dragons — use when designing, mocking, or coding any screen, component, icon, color, or layout
+globs: apps/mobile/**/*.tsx,apps/mobile/ui/**,apps/mobile/theme/**,apps/mobile/constants/colors.ts,docs/reference/ui/**
+alwaysApply: false
+---
+
+# UI Bible — mandatory for any screen work
+
+Source of truth: `docs/reference/ui/design-bible.md`. Start at `docs/reference/ui/README.md`.
+
+Before designing or coding a screen:
+
+1. Look at every PNG in `docs/reference/ui/golden/`. The new screen must look like a sibling of them.
+2. Name the archetype (A sheet+vignette, B card stack, C1 celebration, C2 onboarding question, D world scene, E map) and the closest golden. The table in `docs/reference/ui/README.md` maps screen types to goldens.
+3. Use only components from section 4 of the bible and values from `docs/reference/ui/lookdev/tokens.css`. No new colors, radii, shadows, fonts, or icon sets.
+4. Icons: system = MingCute Fill (mono); content = Fluent Emoji Flat sticker with white die-cut edge; items = world-style art. Gold coin = `hd-coin.svg`, never an emoji coin.
+5. Build a look-dev HTML in `docs/reference/ui/lookdev/` from the same CSS, render with `lookdev/render.ps1`, compare with the golden, run the gate (section 9), show the PNG to the user. Only then write app code.
+
+Never: V1 dark purple (`#0d0a14`) as tab canvas, Lucide or thin outline icons, translucent glass on art, HUD painted into stills, labeled floor menus (use LevelNav arrows), bottom scene cards taller than ~18% of the screen, art showing in the tab bar corners (use `Seam.dock`), onboarding questions without an NPC asking them, rarity names other than common/unique/heroic/artifact.
+
+Existing app code (`constants/colors.ts`, Lucide imports, `world/FloorLift.tsx`) is the old V1 look. Do not copy it into new screens.

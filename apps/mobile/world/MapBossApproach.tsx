@@ -9,8 +9,10 @@ import {
   dungeonLiftFloors,
   getLocationHotspot,
 } from './content';
+import { LevelNav } from '@/ui/LevelNav';
+
 import BossApproach from './BossApproach';
-import FloorLift from './FloorLift';
+import { isFloorOpen } from './interiors';
 import { useFloorLift } from './useTavernLift';
 import { useWorldStore } from './store';
 import type { MapLocationId } from './types';
@@ -57,8 +59,23 @@ export default function MapBossApproach({ locationId }: Props) {
       isFirstClear={!clearedEncounterIds.includes(encounter.id)}
       onBack={closeEncounter}
       onCleared={() => markEncounterCleared(encounter.id)}
-      headerExtra={
-        showLift ? <FloorLift floors={liftFloors} currentId={floorId} onSelect={onPickFloor} /> : null
+      sceneKicker={dungeon.name}
+      sceneName={floor.label}
+      levelNav={
+        showLift ? (
+          <LevelNav
+            floors={liftFloors.map((entry) => ({
+              id: entry.id,
+              label: entry.label,
+              locked: !isFloorOpen(entry),
+            }))}
+            currentId={floorId}
+            onSelect={(next) => {
+              const target = liftFloors.find((entry) => entry.id === next.id);
+              if (target) onPickFloor(target);
+            }}
+          />
+        ) : null
       }
       whisper={whisper}
     />

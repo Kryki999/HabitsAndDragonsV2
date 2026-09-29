@@ -84,9 +84,7 @@ ${fields}
   float veil = mix(0.997, 1.0, clamp(grain, 0.0, 1.0));
   float alpha = veil * (1.0 - clearAmt);
 
-  half3 cold = half3(0.50, 0.56, 0.64);
-  half3 milk = half3(0.78, 0.82, 0.88);
-  half3 col = mix(cold, milk, grain);
+  half3 col = half3(0.663, 0.733, 0.984);
   half a = half(alpha);
   return half4(col * a, a);
 }

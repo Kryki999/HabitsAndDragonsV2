@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=390, initial-scale=1" />
+  <title>H&D — Archetype C: Onboarding question (pick several)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="tokens.css" />
+  <link rel="stylesheet" href="components.css" />
+  <link rel="stylesheet" href="glyphs.css" />
+  <style>
+    .backdrop { position: absolute; inset: 0 0 auto 0; height: 340px; z-index: 0; overflow: hidden; }
+    .backdrop img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 6%; }
+    .backdrop::after { content: ""; position: absolute; inset: 0; background: rgba(145, 162, 242, 0.5); }
+    .seam { top: 130px; height: 210px; }
+    .top { position: absolute; top: 52px; left: var(--screen-x); right: var(--screen-x); z-index: 20; display: flex; flex-direction: column; gap: 16px; }
+    .hint { display: flex; justify-content: space-between; font: 800 14px/1 var(--font); color: #fff; text-shadow: var(--shadow-on-canvas); padding: 0 4px; }
+    .hint b { font-weight: 900; }
+    .grid { position: absolute; top: 302px; left: var(--screen-x); right: var(--screen-x); z-index: 20; }
+    .flow-foot { left: var(--screen-x); right: var(--screen-x); }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="backdrop"><img src="assets/still-crownhaven.jpg" alt="" /></div>
+    <div class="seam"></div>
+
+    <div class="status"><span>9:41</span><span class="sys"><span class="bars"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:11px"></i></span><span class="batt"></span></span></div>
+
+    <div class="top">
+      <div class="step-bar">
+        <span class="icon-btn"><span class="glyph g-back"></span></span>
+        <span class="track-line"><i style="width: 72%"></i></span>
+        <span class="cnt">9 / 12</span>
+      </div>
+      <div class="npc-ask">
+        <span class="face"><img src="assets/face-vendor.jpg" alt="" /></span>
+        <div class="bubble tail-left on-canvas"><div class="caption">Stall keeper</div><div class="q">Every hero starts small. Pick three first quests.</div></div>
+      </div>
+      <div class="hint"><span>Tiny is fine. You can add more later.</span><b>3 / 3</b></div>
+    </div>
+
+    <div class="grid choice-grid">
+      <div class="choice-tile on"><span class="well"><img class="sticker" src="assets/fe-droplet.svg" alt="" /></span><b>Drink water</b><small>1 min</small><span class="mark"><span class="glyph g-check"></span></span></div>
+      <div class="choice-tile"><span class="well"><img class="sticker" src="assets/fe-person-running.svg" alt="" /></span><b>Short walk</b><small>10 min</small><span class="mark"></span></div>
+      <div class="choice-tile on"><span class="well"><img class="sticker" src="assets/fe-open-book.svg" alt="" /></span><b>Read 10 pages</b><small>10 min</small><span class="mark"><span class="glyph g-check"></span></span></div>
+      <div class="choice-tile"><span class="well"><img class="sticker" src="assets/fe-soap.svg" alt="" /></span><b>Wash my face</b><small>2 min</small><span class="mark"></span></div>
+      <div class="choice-tile on"><span class="well"><img class="sticker" src="assets/fe-leaf-fluttering-in-wind.svg" alt="" /></span><b>3 deep breaths</b><small>1 min</small><span class="mark"><span class="glyph g-check"></span></span></div>
+      <div class="choice-tile"><span class="well"><img class="sticker" src="assets/fe-bread.svg" alt="" /></span><b>Real breakfast</b><small>15 min</small><span class="mark"></span></div>
+    </div>
+
+    <div class="flow-foot"><button class="btn btn-primary">Start my journey</button></div>
+    <div class="home-ind"></div>
+  </div>
+</body>
+</html>

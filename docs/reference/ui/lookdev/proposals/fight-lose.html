@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=390, initial-scale=1" />
+  <title>H&D — Fight: defeat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../tokens.css" />
+  <link rel="stylesheet" href="../components.css" />
+  <link rel="stylesheet" href="../glyphs.css" />
+  <style>
+    .mark-wrap { top: 148px; }
+    .mark {
+      width: 148px; height: 148px; border-radius: 50%; background: var(--surface);
+      display: grid; place-items: center;
+      box-shadow: var(--lip-surface), var(--drop-md);
+    }
+    .mark .sticker { width: 78px; height: 78px; filter: none; opacity: .72; }
+    .head { top: 332px; gap: 8px; }
+    .pay {
+      position: absolute; left: 24px; right: 24px; top: 500px; z-index: 5;
+      padding: 16px 18px 18px; text-align: center;
+    }
+    .pay p { font: 800 16px/1.35 var(--font); color: var(--ink-2); }
+    .pay .row {
+      margin-top: 14px; display: inline-flex; align-items: center; gap: 8px;
+      height: 44px; padding: 0 16px 0 8px; border-radius: var(--r-pill); background: var(--gold-soft);
+      font: 900 22px/1 var(--font); color: var(--ink);
+    }
+    .pay .row img { width: 28px; height: 28px; }
+  </style>
+</head>
+<body>
+  <!-- Proposal. Not a celebration: no gold rays. Consolation is the only gold. -->
+  <div class="phone flow">
+    <div class="status"><span>9:41</span><span class="sys"><span class="bars"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:11px"></i></span><span class="batt"></span></span></div>
+
+    <div class="flow-stage mark-wrap"><div class="mark"><img class="sticker" src="../assets/fe-dagger.svg" alt="" /></div></div>
+
+    <div class="flow-stage head">
+      <div class="kicker" style="font: var(--t-caption); letter-spacing: var(--caption-track); text-transform: uppercase; color: #fff; text-shadow: var(--shadow-on-canvas);">Cellar</div>
+      <div class="flow-title">Defeat</div>
+      <div class="flow-note">Gutterjack is still standing</div>
+    </div>
+
+    <div class="card pay">
+      <p>Too strong this round. Take the coins and try again.</p>
+      <div class="row"><img src="../assets/hd-coin.svg" alt="" />+12</div>
+    </div>
+
+    <div class="flow-foot"><button class="btn btn-primary"><img class="sticker" src="../assets/fe-crossed-swords.svg" alt="" />Fight again</button></div>
+    <div class="home-ind"></div>
+  </div>
+</body>
+</html>

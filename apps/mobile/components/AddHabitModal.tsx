@@ -1,27 +1,27 @@
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  Pressable,
-  TextInput,
-  ScrollView,
-  Animated,
-  Dimensions,
-  Platform,
   KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  useWindowDimensions,
 } from 'react-native';
-import { X, ChevronRight, Scroll, PenTool } from 'lucide-react-native';
+
+import type { StatType, SuggestedHabit, TaskType } from '@/habits/types';
 import { impactAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
-import { LinearGradient } from 'expo-linear-gradient';
-import Colors from '@/constants/colors';
-import { StatType, SuggestedHabit, TaskType } from '@/habits/types';
 import { suggestedHabits } from '@/mocks/suggestedHabits';
+import { BottomSheet } from '@/ui/BottomSheet';
+import { ButtonPrimary } from '@/ui/Button';
+import { Card } from '@/ui/Card';
+import { Glyph } from '@/ui/Glyph';
+import { Sticker } from '@/ui/Sticker';
+import { stickerForHabitIcon } from '@/ui/stickerRegistry';
+import { tokens } from '@/ui/tokens';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
-// Approximate chip width: minWidth(92) + gap(10) between chips
 const CHIP_W = 102;
 
 interface AddHabitModalProps {
@@ -39,51 +39,21 @@ interface AddHabitModalProps {
 }
 
 function getTodayKey(): string {
-  return new Date().toISOString().split('T')[0];
+  return new Date().toISOString().split('T')[0]!;
 }
 
 function dateKeyFromOffsetDays(offsetDays: number): string {
   const d = new Date();
   d.setDate(d.getDate() + offsetDays);
-  return d.toISOString().split('T')[0];
+  return d.toISOString().split('T')[0]!;
 }
 
 type ModalView = 'choose' | 'suggested' | 'custom';
 
-function SuggestedHabitItem({ habit, onSelect }: { habit: SuggestedHabit; onSelect: (h: SuggestedHabit) => void }) {
-  const pressAnim = useRef(new Animated.Value(0)).current;
-
-  return (
-    <Pressable
-      onPressIn={() => Animated.timing(pressAnim, { toValue: 1, duration: 80, useNativeDriver: true }).start()}
-      onPressOut={() => Animated.spring(pressAnim, { toValue: 0, friction: 6, tension: 100, useNativeDriver: true }).start()}
-      onPress={() => {
-        impactAsync(ImpactFeedbackStyle.Heavy);
-        onSelect(habit);
-      }}
-      testID={`suggested-habit-${habit.name}`}
-    >
-      <Animated.View style={[
-        styles.suggestedCard,
-        {
-          transform: [{ translateY: pressAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 2] }) }],
-        },
-      ]}>
-        <View style={styles.suggestedCardInner}>
-          <Text style={styles.suggestedIcon}>{habit.icon}</Text>
-          <View style={styles.suggestedInfo}>
-            <Text style={styles.suggestedName}>{habit.name}</Text>
-            <Text style={styles.suggestedDesc} numberOfLines={2}>{habit.rpgDescription}</Text>
-          </View>
-          <ChevronRight size={18} color={Colors.dark.textMuted} />
-        </View>
-        <View style={[styles.suggestedBottom, { backgroundColor: Colors.dark.gold + '30' }]} />
-      </Animated.View>
-    </Pressable>
-  );
-}
+const ICON_OPTIONS = ['⚔️', '🛡️', '🏃', '📖', '🧠', '💪', '🎯', '🔥', '⭐', '🌟', '💎', '🏆'];
 
 export default function AddHabitModal({ visible, onClose, onAddHabit, initialScheduledDateKey }: AddHabitModalProps) {
+  const { width: screenWidth } = useWindowDimensions();
   const [view, setView] = useState<ModalView>('choose');
   const [customName, setCustomName] = useState('');
   const [customDesc, setCustomDesc] = useState('');
@@ -93,11 +63,8 @@ export default function AddHabitModal({ visible, onClose, onAddHabit, initialSch
   const [customNameInputH, setCustomNameInputH] = useState(56);
   const scheduleScrollRef = useRef<ScrollView>(null);
 
-  const ICON_OPTIONS = ['⚔️', '🛡️', '🏃', '📖', '🧠', '💪', '🎯', '🔥', '⭐', '🌟', '💎', '🏆'];
-
   const todayKey = useMemo(() => getTodayKey(), []);
   const scheduleChips = useMemo(() => {
-    // scheduledDate is optional; `null` => due today (including overdue).
     const maxDays = 60;
     return [
       { key: null as string | null, label: 'No date', sub: 'Due today' },
@@ -112,31 +79,6 @@ export default function AddHabitModal({ visible, onClose, onAddHabit, initialSch
     ];
   }, [todayKey]);
 
-  const renderSchedulePicker = () => (
-    <View style={styles.scheduleWrap}>
-      <Text style={styles.scheduleLabel}>Plan date</Text>
-      <ScrollView ref={scheduleScrollRef} horizontal showsHorizontalScrollIndicator={false}>
-        <View style={styles.scheduleRow}>
-          {scheduleChips.map((c) => {
-            const isActive = c.key === selectedScheduledDateKey;
-            return (
-              <Pressable
-                key={c.key ?? 'no_date'}
-                onPress={() => setSelectedScheduledDateKey(c.key)}
-                style={[styles.scheduleChip, isActive && styles.scheduleChipActive]}
-              >
-                <Text style={[styles.scheduleChipText, isActive && styles.scheduleChipTextActive]}>
-                  {c.label}
-                </Text>
-                {'sub' in c && c.sub ? <Text style={styles.scheduleChipSub}>{c.sub}</Text> : null}
-              </Pressable>
-            );
-          })}
-        </View>
-      </ScrollView>
-    </View>
-  );
-
   useEffect(() => {
     if (visible) {
       setView('choose');
@@ -145,44 +87,43 @@ export default function AddHabitModal({ visible, onClose, onAddHabit, initialSch
       setSelectedTaskType('daily');
       setSelectedIcon('⚔️');
       setCustomNameInputH(56);
-      const todayKey = getTodayKey();
+      const today = getTodayKey();
       setSelectedScheduledDateKey(
-        initialScheduledDateKey && initialScheduledDateKey === todayKey ? null : (initialScheduledDateKey ?? null),
+        initialScheduledDateKey && initialScheduledDateKey === today ? null : (initialScheduledDateKey ?? null),
       );
     }
   }, [visible, initialScheduledDateKey]);
 
-  // Auto-scroll the date-picker to the pre-selected date whenever
-  // the schedule picker becomes visible (suggested / custom views).
   useEffect(() => {
     if (view === 'choose' || !selectedScheduledDateKey) return;
     const idx = scheduleChips.findIndex((c) => c.key === selectedScheduledDateKey);
     if (idx <= 0) return;
-    // Center the selected chip: left edge of chip - half viewport + half chip
-    const x = Math.max(0, idx * CHIP_W - SCREEN_WIDTH / 2 + CHIP_W / 2);
-    // Small delay so the ScrollView has finished its layout pass
+    const x = Math.max(0, idx * CHIP_W - screenWidth / 2 + CHIP_W / 2);
     const t = setTimeout(() => {
       scheduleScrollRef.current?.scrollTo({ x, animated: false });
     }, 60);
     return () => clearTimeout(t);
-  }, [view, selectedScheduledDateKey, scheduleChips]);
+  }, [view, selectedScheduledDateKey, scheduleChips, screenWidth]);
 
   const handleClose = useCallback(() => {
     onClose();
   }, [onClose]);
 
-  const handleSelectSuggested = useCallback((habit: SuggestedHabit) => {
-    impactAsync(ImpactFeedbackStyle.Heavy);
-    onAddHabit({
-      name: habit.name,
-      description: habit.description,
-      stat: habit.stat,
-      taskType: habit.taskType,
-      icon: habit.icon,
-      scheduledDate: selectedScheduledDateKey ?? null,
-    });
-    handleClose();
-  }, [onAddHabit, handleClose, selectedScheduledDateKey]);
+  const handleSelectSuggested = useCallback(
+    (habit: SuggestedHabit) => {
+      impactAsync(ImpactFeedbackStyle.Heavy);
+      onAddHabit({
+        name: habit.name,
+        description: habit.description,
+        stat: habit.stat,
+        taskType: habit.taskType,
+        icon: habit.icon,
+        scheduledDate: selectedScheduledDateKey ?? null,
+      });
+      handleClose();
+    },
+    [onAddHabit, handleClose, selectedScheduledDateKey],
+  );
 
   const handleCreateCustom = useCallback(() => {
     if (!customName.trim()) return;
@@ -196,579 +137,306 @@ export default function AddHabitModal({ visible, onClose, onAddHabit, initialSch
       scheduledDate: selectedScheduledDateKey ?? null,
     });
     handleClose();
-  }, [
-    customName,
-    customDesc,
-    selectedTaskType,
-    selectedIcon,
-    onAddHabit,
-    handleClose,
-    selectedScheduledDateKey,
-  ]);
+  }, [customName, customDesc, selectedTaskType, selectedIcon, onAddHabit, handleClose, selectedScheduledDateKey]);
 
-  const renderChooseView = () => (
-    <View style={styles.chooseContainer}>
-      <Text style={styles.chooseTitle}>Forge a New Habit</Text>
-      <Text style={styles.chooseSubtitle}>Choose your path, adventurer</Text>
-
-      <Pressable
-        onPress={() => {
-          impactAsync(ImpactFeedbackStyle.Heavy);
-          setView('suggested');
-        }}
-        testID="choose-suggested"
-      >
-        <View style={styles.pathCard}>
-          <LinearGradient
-            colors={['#2a1f3d', '#362a50']}
-            style={styles.pathCardGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-          >
-            <View style={[styles.pathIconWrap, { backgroundColor: Colors.dark.gold + '18' }]}>
-              <Scroll size={28} color={Colors.dark.gold} />
-            </View>
-            <View style={styles.pathInfo}>
-              <Text style={styles.pathTitle}>Suggested Quests</Text>
-              <Text style={styles.pathDesc}>Choose from curated habits with RPG wisdom</Text>
-            </View>
-            <ChevronRight size={20} color={Colors.dark.textMuted} />
-          </LinearGradient>
-          <View style={[styles.pathBottom, { backgroundColor: Colors.dark.gold + '40' }]} />
+  const schedulePicker = (
+    <View style={styles.scheduleWrap}>
+      <Text style={styles.fieldLabel}>Plan date</Text>
+      <ScrollView ref={scheduleScrollRef} horizontal showsHorizontalScrollIndicator={false}>
+        <View style={styles.scheduleRow}>
+          {scheduleChips.map((c) => {
+            const isActive = c.key === selectedScheduledDateKey;
+            return (
+              <Pressable
+                key={c.key ?? 'no_date'}
+                onPress={() => setSelectedScheduledDateKey(c.key)}
+                style={[styles.chip, isActive && styles.chipOn]}
+              >
+                <Text style={[styles.chipText, isActive && styles.chipTextOn]}>{c.label}</Text>
+                {'sub' in c && c.sub ? <Text style={styles.chipSub}>{c.sub}</Text> : null}
+              </Pressable>
+            );
+          })}
         </View>
-      </Pressable>
-
-      <Pressable
-        onPress={() => {
-          impactAsync(ImpactFeedbackStyle.Heavy);
-          setView('custom');
-        }}
-        testID="choose-custom"
-      >
-        <View style={styles.pathCard}>
-          <LinearGradient
-            colors={['#1a2028', '#253040']}
-            style={styles.pathCardGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-          >
-            <View style={[styles.pathIconWrap, { backgroundColor: Colors.dark.purple + '18' }]}>
-              <PenTool size={28} color={Colors.dark.purple} />
-            </View>
-            <View style={styles.pathInfo}>
-              <Text style={styles.pathTitle}>Custom Quest</Text>
-              <Text style={styles.pathDesc}>Craft your own quest</Text>
-            </View>
-            <ChevronRight size={20} color={Colors.dark.textMuted} />
-          </LinearGradient>
-          <View style={[styles.pathBottom, { backgroundColor: Colors.dark.purple + '40' }]} />
-        </View>
-      </Pressable>
+      </ScrollView>
     </View>
   );
 
-  const renderSuggestedView = () => {
-    const dailyHabits = suggestedHabits.filter(h => h.taskType === 'daily');
-    const quickQuests = suggestedHabits.filter(h => h.taskType === 'one-off');
-
-    return (
-      <ScrollView style={styles.suggestedContainer} showsVerticalScrollIndicator={false}>
-        <Pressable onPress={() => setView('choose')} style={styles.backBtn}>
-          <Text style={styles.backText}>← Back</Text>
-        </Pressable>
-        {renderSchedulePicker()}
-        <Text style={styles.sectionTitle}>Suggested Quests</Text>
-
-        <Text style={styles.timeGroupLabel}>🔁 Daily Habits</Text>
-        {dailyHabits.map(h => (
-          <SuggestedHabitItem key={h.name} habit={h} onSelect={handleSelectSuggested} />
-        ))}
-
-        <Text style={styles.timeGroupLabel}>🎯 Quick Quests</Text>
-        {quickQuests.map(h => (
-          <SuggestedHabitItem key={h.name} habit={h} onSelect={handleSelectSuggested} />
-        ))}
-        <View style={{ height: 40 }} />
-      </ScrollView>
-    );
-  };
-
-  const renderCustomView = () => {
-    return (
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
-      >
-        <ScrollView style={styles.customContainer} showsVerticalScrollIndicator={false}>
-          <Pressable onPress={() => setView('choose')} style={styles.backBtn}>
-            <Text style={styles.backText}>← Back</Text>
-          </Pressable>
-          {renderSchedulePicker()}
-          <Text style={styles.sectionTitle}>Craft Your Quest</Text>
-
-          <View style={styles.taskTypeSwitch}>
-            <Pressable
-              onPress={() => setSelectedTaskType('daily')}
-              style={[styles.taskTypeBtn, selectedTaskType === 'daily' && styles.taskTypeBtnActive]}
-            >
-              <Text style={[styles.taskTypeText, selectedTaskType === 'daily' && styles.taskTypeTextActive]}>🔁 Daily Habit</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => setSelectedTaskType('one-off')}
-              style={[styles.taskTypeBtn, selectedTaskType === 'one-off' && styles.taskTypeBtnActive]}
-            >
-              <Text style={[styles.taskTypeText, selectedTaskType === 'one-off' && styles.taskTypeTextActive]}>🎯 One-off Quest</Text>
-            </Pressable>
-          </View>
-
-          <Text style={styles.fieldLabel}>Quest Name</Text>
-          <TextInput
-            style={[styles.textInput, styles.textInputMultiGrow, { height: Math.max(56, customNameInputH) }]}
-            placeholder="e.g. Drink 2L Water"
-            placeholderTextColor={Colors.dark.textMuted}
-            value={customName}
-            onChangeText={setCustomName}
-            multiline
-            textAlignVertical="top"
-            onContentSizeChange={(e) => {
-              const next = Math.min(180, Math.max(56, Math.ceil(e.nativeEvent.contentSize.height) + 18));
-              setCustomNameInputH(next);
-            }}
-            testID="custom-habit-name"
-          />
-
-          <Text style={styles.fieldLabel}>Icon</Text>
-          <View style={styles.iconGrid}>
-            {ICON_OPTIONS.map(icon => (
-              <Pressable
-                key={icon}
-                onPress={() => setSelectedIcon(icon)}
-                style={[
-                  styles.iconOption,
-                  selectedIcon === icon && { borderColor: Colors.dark.gold, backgroundColor: Colors.dark.gold + '15' },
-                ]}
-              >
-                <Text style={styles.iconOptionText}>{icon}</Text>
-              </Pressable>
-            ))}
-          </View>
-
-          <Pressable
-            onPress={handleCreateCustom}
-            style={[
-              styles.createBtn,
-              !customName.trim() && styles.createBtnDisabled,
-            ]}
-            disabled={!customName.trim()}
-            testID="create-custom-habit"
-          >
-            <LinearGradient
-              colors={
-                customName.trim() ? [...Colors.gradients.gold] : ['#333', '#333']
-              }
-              style={styles.createBtnGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-            >
-              <Text
-                style={[
-                  styles.createBtnText,
-                  !customName.trim() && { color: Colors.dark.textMuted },
-                ]}
-              >
-                Forge Quest
-              </Text>
-            </LinearGradient>
-            <View
-              style={[
-                styles.createBtnBottom,
-                { backgroundColor: customName.trim() ? Colors.dark.goldDark : '#222' },
-              ]}
-            />
-          </Pressable>
-          <View style={{ height: 40 }} />
-        </ScrollView>
-      </KeyboardAvoidingView>
-    );
-  };
+  const dailyHabits = suggestedHabits.filter((h) => h.taskType === 'daily');
+  const quickQuests = suggestedHabits.filter((h) => h.taskType === 'one-off');
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={handleClose}
-      statusBarTranslucent
-      navigationBarTranslucent
-      presentationStyle="overFullScreen"
-    >
-      {view === 'choose' ? (
-        <View style={styles.overlay}>
-          <Pressable style={styles.overlayBg} onPress={handleClose} />
-          <View style={styles.chooseSheet}>
-            <View style={styles.handleBar} />
-            <Pressable
-              onPress={handleClose}
-              style={({ pressed }) => [styles.closeBtnSheet, pressed && styles.closeBtnPressed]}
-              testID="close-modal"
-            >
-              <X size={18} color={Colors.dark.textSecondary} />
-            </Pressable>
-            {renderChooseView()}
-          </View>
-        </View>
-      ) : (
-        <View style={styles.fullSheet}>
-          <Pressable
-            onPress={handleClose}
-            style={({ pressed }) => [styles.closeBtn, pressed && styles.closeBtnPressed]}
-            testID="close-modal"
-          >
-            <X size={20} color={Colors.dark.textSecondary} />
+    <BottomSheet visible={visible} onClose={handleClose} fill={view !== 'choose'}>
+      <View style={styles.sheetHead}>
+        {view === 'choose' ? <View style={styles.headSpacer} /> : (
+          <Pressable onPress={() => setView('choose')} accessibilityLabel="Back" hitSlop={8}>
+            <Glyph name="back" size={22} color={tokens.brand} />
           </Pressable>
-          {view === 'suggested' && renderSuggestedView()}
-          {view === 'custom' && renderCustomView()}
+        )}
+        <Text style={styles.title}>
+          {view === 'choose' ? 'Forge a New Habit' : view === 'suggested' ? 'Suggested Quests' : 'Craft Your Quest'}
+        </Text>
+        <Pressable onPress={handleClose} accessibilityLabel="Close" testID="close-modal" hitSlop={8}>
+          <Glyph name="close" size={22} color={tokens.ink2} />
+        </Pressable>
+      </View>
+      {view === 'choose' ? (
+        <View style={styles.choose}>
+          <Text style={styles.sub}>Choose your path, adventurer</Text>
+          <Pressable
+            testID="choose-suggested"
+            onPress={() => {
+              impactAsync(ImpactFeedbackStyle.Heavy);
+              setView('suggested');
+            }}
+          >
+            <Card style={styles.path}>
+              <Sticker name="scroll" size={32} />
+              <View style={styles.pathCopy}>
+                <Text style={styles.pathTitle}>Suggested Quests</Text>
+                <Text style={styles.pathDesc}>Choose from curated habits with RPG wisdom</Text>
+              </View>
+              <Glyph name="next" size={20} color={tokens.ink3} />
+            </Card>
+          </Pressable>
+          <Pressable
+            testID="choose-custom"
+            onPress={() => {
+              impactAsync(ImpactFeedbackStyle.Heavy);
+              setView('custom');
+            }}
+          >
+            <Card style={styles.path}>
+              <Sticker name="swords" size={32} />
+              <View style={styles.pathCopy}>
+                <Text style={styles.pathTitle}>Custom Quest</Text>
+                <Text style={styles.pathDesc}>Craft your own quest</Text>
+              </View>
+              <Glyph name="next" size={20} color={tokens.ink3} />
+            </Card>
+          </Pressable>
         </View>
-      )}
-    </Modal>
+      ) : null}
+      {view === 'suggested' ? (
+        <ScrollView style={styles.flex} showsVerticalScrollIndicator={false}>
+          {schedulePicker}
+          <Text style={styles.group}>Daily habits</Text>
+          {dailyHabits.map((habit) => (
+            <SuggestedRow key={habit.name} habit={habit} onSelect={handleSelectSuggested} />
+          ))}
+          <Text style={styles.group}>Quick quests</Text>
+          {quickQuests.map((habit) => (
+            <SuggestedRow key={habit.name} habit={habit} onSelect={handleSelectSuggested} />
+          ))}
+          <View style={styles.endPad} />
+        </ScrollView>
+      ) : null}
+      {view === 'custom' ? (
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {schedulePicker}
+            <View style={styles.typeRow}>
+              <Pressable
+                style={[styles.typeBtn, selectedTaskType === 'daily' && styles.typeBtnOn]}
+                onPress={() => setSelectedTaskType('daily')}
+              >
+                <Text style={[styles.typeText, selectedTaskType === 'daily' && styles.typeTextOn]}>Daily habit</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.typeBtn, selectedTaskType === 'one-off' && styles.typeBtnOn]}
+                onPress={() => setSelectedTaskType('one-off')}
+              >
+                <Text style={[styles.typeText, selectedTaskType === 'one-off' && styles.typeTextOn]}>One-off quest</Text>
+              </Pressable>
+            </View>
+            <Text style={styles.fieldLabel}>Quest name</Text>
+            <TextInput
+              style={[styles.input, { height: Math.max(56, customNameInputH) }]}
+              placeholder="e.g. Drink 2L Water"
+              placeholderTextColor={tokens.ink3}
+              value={customName}
+              onChangeText={setCustomName}
+              multiline
+              textAlignVertical="top"
+              onContentSizeChange={(e) => {
+                const next = Math.min(180, Math.max(56, Math.ceil(e.nativeEvent.contentSize.height) + 18));
+                setCustomNameInputH(next);
+              }}
+              testID="custom-habit-name"
+            />
+            <Text style={styles.fieldLabel}>Icon</Text>
+            <View style={styles.iconGrid}>
+              {ICON_OPTIONS.map((icon) => {
+                const on = selectedIcon === icon;
+                return (
+                  <Pressable key={icon} onPress={() => setSelectedIcon(icon)} style={[styles.iconOption, on && styles.iconOptionOn]}>
+                    <Sticker name={stickerForHabitIcon(icon)} size={28} />
+                  </Pressable>
+                );
+              })}
+            </View>
+            <ButtonPrimary
+              label="Forge Quest"
+              disabled={!customName.trim()}
+              onPress={handleCreateCustom}
+              testID="create-custom-habit"
+            />
+            <View style={styles.endPad} />
+          </ScrollView>
+        </KeyboardAvoidingView>
+      ) : null}
+    </BottomSheet>
+  );
+}
+
+function SuggestedRow({ habit, onSelect }: { habit: SuggestedHabit; onSelect: (habit: SuggestedHabit) => void }) {
+  return (
+    <Pressable
+      testID={`suggested-habit-${habit.name}`}
+      onPress={() => onSelect(habit)}
+      style={styles.suggestedPress}
+    >
+      <Card style={styles.suggested}>
+        <View style={styles.well}>
+          <Sticker name={stickerForHabitIcon(habit.icon)} size={28} />
+        </View>
+        <View style={styles.pathCopy}>
+          <Text style={styles.pathTitle}>{habit.name}</Text>
+          <Text style={styles.pathDesc} numberOfLines={2}>
+            {habit.rpgDescription}
+          </Text>
+        </View>
+      </Card>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  // Bottom-sheet overlay (choose view)
-  overlay: {
+  flex: { flex: 1 },
+  sheetHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+    gap: 8,
+  },
+  headSpacer: { width: 22 },
+  title: {
     flex: 1,
-    justifyContent: 'flex-end' as const,
+    textAlign: 'center',
+    fontFamily: tokens.font900,
+    fontSize: 20,
+    color: tokens.ink,
   },
-  overlayBg: {
-    position: 'absolute' as const,
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.62)',
-  },
-  chooseSheet: {
-    backgroundColor: Colors.dark.background,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingBottom: Platform.OS === 'ios' ? 34 : 20,
-    borderTopWidth: 1,
-    borderColor: Colors.dark.border,
-    zIndex: 2,
-    elevation: 16,
-  },
-  handleBar: {
-    width: 40,
-    height: 4,
-    backgroundColor: Colors.dark.textMuted,
-    borderRadius: 2,
-    alignSelf: 'center' as const,
-    marginTop: 10,
-    marginBottom: 6,
-  },
-  closeBtnSheet: {
-    position: 'absolute' as const,
-    top: 10,
-    right: 14,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.dark.surface,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    zIndex: 10,
-    borderWidth: 1,
-    borderColor: Colors.dark.border + '88',
-  },
-  closeBtnPressed: {
-    opacity: 0.7,
-    transform: [{ scale: 0.95 }],
-  },
-  fullSheet: {
-    flex: 1,
-    backgroundColor: Colors.dark.background,
-    paddingTop: Platform.OS === 'ios' ? 52 : 28,
-    paddingBottom: Platform.OS === 'ios' ? 34 : 20,
-  },
-  closeBtn: {
-    position: 'absolute' as const,
-    top: Platform.OS === 'ios' ? 52 : 28,
-    right: 16,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: Colors.dark.surface,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    zIndex: 10,
-  },
-  chooseContainer: {
-    padding: 20,
-    paddingTop: 10,
-  },
-  chooseTitle: {
-    fontSize: 24,
-    fontWeight: '800' as const,
-    color: Colors.dark.text,
-    textAlign: 'center' as const,
-    marginBottom: 4,
-  },
-  chooseSubtitle: {
+  sub: {
+    fontFamily: tokens.font700,
     fontSize: 14,
-    color: Colors.dark.textSecondary,
-    textAlign: 'center' as const,
-    marginBottom: 24,
-  },
-  pathCard: {
-    borderRadius: 16,
-    overflow: 'hidden' as const,
+    color: tokens.ink2,
+    textAlign: 'center',
     marginBottom: 14,
-    borderWidth: 1,
-    borderBottomWidth: 0,
-    borderColor: Colors.dark.border,
   },
-  pathCardGradient: {
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    padding: 18,
+  choose: { gap: 10, paddingBottom: 8 },
+  path: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 14,
   },
-  pathIconWrap: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-  },
-  pathInfo: {
-    flex: 1,
-    marginLeft: 14,
-  },
+  pathCopy: { flex: 1 },
   pathTitle: {
-    fontSize: 17,
-    fontWeight: '700' as const,
-    color: Colors.dark.text,
-    marginBottom: 3,
+    fontFamily: tokens.font800,
+    fontSize: 16,
+    color: tokens.ink,
   },
   pathDesc: {
-    fontSize: 12,
-    color: Colors.dark.textSecondary,
+    fontFamily: tokens.font700,
+    fontSize: 13,
+    color: tokens.ink2,
+    marginTop: 2,
   },
-  pathBottom: {
-    height: 4,
-  },
-  backBtn: {
-    marginBottom: 8,
-    paddingVertical: 4,
-  },
-  backText: {
-    fontSize: 14,
-    fontWeight: '600' as const,
-    color: Colors.dark.gold,
-  },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: '800' as const,
-    color: Colors.dark.text,
-    marginBottom: 16,
-  },
-  taskTypeSwitch: {
-    flexDirection: 'row' as const,
-    gap: 8,
-    marginBottom: 14,
-  },
-  taskTypeBtn: {
-    flex: 1,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: Colors.dark.border,
-    backgroundColor: Colors.dark.surface,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    alignItems: 'center' as const,
-  },
-  taskTypeBtnActive: {
-    borderColor: Colors.dark.gold,
-    backgroundColor: Colors.dark.gold + '15',
-  },
-  taskTypeText: {
+  group: {
+    fontFamily: tokens.font800,
     fontSize: 11,
-    fontWeight: '800' as const,
-    color: Colors.dark.textMuted,
-    textAlign: 'center' as const,
-  },
-  taskTypeTextActive: {
-    color: Colors.dark.gold,
-  },
-  timeGroupLabel: {
-    fontSize: 14,
-    fontWeight: '700' as const,
-    color: Colors.dark.textSecondary,
-    marginBottom: 10,
-    marginTop: 6,
-  },
-  suggestedContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 4,
-  },
-  suggestedCard: {
-    borderRadius: 12,
-    overflow: 'hidden' as const,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderBottomWidth: 0,
-    borderColor: Colors.dark.border,
-    backgroundColor: Colors.dark.surface,
-  },
-  suggestedCardInner: {
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    padding: 14,
-  },
-  suggestedIcon: {
-    fontSize: 28,
-    marginRight: 12,
-  },
-  suggestedInfo: {
-    flex: 1,
-  },
-  suggestedName: {
-    fontSize: 15,
-    fontWeight: '700' as const,
-    color: Colors.dark.text,
-    marginBottom: 3,
-  },
-  suggestedDesc: {
-    fontSize: 12,
-    color: Colors.dark.textSecondary,
-    lineHeight: 17,
-    marginBottom: 6,
-  },
-  suggestedBottom: {
-    height: 3,
-  },
-  customContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 4,
-  },
-  fieldLabel: {
-    fontSize: 12,
-    fontWeight: '700' as const,
-    color: Colors.dark.textSecondary,
-    letterSpacing: 0.5,
-    textTransform: 'uppercase' as const,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    color: tokens.ink2,
+    marginTop: 8,
     marginBottom: 8,
-    marginTop: 4,
   },
-  textInput: {
-    backgroundColor: Colors.dark.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: Colors.dark.border,
-    padding: 14,
-    fontSize: 15,
-    color: Colors.dark.text,
-    marginBottom: 16,
+  suggestedPress: { marginBottom: 10 },
+  suggested: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 12,
   },
-  textInputMultiGrow: {
-    lineHeight: 20,
-    paddingTop: 12,
-    paddingBottom: 12,
+  well: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: tokens.surface2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  textInputMulti: {
-    minHeight: 60,
-    textAlignVertical: 'top' as const,
+  scheduleWrap: { marginBottom: 12 },
+  scheduleRow: { flexDirection: 'row', gap: 8, paddingVertical: 4 },
+  fieldLabel: {
+    fontFamily: tokens.font800,
+    fontSize: 14,
+    color: tokens.ink,
+    marginBottom: 8,
+  },
+  chip: {
+    minWidth: 92,
+    borderRadius: tokens.rSm,
+    backgroundColor: tokens.surface2,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  chipOn: { backgroundColor: tokens.brand },
+  chipText: { fontFamily: tokens.font800, fontSize: 13, color: tokens.ink },
+  chipTextOn: { color: tokens.onCanvas },
+  chipSub: { fontFamily: tokens.font700, fontSize: 11, color: tokens.ink3, marginTop: 2 },
+  typeRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
+  typeBtn: {
+    flex: 1,
+    height: 44,
+    borderRadius: tokens.rSm,
+    backgroundColor: tokens.surface2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  typeBtnOn: { backgroundColor: tokens.brand },
+  typeText: { fontFamily: tokens.font800, fontSize: 14, color: tokens.ink },
+  typeTextOn: { color: tokens.onCanvas },
+  input: {
+    borderRadius: tokens.rSm,
+    backgroundColor: tokens.surface2,
+    color: tokens.ink,
+    fontFamily: tokens.font700,
+    fontSize: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    marginBottom: 12,
   },
   iconGrid: {
-    flexDirection: 'row' as const,
-    flexWrap: 'wrap' as const,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
     marginBottom: 16,
   },
   iconOption: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: Colors.dark.surface,
-    borderWidth: 1.5,
-    borderColor: Colors.dark.border,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-  },
-  iconOptionText: {
-    fontSize: 20,
-  },
-  scheduleWrap: {
-    marginTop: 0,
-    marginBottom: 16,
-  },
-  scheduleLabel: {
-    fontSize: 12,
-    fontWeight: '700' as const,
-    color: Colors.dark.textSecondary,
-    letterSpacing: 0.5,
-    textTransform: 'uppercase' as const,
-    marginBottom: 8,
-  },
-  scheduleRow: {
-    flexDirection: 'row' as const,
-    gap: 10,
-    paddingBottom: 6,
-  },
-  scheduleChip: {
+    width: 48,
+    height: 48,
     borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: Colors.dark.border,
-    backgroundColor: Colors.dark.surface,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    minWidth: 92,
+    backgroundColor: tokens.surface2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  scheduleChipActive: {
-    borderColor: Colors.dark.gold,
-    backgroundColor: Colors.dark.gold + '12',
+  iconOptionOn: {
+    backgroundColor: tokens.brandSoft,
+    boxShadow: [{ offsetX: 0, offsetY: 3, blurRadius: 0, color: tokens.brand }],
   },
-  scheduleChipText: {
-    fontSize: 12,
-    fontWeight: '800' as const,
-    color: Colors.dark.text,
-  },
-  scheduleChipTextActive: {
-    color: Colors.dark.gold,
-  },
-  scheduleChipSub: {
-    marginTop: 2,
-    fontSize: 10,
-    fontWeight: '700' as const,
-    color: Colors.dark.textSecondary,
-    textAlign: 'center' as const,
-  },
-  createBtn: {
-    borderRadius: 14,
-    overflow: 'hidden' as const,
-    marginTop: 8,
-  },
-  createBtnDisabled: {
-    opacity: 0.5,
-  },
-  createBtnGradient: {
-    paddingVertical: 16,
-    alignItems: 'center' as const,
-  },
-  oracleRow: {
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
-    gap: 10,
-  },
-  createBtnText: {
-    fontSize: 17,
-    fontWeight: '800' as const,
-    color: '#1a1228',
-    letterSpacing: 0.5,
-  },
-  createBtnBottom: {
-    height: 4,
-  },
+  endPad: { height: 28 },
 });

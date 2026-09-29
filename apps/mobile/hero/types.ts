@@ -40,7 +40,11 @@ export type HeroActions = {
   equipItemById: (itemId: string) => void;
   unequipLoadoutSlot: (slot: ItemLoadoutSlot) => void;
   sellInventoryItemAtIndex: (index: number) => void;
+  /** Stall shop: one copy of itemId for this gold. Does not use Hero backpack prices. */
+  sellOwnedItemForGold: (itemId: string, gold: number) => boolean;
   addGold: (amount: number) => void;
+  /** Returns false if the wallet cannot cover it. */
+  spendGold: (amount: number) => boolean;
   addDungeonKeys: (amount: number) => void;
   /** Demo / DEV. Clamps to 1–99. */
   setPlayerLevel: (level: number) => void;

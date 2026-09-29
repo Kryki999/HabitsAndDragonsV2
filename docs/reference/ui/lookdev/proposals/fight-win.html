@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=390, initial-scale=1" />
+  <title>H&D — Fight: victory</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../tokens.css" />
+  <link rel="stylesheet" href="../components.css" />
+  <link rel="stylesheet" href="../glyphs.css" />
+  <style>
+    .phone.flow { background: radial-gradient(120% 70% at 50% 28%, #fff1d6 0%, #c9d3ff 22%, var(--canvas-hi) 36%, var(--canvas) 64%, var(--canvas-deep) 120%); }
+    .rays { --ray-y: 250px; }
+    .chest-wrap { top: 168px; }
+    .chest {
+      width: 168px; height: 168px; border-radius: 50%; background: #fff;
+      display: grid; place-items: center;
+      box-shadow: 0 0 0 6px var(--gold), 0 7px 0 6px var(--gold-deep), 0 0 0 22px rgba(255,255,255,.18), 0 20px 50px rgba(40,50,140,.35);
+    }
+    .chest .sticker { width: 96px; height: 96px; filter: none; }
+    .head { top: 390px; gap: 8px; }
+  </style>
+</head>
+<body>
+  <!-- Proposal. Same celebration language as flow-levelup. Chest opens the roll. -->
+  <div class="phone flow">
+    <div class="rays gold"></div>
+    <span class="spark gold" style="left: 58px; top: 128px; --s: 24px"></span>
+    <span class="spark" style="left: 322px; top: 114px; --s: 16px"></span>
+    <span class="spark gold" style="left: 36px; top: 318px; --s: 16px"></span>
+    <span class="spark gold" style="left: 328px; top: 290px; --s: 28px"></span>
+    <span class="spark" style="left: 296px; top: 200px; --s: 10px"></span>
+    <span class="spark" style="left: 88px; top: 230px; --s: 12px"></span>
+
+    <div class="status"><span>9:41</span><span class="sys"><span class="bars"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:11px"></i></span><span class="batt"></span></span></div>
+
+    <div class="flow-stage chest-wrap"><div class="chest"><img class="sticker" src="../assets/fe-wrapped-gift.svg" alt="" /></div></div>
+
+    <div class="flow-stage head">
+      <div class="flow-title">Victory</div>
+      <div class="flow-note">Gutterjack goes down</div>
+    </div>
+
+    <div class="flow-foot"><button class="btn btn-flow"><img class="sticker" src="../assets/fe-wrapped-gift.svg" alt="" />Open chest</button></div>
+    <div class="home-ind"></div>
+  </div>
+</body>
+</html>

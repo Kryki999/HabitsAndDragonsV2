@@ -34,11 +34,11 @@
   --success-deep: #3aa866;
   --danger: #f2685a;
 
-  /* Rarity (item frames only) */
+  /* Rarity (item frames only) — tiers from docs/06: Common · Unique · Heroic · Artifact */
   --r-common: #c9cee6;
-  --r-rare: #5aa7f5;
-  --r-epic: #a56bf5;
-  --r-legendary: #fdb43c;
+  --r-unique: #5aa7f5;
+  --r-heroic: #a56bf5;
+  --r-artifact: #fdb43c;
 
   /* Radius */
   --r-xs: 10px;
@@ -56,6 +56,7 @@
   --s-6: 24px;
   --s-8: 32px;
   --screen-x: 16px;
+  --tabbar-h: 96px;
 
   /* Elevation — "lip" = solid bottom edge that makes things pressable */
   --lip-surface: 0 4px 0 #cfd5f5;
@@ -67,6 +68,7 @@
 
   /* Typography — Nunito only */
   --font: "Nunito", system-ui, sans-serif;
+  --t-hero-num: 900 104px/0.9 var(--font);
   --t-display: 900 44px/1.0 var(--font);
   --t-h1: 900 24px/1.15 var(--font);
   --t-h2: 800 20px/1.2 var(--font);
