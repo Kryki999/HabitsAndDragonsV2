@@ -7,17 +7,15 @@ import type { StickerName } from '@/ui/stickerRegistry';
  *
  * All positions are **normalized 0–1** over the still (x = left→right, y = top→bottom).
  * Map pins: icon only (no name labels). Anchor = stem tip on the landmark.
- * Fogged pins use the same circle with a lock instead of the landmark icon.
+ * Locked pins: lock glyph + required hero level (no fog veil).
  * Hub hotspots: (x, y) is below the icon. Tune this file only.
  *
  * How to retune
  * -------------
  * 1. Replace `map_board.webp` (keep the filename / WORLD_ART path).
  * 2. Update `MAP_INTRINSIC` if the pixel size changed (portrait corridor).
- * 3. Nudge pin `x` / `y` and fog seeds below. 0.01 ≈ 1% of the still.
- *    Fog is one runtime veil — never paint it into the PNG. Seeds are
- *    influence, not drawn circles: they merge into a single clearing.
- *    When the illustration moves, only these normalized seeds need a nudge.
+ * 3. Nudge pin `x` / `y` below. 0.01 ≈ 1% of the still.
+ *    Unlock thresholds are hero level, not map geometry.
  *
  * Art ingest
  * ----------
@@ -49,22 +47,27 @@ export type MapPinKind = 'home' | 'locked' | 'landmark';
 
 export type MapPinDef = {
   id: string;
-  /** Spoken / fog-hint name. Not drawn on the overview map. */
+  /** Spoken name. Not drawn on the overview map. */
   label: string;
   x: number;
   y: number;
   kind: MapPinKind;
-  /** Landmark sticker when the region is revealed. Hidden on locked / current. */
+  /** Landmark sticker when unlocked. Hidden on locked / current. */
   sticker: StickerName;
   /** Crownhaven opens the hub. Other pins open a location still. */
   opens?: 'hub' | 'location';
+  /**
+   * Hero level required to enter. `0` = always (Crownhaven).
+   * Ladder from docs/17 (side points + Main ★, collapsed to static gates).
+   */
+  unlockLevel: number;
 };
 
 /**
  * Strip pins (stitched folds, Crownhaven at the bottom). Anchor = landmark tip.
  *
- * Crownhaven is the only hub pin. Side pins start locked and become landmarks
- * once their fog region is revealed. Gutterjack is the tavern cellar — not a
+ * Crownhaven is the only hub pin (always). Other pins lock until
+ * `hero.playerLevel >= unlockLevel`. Gutterjack is the tavern cellar — not a
  * kingdom-map pin. Hub tavern hotspot opens the Ground hall + floor lift.
  *
  * Spine (Main ★): Closed Way → Raven Castle → Pyramid → Ananiel.
@@ -79,6 +82,7 @@ export const KINGDOM_PINS: MapPinDef[] = [
     kind: 'home',
     sticker: 'castle',
     opens: 'hub',
+    unlockLevel: 0,
   },
   {
     id: 'crown-approaches',
@@ -88,6 +92,7 @@ export const KINGDOM_PINS: MapPinDef[] = [
     kind: 'locked',
     sticker: 'helmet',
     opens: 'location',
+    unlockLevel: 3,
   },
   {
     id: 'smugglers-teeth',
@@ -97,6 +102,7 @@ export const KINGDOM_PINS: MapPinDef[] = [
     kind: 'locked',
     sticker: 'dagger',
     opens: 'location',
+    unlockLevel: 4,
   },
   {
     id: 'anvil-glade',
@@ -106,6 +112,7 @@ export const KINGDOM_PINS: MapPinDef[] = [
     kind: 'locked',
     sticker: 'hammer',
     opens: 'location',
+    unlockLevel: 6,
   },
   {
     id: 'closed-way',
@@ -115,6 +122,7 @@ export const KINGDOM_PINS: MapPinDef[] = [
     kind: 'locked',
     sticker: 'leaf',
     opens: 'location',
+    unlockLevel: 5,
   },
   {
     id: 'water-temple',
@@ -124,6 +132,7 @@ export const KINGDOM_PINS: MapPinDef[] = [
     kind: 'locked',
     sticker: 'droplet',
     opens: 'location',
+    unlockLevel: 7,
   },
   {
     id: 'pallglass',
@@ -133,6 +142,7 @@ export const KINGDOM_PINS: MapPinDef[] = [
     kind: 'locked',
     sticker: 'crystalBall',
     opens: 'location',
+    unlockLevel: 9,
   },
   {
     id: 'raven-castle',
@@ -142,6 +152,7 @@ export const KINGDOM_PINS: MapPinDef[] = [
     kind: 'locked',
     sticker: 'blackbird',
     opens: 'location',
+    unlockLevel: 8,
   },
   {
     id: 'vampire-house',
@@ -151,6 +162,7 @@ export const KINGDOM_PINS: MapPinDef[] = [
     kind: 'locked',
     sticker: 'bat',
     opens: 'location',
+    unlockLevel: 10,
   },
   {
     id: 'pyramid',
@@ -160,6 +172,7 @@ export const KINGDOM_PINS: MapPinDef[] = [
     kind: 'locked',
     sticker: 'desert',
     opens: 'location',
+    unlockLevel: 11,
   },
   {
     id: 'ananiel',
@@ -169,111 +182,12 @@ export const KINGDOM_PINS: MapPinDef[] = [
     kind: 'locked',
     sticker: 'mage',
     opens: 'location',
+    unlockLevel: 13,
   },
 ];
 
-/**
- * Discoverable fog regions. Geometry lives on `MAP_FOG_SEEDS` so one region
- * can be a merged bay, not a circle around its pin.
- *
- * Order = DEV unveil / seed discover sequence: Approaches first, then optional
- * R1 sides, then Main spine + later sides. Sides never hard-gate Main ★.
- */
-export type MapFogRegionDef = {
-  id: string;
-  revealedByDefault?: boolean;
-};
-
-export const MAP_FOG_REGIONS: MapFogRegionDef[] = [
-  { id: 'crownhaven', revealedByDefault: true },
-  { id: 'crown-approaches' },
-  { id: 'smugglers-teeth' },
-  { id: 'anvil-glade' },
-  { id: 'closed-way' },
-  { id: 'water-temple' },
-  { id: 'pallglass' },
-  { id: 'raven-castle' },
-  { id: 'vampire-house' },
-  { id: 'pyramid' },
-  { id: 'ananiel' },
-];
-
-export const DEFAULT_REVEALED_REGION_IDS: string[] = MAP_FOG_REGIONS.filter(
-  (region) => region.revealedByDefault,
-).map((region) => region.id);
-
-/**
- * Influence seeds for the clearance field (normalized 0–1).
- * Puzzle-piece bays: each region is large enough for its landmark + light
- * margin, and the full set tiles the board so unveil-all leaves zero fog.
- * Nearby open regions smooth-min into one continuous veil. Crownhaven alone
- * must not leak the Approaches bridge, Teeth cove, or Anvil forge.
- * Not drawn as ellipses.
- */
-export type MapFogSeedDef = {
-  id: string;
-  regionId: string;
-  cx: number;
-  cy: number;
-  rx: number;
-  ry: number;
-};
-
-export const MAP_FOG_SEEDS: MapFogSeedDef[] = [
-  // Crownhaven — harbor blob; stops short of the bridge
-  { id: 'ch-city', regionId: 'crownhaven', cx: 0.5, cy: 0.91, rx: 0.48, ry: 0.07 },
-  { id: 'ch-south', regionId: 'crownhaven', cx: 0.5, cy: 0.97, rx: 0.52, ry: 0.055 },
-  { id: 'ch-plaza', regionId: 'crownhaven', cx: 0.5, cy: 0.87, rx: 0.4, ry: 0.05 },
-  // Approaches — bridge / watchtower row
-  { id: 'ca-center', regionId: 'crown-approaches', cx: 0.5, cy: 0.82, rx: 0.44, ry: 0.055 },
-  { id: 'ca-west', regionId: 'crown-approaches', cx: 0.14, cy: 0.82, rx: 0.28, ry: 0.055 },
-  { id: 'ca-east', regionId: 'crown-approaches', cx: 0.86, cy: 0.82, rx: 0.28, ry: 0.055 },
-  // Smuggler's Teeth — west cove
-  { id: 'st-cove', regionId: 'smugglers-teeth', cx: 0.18, cy: 0.735, rx: 0.28, ry: 0.07 },
-  { id: 'st-west', regionId: 'smugglers-teeth', cx: 0.04, cy: 0.73, rx: 0.18, ry: 0.075 },
-  // Anvil Glade — east cottage
-  { id: 'ag-forge', regionId: 'anvil-glade', cx: 0.84, cy: 0.735, rx: 0.28, ry: 0.07 },
-  { id: 'ag-east', regionId: 'anvil-glade', cx: 0.96, cy: 0.73, rx: 0.18, ry: 0.075 },
-  // Closed Way — gate on the spine
-  { id: 'cw-gate', regionId: 'closed-way', cx: 0.5, cy: 0.64, rx: 0.4, ry: 0.06 },
-  { id: 'cw-path', regionId: 'closed-way', cx: 0.5, cy: 0.69, rx: 0.28, ry: 0.05 },
-  // Water Temple — west shrine
-  { id: 'wt-portal', regionId: 'water-temple', cx: 0.18, cy: 0.51, rx: 0.28, ry: 0.065 },
-  { id: 'wt-west', regionId: 'water-temple', cx: 0.04, cy: 0.5, rx: 0.18, ry: 0.07 },
-  // Pallglass — east glass tower
-  { id: 'pg-spire', regionId: 'pallglass', cx: 0.84, cy: 0.51, rx: 0.28, ry: 0.07 },
-  { id: 'pg-east', regionId: 'pallglass', cx: 0.96, cy: 0.5, rx: 0.18, ry: 0.075 },
-  // Raven Castle — keep
-  { id: 'rc-keep', regionId: 'raven-castle', cx: 0.5, cy: 0.415, rx: 0.42, ry: 0.065 },
-  { id: 'rc-path', regionId: 'raven-castle', cx: 0.5, cy: 0.47, rx: 0.28, ry: 0.05 },
-  // Vampire House — right wing
-  { id: 'vh-manor', regionId: 'vampire-house', cx: 0.78, cy: 0.3, rx: 0.36, ry: 0.06 },
-  { id: 'vh-east', regionId: 'vampire-house', cx: 0.95, cy: 0.29, rx: 0.2, ry: 0.06 },
-  // Pyramid — desert belt
-  { id: 'py-center', regionId: 'pyramid', cx: 0.5, cy: 0.175, rx: 0.5, ry: 0.065 },
-  { id: 'py-belt', regionId: 'pyramid', cx: 0.5, cy: 0.22, rx: 0.46, ry: 0.05 },
-  { id: 'py-west', regionId: 'pyramid', cx: 0.1, cy: 0.18, rx: 0.2, ry: 0.06 },
-  // Ananiel — tower + sky
-  { id: 'an-tower', regionId: 'ananiel', cx: 0.5, cy: 0.055, rx: 0.5, ry: 0.065 },
-  { id: 'an-sky', regionId: 'ananiel', cx: 0.5, cy: 0.0, rx: 0.56, ry: 0.055 },
-  { id: 'an-nw', regionId: 'ananiel', cx: 0.08, cy: 0.04, rx: 0.18, ry: 0.05 },
-  { id: 'an-ne', regionId: 'ananiel', cx: 0.92, cy: 0.04, rx: 0.18, ry: 0.05 },
-];
-
-/** Native Skia veil is unrolled — keep this in lockstep with `fogShader.ts`. */
-export const MAP_FOG_SEED_SLOTS = 28;
-
-export function isFogRegionRevealed(id: string, discoveredRegionIds: string[]): boolean {
-  const region = MAP_FOG_REGIONS.find((entry) => entry.id === id);
-  if (region?.revealedByDefault) return true;
-  return discoveredRegionIds.includes(id);
-}
-
-export function nextHiddenFogRegionId(discoveredRegionIds: string[]): string | null {
-  const hidden = MAP_FOG_REGIONS.find(
-    (region) => !region.revealedByDefault && !discoveredRegionIds.includes(region.id),
-  );
-  return hidden?.id ?? null;
+export function isMapPinUnlocked(pin: MapPinDef, heroLevel: number): boolean {
+  return heroLevel >= pin.unlockLevel;
 }
 
 export type HubHotspotAction = 'tavern' | 'market' | 'palace';

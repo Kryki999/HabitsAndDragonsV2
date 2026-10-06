@@ -17,7 +17,7 @@ Camp / castle stills already in this folder are for **Questy** (`HomeScenePanel`
 
 | File | Use |
 |------|-----|
-| `map_board.webp` | Kingdom strip (stitched folds, pan Y + pins + fog) |
+| `map_board.webp` | Kingdom strip (stitched folds, pan Y + pins) |
 | `world/map-kingdom.jpg` | Unused legacy square orbit still (not live UI) |
 | `world/hub-crownhaven.jpg` | Crownhaven close-up hub + stall/palace NPC stand-in |
 | `world/dungeon-gutterjack.jpg` | Unused cellar still (fight uses `mietek.png`) |
@@ -51,4 +51,4 @@ Camp / castle stills already in this folder are for **Questy** (`HomeScenePanel`
 | `ananiel.png` | Ananiel (Titan) fight |
 | `eliteananiel.png` | Unused — no Bible Elite floor before Titan |
 
-Pin / hotspot / fog fractions: `apps/mobile/world/layout.ts`. Location catalog: `apps/mobile/world/content.ts`. Hub interiors: `apps/mobile/world/interiors.ts`.
+Pin / hotspot fractions + level gates: `apps/mobile/world/layout.ts`. Location catalog: `apps/mobile/world/content.ts`. Hub interiors: `apps/mobile/world/interiors.ts`.

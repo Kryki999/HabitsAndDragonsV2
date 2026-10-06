@@ -74,6 +74,7 @@
 | Rarity ladder | **4:** Common → Unique → Heroic → Artifact (Titan only); **KILL** Legendary jako 5. | Czysty UI; Titan = święto |
 | Elite loot | Unikat **~7%** · Heroic **~2%** · pasma **nie stackują** · zero pity; Necklace = **Second Tide** (retry Common/Elite, nie ★/Titan) | `23` D1 · `06` |
 | Item afiksy / aukcje | Equipped-only · XP z itemów **KILL** · durability **KILL** · aukcje **PARK M1** · **Atrybut lock do resetu dnia**; Outfit/Emotka free | `06` §6c |
+| Mgła wojny na mapie (2026-10-06) | **KILL** z product path. Pełny korytarz widoczny. Pin unlocked gdy `hero.playerLevel ≥ unlockLevel` (`layout.ts`). Crownhaven always (0). Locked tap = PeekCard „from level X”, bez Enter. Discover-once / veil / DEV unveil = nie bramkują gry. | Founder: nie „undiscovered mist”. Punkty odkrycia z `17` collapsed do stałych progów south→north. |
 
 **Odrzucone nazwy tierów (nie wracać bez powodu):** Scum, Foe, Dread, Hero-class, Rabble, Greater Elite (jako osobna 5. nazwa).
 
