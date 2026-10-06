@@ -19,7 +19,7 @@ Ten plik ma trzy warstwy. Czytaj w tej kolejności:
 | [`flow-levelup.png`](golden/flow-levelup.png) | C1 · Celebracja | Złote promienie, plakietka LV, rząd nagród, punkt drogi |
 | [`onboarding-choice.png`](golden/onboarding-choice.png) | C2 · Pytanie | Pasek kroków, NPC pyta w dymku, lista jednokrotnego wyboru, Button.primary |
 | [`onboarding-pick.png`](golden/onboarding-pick.png) | C2 · Pytanie | To samo, siatka wielokrotnego wyboru (3 pierwsze questy) |
-| [`world-map.png`](golden/world-map.png) | E · Mapa | Fit-width, piny (sticker / lock / current), PeekCard; bez górnej poświaty. Chrome — nie kompozycja świata |
+| [`world-map.png`](golden/world-map.png) | E · Mapa | Fit-width, piny (sticker / lock / current), PeekCard; **bez fog of war**; bez górnej poświaty. Chrome — nie kompozycja świata |
 | [`world-map-gray.png`](golden/world-map-gray.png) | E · Mapa (kłódka) | Siatka 390×1920, B=200, środek-albo-para. Composition lock pod nowy art (`24`) |
 | [`world-crownhaven.png`](golden/world-crownhaven.png) | D · Scena (hub) | Nameplate'y na malunku, scene head, szew dokowany |
 | [`world-gutterjack.png`](golden/world-gutterjack.png) | D · Scena (encounter) | LevelNav (strzałki), kompaktowa karta bossa: szanse, łup, Fight |
@@ -54,7 +54,7 @@ Wartości zmierzone z mocków (próbkowanie PNG), nie „na oko”. Pełna lista
 
 | Token | Hex | Użycie |
 |-------|-----|--------|
-| `canvas` | `#91A2F2` | Tło aplikacji, szew, mgła wojny |
+| `canvas` | `#91A2F2` | Tło aplikacji (sheety A/B), szew. **Nie** overlay fog of war na mapie E |
 | `canvas-hi` | `#A9BBFB` | Tab bar, jaśniejsza mgła |
 | `canvas-deep` | `#7483DC` | Panel *na* mgle (Crown Day), nie karta |
 | `surface` | `#FFFFFF` | Karty, pills, plakietki, przycisk flow |
@@ -200,7 +200,7 @@ Mentor wejście               Chronicles, Inventory     nagroda, awans      (10�
 
 D · SCENA (still full-bleed)                E · MAPA
 ┌──────────────┐  ┌──────────────┐          ┌──────────────┐
-│[scene head]  │  │[head]    [▲] │          │░░ mgła wojny░│
+│[scene head]  │  │[head]    [▲] │          │  (plansza    │
 │   ⬭ plate    │  │          [•] │          │[head]  🔒    │
 │      │       │  │    BOSS  [▼] │          │     ⚔  🔒    │
 │  ⬭   •  ⬭    │  │   / NPC      │          │     (avatar) │
@@ -219,7 +219,7 @@ D · SCENA (still full-bleed)                E · MAPA
 | **C1 · Celebracja** | Pełny ekran bez tab bara. `FlowBackdrop` + jeden bohater kadru (`Portrait.xl` albo obiekt) + `HeroNum`/`FlowTitle` + jedna karta informacji + `Button.flow`. Karta mówi, **co to daje dalej** (np. „3 dni do Iron blade”). | Streak ([golden](golden/flow-streak.png)), level-up ([golden](golden/flow-levelup.png)), S05 nagroda, awans stolicy, S10 powrót wyprawy, loot reveal |
 | **C2 · Pytanie** | Pełny ekran bez tab bara. Góra: przyciemniony kadr świata rozpuszczony w mgłę. `StepBar` → `NpcAsk` (pytanie w dymku) → podpowiedź → `ChoiceRow` albo `ChoiceTile` → `Button.primary`. **Jedno pytanie na ekran.** | S01–S02 onboarding ([lista](golden/onboarding-choice.png), [siatka](golden/onboarding-pick.png)), późniejsze pytania Mentora |
 | **D · Scena** | Still do krawędzi. Chrome tylko w 4 miejscach: lewy górny (SceneHead), prawy górny (LevelNav, jeśli miejsce ma poziomy), plakietki na landmarkach, dół (kompaktowa SceneCard albo nic). Bez account bara. Postać jest bohaterem kadru; UI zajmuje max ~18% wysokości na dole. | S07 hub/lokacja, S14 kuźnia (AllyCard), S16/S15/S18 encounter (EncounterCard), stragan/doradca |
-| **E · Mapa** | Plansza **fit-width** (szerokość = jeden ekran). Wysokość = **pasek** ~5× (graybox 390×1920) — pan tylko góra–dół, spawn na dole (Crownhaven). Piny rzędy środek-albo-para. Mgła wojny w kolorze `canvas-hi`, PeekCard na dole. Bez górnej poświaty. Bez account bara. Bez pinch. | S06 mapa królestwa |
+| **E · Mapa** | Plansza **fit-width** (szerokość = jeden ekran). Wysokość = **pasek** ~5× (graybox 390×1920) — pan tylko góra–dół, spawn na dole (Crownhaven). Piny rzędy środek-albo-para. **Całe królestwo widać** — fog of war **nie** jest chrome (LOCK 2026-10-06). Piny: sticker / kłódka (unlock = **level**) / current. PeekCard na dole. Bez górnej poświaty. Bez account bara. Bez pinch. | S06 mapa królestwa |
 
 Modal (S09 start wyprawy, loot detail) = **bottom sheet**: biały, górne rogi 28, uchwyt, przyciemnienie `ink` 40% pod spodem. Wewnątrz te same komponenty.
 

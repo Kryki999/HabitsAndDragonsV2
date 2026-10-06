@@ -13,10 +13,10 @@
 ## Cel (final)
 
 - **Klasy: KILL** na launch / MVP.
-- Tożsamość przez: stolica (dom), tytuły, **loadout (outfit + atrybut)**, **emotki (kolekcja)**, hex, affinity NPC.
+- Tożsamość przez: stolica (dom), **loadout (outfit + atrybut)**, hex, affinity NPC. **Tytuły PARK. Emotki OUT** tego MVP (`00`).
 - Skill tree: **PARK**.
 - **Loadout:** tylko **2 sloty EQ** (outfit + atrybut) — świadomie bez hełm/zbroja/buty (nie Habitica).
-- **Emotki:** kolekcjonerskie animacje postaci (Fortnite-vibe, ale nasz ton); 1 equipped; drop loch / NPC / ★; kosmetyka only (`06`).
+- **Emotki:** Cel later — kolekcjonerskie animacje postaci; 1 equipped; drop loch / NPC / ★; kosmetyka only (`06`). **Ten slice: OUT.**
 - **Level / wpływ** z XP nawyków (diminishing + soft-cap dnia) — główna oś odblokowań.
 - **Aktywne dni** — druga oś pace Aktu 1 (sumienność).
 - **Dom:** stodoła → **chata po ★1** (doradca) → **murowany po ★3 Osiris** (doradca) · gold = skin.
@@ -28,7 +28,7 @@
 
 | Progres | Odblokowuje |
 |---------|-------------|
-| Level / wpływ | Dom tier, **punkty odkrycia**, progi Main ★ (z dniami + ★) — **nie** „L9 = Mag” |
+| Level / wpływ | **Ten slice:** piny mapy (unlock = level) + progi domu. Cel later: punkty odkrycia, Main ★ z dniami — **nie** „L9 = Mag” |
 | Aktywne dni | Progi mapy / Main (z levelem + ★) |
 | Soft breadth (≥2 R1) | Pool R2 otwarty do wyboru (Mag / cmentarz / …) |
 | Main ★ ukończony | Następny beat fabularny (chronologia) |
@@ -38,5 +38,5 @@
 ## Otwarte
 
 - Kiedy pierwsza Droga wchodzi w MVP miesiąc 1? (raczej later)
-- Hex: widoczny od razu na Bohaterze czy po Mentorze?
+- Hex: widoczny od razu na Bohaterze (hex polish IN). Mentor AI **OUT**.
 - Twarde progi level ↔ dzień kalendarza Aktu 1 — tabela w [`06`](06-economy-loot.md).

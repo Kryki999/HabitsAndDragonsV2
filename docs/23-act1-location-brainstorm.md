@@ -31,7 +31,7 @@
 | Kolejność                | **Stolica najpierw** (NPC + Gutterjack) → dopiero potem pierścień side → dopiero potem 1. Champion                   |
 | Pierwszy NPC             | **Nie „Kapusta”.** Babka / osoba przy **straganie na rynku** (warzywa itd.) — skojarzenie z kapustą było żartem nazw |
 | Tawerna                  | Kiedyś dobra restauracja rodzin/wpływowych → teraz **menelnia** (alkohol, burdy)                                     |
-| Pierwszy boss            | **Gutterjack** w piwnicach tawerny (hub, nie pin mgły)                                                               |
+| Pierwszy boss            | **Gutterjack** w piwnicach tawerny (hub, nie pin mapy)                                                               |
 | Pierścień 1              | **3 side** — gracz wybiera kolejność odkryć                                                                          |
 | Main ★ lokacje           | **Bez ally NPC na start** — miejscówki do walki; ≥2 tiery (Elite → Champion); lepszy loot. Co-founder: OK (patrz §G) |
 | Lampki                   | Po Championie jasna podpowiedź dokąd dalej w wątku main                                                              |
@@ -90,13 +90,13 @@ Klimat: *żywe królestwo, które udaje, że jest OK* — Re:Zero scale + nasz D
 **Sekwencja odblokowań (LOCK kierunku):**
 
 ```text
-L2 → Mentor zleca: odzyskaj tawernę
+L2 → misja tawerny (scripted hub — **nie** Mentor AI): odzyskaj tawernę
   → tylko PIWNICA widoczna / wejście do lochu
   → Clear Gutterjack (tutorial 100% win, darmowy; potem CD Common ~6–8 h)
   → Menelnia „odzyskana”:
        · PARTER — koło fortuny (barman)
        · PIĘTRO — kubeczki (hazardzista)
-       · (Mentor zostaje w menelni jako fullscreen entry)
+       · (Tab Mentor = stub; Mentor AI OUT tego MVP)
 ```
 
 ### B2a. Koło fortuny (parter) — LOCK kierunku 2026-08-04
@@ -120,7 +120,7 @@ L2 → Mentor zleca: odzyskaj tawernę
 - Cap dzienny / max stawka TBD (żeby nie spalić 300g pensji w 30 s — seed: mały max bet).
 
 **Piwnice:** nadal **Gutterjack** farmable Common po tutorialu. Still walki: [`reference/art/prompt-gutterjack-dungeon.md`](reference/art/prompt-gutterjack-dungeon.md).  
-Po L3 → punkt odkrycia → pierwszy pin R1 (mgła).
+Po L3 → pierwszy pin R1 odblokowany **poziomem** (mapa bez fog; wyprawa discover = OUT tego MVP).
 
 ### B2c. Loot Gutterjack (LOCK 2026-08-04)
 
@@ -874,7 +874,7 @@ Wieża / Siphon — jak w `21` / `22`. Po upadku: zajawka Aktu 2 (reguły świat
 
 ```text
 Zakładka Świat
-  → mapa królestwa (mgła, piny)
+  → mapa królestwa (całe królestwo widać; piny lock/unlock po poziomie)
   → tap lokacji
   → CLOSE-UP grafiki lokacji (nie od razu lista questów)
        → hotspoty na obrazie:

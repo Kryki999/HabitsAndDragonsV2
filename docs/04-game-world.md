@@ -28,7 +28,9 @@ Przykłady klimatu: złowrogi las, piramida, pałac wiedźmy, kryjówka piratów
 
 ### Travel
 
-Zobacz konsensus poniżej: **Discover once, return forever**.  
+> **MVP lock 2026-10-06:** mapa **bez fog of war**; piny otwiera **level**. Wyprawa discover **nie** jest near-term. [`00`](00-final-picture.md).
+
+**Cel (final), nie ten slice:** *Discover once, return forever.*  
 Wyprawa czasowa = przede wszystkim **pierwsze odkrycie** lokacji (Finch: rano wyślij / wieczór odbierz). Potem dostęp bez timera.
 
 ### Stolica = od zera do wpływu
@@ -42,20 +44,22 @@ Ukryta karta gracza + reguły „świat pamięta” (anty-Skyrim) — nadal fund
 
 ## Travel / odkrywanie lokacji — konsensus roboczy (2026-07-30)
 
-**Nazwa robocza:** *Discover once, return forever.*
+**Nazwa robocza (Cel / later):** *Discover once, return forever.*  
+**Ten slice (2026-10-06):** całe królestwo **widać**; pin locked/open = **poziom**; bez timera wyprawy.
 
 | Moment | Co się dzieje |
 |--------|----------------|
-| Mapa | Mgła (klimat Ghost of Tsushima) — nieodkryte = zasłonięte |
-| Nowy unlock | Z odkrytego obszaru (np. stolicy) wychodzi **2–3 punkty wyboru** w mgle |
-| Pierwsza podróż | Gracz wybiera pin → postać **wyrusza** (timer godzinowy) → po powrocie lokacja **odkryta** |
-| Potem | **Szybka podróż / fokus natychmiastowy** — lochy, NPC, misje bez kolejnego czekania |
-| Zwoje teleportu | PARK / later (Margonem-flavor); nie potrzebne do core. Ewentualnie: skróć timer pierwszej wyprawy albo awaryjny powrót |
+| Mapa (ten slice) | Cała widoczna — fog of war **nie** jest chrome ani near-term |
+| Unlock (ten slice) | Level otwiera pin → PeekCard → Enter |
+| Cel (final) | Mgła (klimat Ghost of Tsushima) — nieodkryte = zasłonięte; pierwsza podróż = timer → lokacja odkryta |
+| Potem (Cel) | **Szybka podróż / fokus natychmiastowy** — lochy, NPC, misje bez kolejnego czekania |
+| Zwoje teleportu | PARK / later (Margonem-flavor); nie potrzebne do core |
 
-**Dlaczego:** immersja przy odkryciu + grywalność przy powrotach. Unika „muszę jechać 4h żeby zmienić loch”.
+**Dlaczego Cel miał timer:** immersja przy odkryciu + grywalność przy powrotach. **Ten slice** nie wymaga tego — gate = level.
 
 **Otwarte dopiski / status:**
 - Fail odkrycia: **KILL** — zawsze dochodzisz (`20-pre-world-locklist.md`)
 - Pierścienie: propozycja **soft breadth** (R2 wymaga ≥2 lokacji R1) + main piny wymuszone
 - Zwoje: park
+- Fog / discover expedition: **OUT** tego MVP
 

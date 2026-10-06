@@ -34,7 +34,7 @@ Plik roboczy: [`17-player-journey.md`](17-player-journey.md)
 
 Dla każdego momentu: **trigger → co widzi → co robi → co czuje → co zapisuje świat**.
 
-Must: Day 0 (isekai→kapusta→questy), Day 1 wieczór (wyprawa?), Day 3 (pierwsza lokacja), Day 7 (wpływ w stolicy).
+Must: Day 0 (isekai→kapusta→questy), Day 1 Gutterjack, Day 3 (pierwsza lokacja po levelu), Day 7 (wpływ w stolicy). Wyprawa timer **OUT** tego MVP.
 
 ## Warstwa 2 — Przestrzenie (IA)
 
@@ -55,7 +55,9 @@ Max **5 pozycji nawigacji głównej** na co dzień (+ overlaye).
 
 Jedna ścieżka end-to-end bez side systems:
 
-Onboarding → 3 starter questy → stolica → odblokuj 1 lokację → 1 loch tier 1 → 1 wyprawa timer → wieczorny check → 1 reakcja Mentora z pamięci.
+**Ten slice (2026-10-06):** Onboarding → 3 starter questy → stolica → Gutterjack tutorial → pin otwarty **levelem** → 1 loch → loot + Hero/hex.
+
+**Nie w tym slice:** wyprawa timer, wieczorny check discover, reakcja Mentora AI, fog, emotki, tytuły, narracja aktu.
 
 Wszystko poza slice = **park**, nawet jeśli kochamy pomysł.
 

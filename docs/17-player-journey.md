@@ -3,6 +3,8 @@
 > **Status:** gotowość do **precyzyjnego** Day 0–7 (2026-08-01).  
 > Stary szkic T1 poniżej = **OUTDATED** (Rev A). Lokacje = `[23](23-act1-location-brainstorm.md)` **Rev B**.  
 > Ekonomia = `[06](06-economy-loot.md)`. Titan ≈ **~30 dni** sumienny (`06` / `21`).
+>
+> **MVP lock 2026-10-06:** ten plik = journey Aktu 1 (kierunek). **Ten slice** nie wymaga fog / wyprawy discover / Mentor AI / emotek / tytułów / narracji aktu. Unlock pinów = **level**. Mapa = całe królestwo widać. Kanon IN/OUT: [`00`](00-final-picture.md).
 
 ---
 
@@ -16,11 +18,11 @@
 | Ton wejścia / Crownhaven | Soft-zgrzyt, targ, menelnia, stragan-NPC                             |
 | Hub loop                 | Gutterjack darmowy tutorial → mapa                                   |
 | Mapa Rev B               | R1: piraci / szlak / las+kowal; ★1 zakazana ścieżka; R2 later        |
-| HUD / tabs               | Questy · Świat · Bohater · Społeczność · Mentor                      |
-| Travel                   | Discover once, return forever; fail KILL                             |
+| HUD / tabs               | Questy · Świat · Bohater · Społeczność · Mentor (Mentor AI **OUT** tego MVP) |
+| Travel                   | **Ten slice:** unlock = level, mapa bez fog. Cel later: Discover once, fail KILL |
 | Gold / klucze / lochy    | 300g, klucz 100, drop 20/5/1; **CD per tier** (nie globalna energia) |
 | Skup                     | Zwykły ~10–15g; Unikat ~≥1 klucz; Heroic ~kilka; pensja = main       |
-| Loadout                  | Outfit + atrybut + emotki (kolekcja)                                 |
+| Loadout                  | Outfit + atrybut. Emotki **OUT** tego MVP |
 | Walka                    | % = level + first clear + afiksy + affinity + 1 pot; hex OUT         |
 | Psychologia              | Joy, zero kary; 2 taski = klucz                                      |
 
@@ -33,13 +35,13 @@
 | **XP absolutne + levele dnia 0–7**           | To jest główna matematyka tygodnia — robimy **razem** z beatami |
 | Imiona: stragan, ★1 tropiciel, pirat, herszt | Placeholder OK na pierwszą pass                                 |
 | Exact CD Common/Elite/Champ/Titan            | Seed w `06`; dograć godziny                                     |
-| Lista 8–12 emotek Akt 1                      | Wystarczy 1–2 w tygodniu 1 (starter + Gutterjack)               |
-| Proza 1–2 akapity / lokacja                  | Po flow dnia                                                    |
+| Proza 1–2 akapity / lokacja                  | Po flow dnia — **narracja aktu OUT** tego MVP                   |
 
 
 ### NIE BLOKUJE Day 0–7 (park / later)
 
 - Nazwa królestwa, aukcje, 2 klucze na late lochy, Zygfryda, pełna rarity nazewnictwo PL, hex→combat, drugie dno Championów Tolkien-pass, look-dev art final
+- **Ten slice OUT:** fog of war, wyprawa discover, Mentor AI, emotki, tytuły (PARK), narracja aktu
 
 ### Werdykt
 
@@ -59,19 +61,21 @@
 | Tydzień 1 lokacje                 | Rev B: hub + 3× R1 side + ★1 (zakazana ścieżka); R2/★2 **nie** muszą być w D0–7 |
 | Kowal                             | W **lesie R1** (nie dopiero T2)                                                 |
 | Mag palantir                      | R2 (poza ścisłym D0–7 albo late D7 soft pin)                                    |
-| Travel                            | Discover once + fast travel                                                     |
-| Emotki                            | Kolekcja + 1 equipped                                                           |
+| Travel                            | **Ten slice:** unlock = level, mapa bez fog. Cel later: Discover once + fast travel |
+| Emotki                            | **OUT** tego MVP (Cel later: kolekcja + 1 equipped)                                 |
 | Dom gracza                        | **Stodoła** u straganu (Lv1) → …                                                |
 | Onboarding cinematic              | Real overcrowded → blur → Crownhaven targ                                       |
 | Gutterjack tutorial               | **100% win** first; **darmowe** wejście (potem CD Common ~6–8 h)                |
 | Menelnia warstwy                  | Dół loch · parter koło · piętro kubeczki                                        |
 | Społeczność tab                   | Soft gate po L3+ / D2+                                                          |
-| Timer discover (pierwsza wyprawa) | **~4–6 h** seed (nie 3, nie 8 default)                                          |
+| Timer discover (pierwsza wyprawa) | **OUT** tego MVP. Cel later: **~4–6 h** seed                                    |
 
 
-### Timery wyprawy — rekomendacja co-founder
+### Timery wyprawy — Cel later (nie ten slice)
 
-Cel produktu: **nie siedzieć godzinę w apce** — 2–3 wejścia/dzień × ~10–15 min.
+> **MVP lock 2026-10-06:** wyprawa discover **OUT**. Poniżej zostaje jako Cel (final), nie near-term.
+
+Cel produktu (gdyby discover wrócił): **nie siedzieć godzinę w apce** — 2–3 wejścia/dzień × ~10–15 min.
 
 
 | Opcja     | Werdykt                                                               |
@@ -91,7 +95,7 @@ Potem fast travel (bez timera). Jedna aktywna wyprawa discover naraz.
 
 | Beat                  | Treść                                                                                   |
 | --------------------- | --------------------------------------------------------------------------------------- |
-| Hub                   | Targ, stragan (sklep), menelnia (+ koło/kubeczki seed), Mentor, **stodoła**, Gutterjack |
+| Hub                   | Targ, stragan (sklep), menelnia (+ koło/kubeczki seed), **stodoła**, Gutterjack. Mentor AI **OUT**. |
 | R1 (wybór kolejności) | Piracka kryjówka · Szlak handlowy · Las + kowal + Basilisk                              |
 | Main ★1               | Zakazana ścieżka (Elite → Champion tropiciel) — lampka → zamek (T2)                     |
 | Soft koniec D7        | Zwykły dzień jeśli bez levela — **bez** „podsumowania tygodnia Mentora” |
@@ -128,37 +132,28 @@ Auth / podstawowe info
   → Soft teach: możesz edytować / dodawać / usuwać
 ```
 
-**Zakładki od startu (rekomendacja):** Questy · Świat (mapa jeszcze pusta/mgła) · Bohater (prawie pusty) · Mentor (locked lub „wkrótce”) · Społeczność (**locked** do L3+/D2 — nie zaśmiecać D0).
+**Zakładki od startu (rekomendacja):** Questy · Świat (mapa **cała widoczna**; piny kłódka aż level) · Bohater (hex polish) · Mentor (stub — **AI OUT**) · Społeczność (**locked** do L3+/D2 — nie zaśmiecać D0).
 
 ### Progresja tego samego wieczoru / „Dnia 1” (gęsty tutorial)
 
 ```text
 ~2 pełne zadania → LEVEL 2
   → Celebracja odblokowań (lista jasna dla gracza):
-       • Mentor dostępny
        • Menelnia otwarta
-       • Misja: odzyskaj tawernę
-  → Przeniesienie / lead do MENTORA (fullscreen, bez Ananiela)
-       „Tu panuje pijaństwo. Ich szef siedzi w piwnicach.
-        Odzyskajcie tawernę — to pierwszy krok iskry.”
+       • Misja: odzyskaj tawernę (scripted hub — **nie** Mentor AI)
   → Świat → close-up Menelnia → Gutterjack (darmowy, 100% win; potem CD Common)
   → Drop: Zwykłe + mała szansa Unikat → teach Bohater (outfit/atrybut)
-  → Emotka? (opcjonalnie)
   → Po clear: tawerna „odzyskana” → odblokuj klimaty:
        parter KOŁO (1×/dzień) · piętro KUBECZKI
        (NIE przed bossem — mniej clutter, lepsza historia)
   → Sklep straganu + affinity straganu (3 lv) — też przy L2 / po rozmowie straganu
 
 Więcej zadań (pełne + 20%) → LEVEL 3 (max D0/D1)
-  → 1 punkt odkrycia → wybór 1 z 3 pinów R1
-  → start wyprawy discover (**timer ~4–6 h**) — postać w drodze
-  → teach: „wróć później” (Finch); nie czekaj w apce
-  → koniec sesji D1 (powrót często rano D2)
+  → 1. pin R1 otwarty **levelem** (mapa bez fog; bez timera wyprawy)
 ```
 
-**Jak pokazać L2:** celebracja krótka → Mentor → misja.  
+**Jak pokazać L2:** celebracja krótka → menelnia / Gutterjack. Mentor AI **OUT**.  
 **Koło/kubeczki:** dopiero po Gutterjacku.  
-**Mentor ↔ Gutterjack:** L2 łączy oba.  
 **Po 10. zadaniu:** XP/gold = 0; soczek nieprogresyjny (`06`).
 
 ### Podsumowanie D0–1 (stan na koniec) — wzorowy sumienny
@@ -170,10 +165,10 @@ Więcej zadań (pełne + 20%) → LEVEL 3 (max D0/D1)
 | Questy                     | Starter nawyki, pasma gold/XP                            |
 | Dom                        | **Stodoła** (Lv1)                                        |
 | Stragan + sklep + affinity | Tak                                                      |
-| Mentor                     | Intro + misja tawerny zrobiona                           |
+| Mentor                     | Tab stub — **AI OUT** tego MVP                   |
 | Menelnia                   | Odzyskana; Gutterjack first-clear; koło/kubeczki         |
 | Bohater                    | Pierwszy item                                            |
-| Mapa                       | **1× R1** odkryta lub wyprawa wraca rano D2; reszta mgła |
+| Mapa                       | **1× R1** otwarty levelem; reszta pinów widać, kłódka aż level |
 | Społeczność                | Locked → od L4                                           |
 | ★1 / Dom Lv2               | Jeszcze nie                                              |
 
@@ -185,8 +180,8 @@ Więcej zadań (pełne + 20%) → LEVEL 3 (max D0/D1)
 
 | Level | Kiedy (wzorowy)             | Odblokowanie                                                         |
 | ----- | --------------------------- | -------------------------------------------------------------------- |
-| **2** | D0/D1 po ~2 pełnych taskach | Mentor + Menelnia + misja Gutterjack                                 |
-| **3** | Koniec D0/D1                | **+1 punkt eksploracji** → wybór 1. pinu **side** R1                 |
+| **2** | D0/D1 po ~2 pełnych taskach | Menelnia + misja Gutterjack (scripted; Mentor AI OUT)            |
+| **3** | Koniec D0/D1                | **1. pin side R1** otwarty **levelem** (nie punkt odkrycia / fog) |
 | **4** | **D2**                      | **+1 punkt** side + **Społeczność**                                  |
 | **5** | **D3**                      | **★1 dostępna** (Main auto na mapie — nie zjada punktu)              |
 | **6** | **D4**                      | **+1 punkt** side                                                    |
@@ -459,6 +454,8 @@ Jeśli L7 padnie: nagroda = **+1 punkt eksploracji (side)** —
 > Sesje Finch 10–15 min × 2–3/dzień. Titan = **tydzień 3**.
 
 ### Reguła odblokowań (LOCK 2026-08-04 — immersja)
+
+> **MVP lock 2026-10-06:** ten slice = piny po **levelu**, bez fog / bez wyprawy. Tabela poniżej = kierunek Aktu 1, nie near-term.
 
 
 | Warstwa            | Co robi                                                                                                   | Czego nie robi                              |

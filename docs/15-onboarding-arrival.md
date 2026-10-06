@@ -56,7 +56,7 @@ Zamiast „rozwijaj swoją wioskę na pustkowiu”: **awans w stolicy** (rynnszt
 
 ## Zasady designu onboardingu
 
-1. Zero ściany 80 pytań na starcie (głębia później przez Mentora / świat). Robocze założenie foundera (2026-09-24): **10–15 pytań**, bo to apka rozwoju osobistego — znośne tylko, gdy każde to 1 tap, pytanie zadaje NPC (stall keeper) i widać licznik kroków. Wzór karty: archetyp C2 w [`reference/ui/design-bible.md`](reference/ui/design-bible.md) ([jeden wybór](reference/ui/golden/onboarding-choice.png), [kilka](reference/ui/golden/onboarding-pick.png)). Lista pytań = Otwarte.
+1. Zero ściany 80 pytań na starcie (głębia later — nie Mentor AI w tym slice). Robocze założenie foundera (2026-09-24): **10–15 pytań**, bo to apka rozwoju osobistego — znośne tylko, gdy każde to 1 tap, pytanie zadaje NPC (stall keeper) i widać licznik kroków. Wzór karty: archetyp C2 w [`reference/ui/design-bible.md`](reference/ui/design-bible.md) ([jeden wybór](reference/ui/golden/onboarding-choice.png), [kilka](reference/ui/golden/onboarding-pick.png)). Lista pytań = Otwarte.
 2. Każdy krok = scena w świecie, nie ustawienia.
 3. Po 3 minutach gracz wie: *jestem w królestwie, mam zadanie, mapa istnieje*.
 4. Skip cinematic tylko jeśli absolutnie konieczne (dostępność) — default = immersja.
@@ -65,8 +65,8 @@ Zamiast „rozwijaj swoją wioskę na pustkowiu”: **awans w stolicy** (rynnszt
 
 ## Otwarte decyzje
 
-- [ ] Klasy: kill / park / soft flavor bez mechaniki?
-- [ ] Czy Mentor pojawia się w day 0, czy dopiero w tawernie po 1–2 dniach?
+- [ ] Klasy: kill / park / soft flavor bez mechaniki? → w `05`/`20` już **KILL**
+- [ ] Mentor AI: **OUT** tego MVP (lock 2026-10-06). Tab może zostać stubem.
 - [ ] Auth (konto) przed cinematic, w środku, czy po pierwszej nagrodzie?
 - [ ] Długość cinematicu (15s / 45s / 90s)?
 - [ ] Ile starter questów (3 vs 5)?

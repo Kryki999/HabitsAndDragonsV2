@@ -28,7 +28,7 @@ Kod w `apps/mobile` tylko gdy świadomie wychodzimy z trybu koncepcji (albo gdy 
 
 | Plik | O czym |
 |------|--------|
-| [`00-final-picture.md`](00-final-picture.md) | Synteza — jak wygląda i działa cała gra |
+| [`00-final-picture.md`](00-final-picture.md) | Synteza — jak wygląda i działa cała gra. **MVP lock 2026-10-06** (IN/OUT) tu |
 | [`01-product-vision.md`](01-product-vision.md) | Po co ta gra istnieje, gracz, obietnica |
 | [`02-psychology.md`](02-psychology.md) | Retencja, haczyki, anty-cele psychologiczne |
 | [`03-core-loop.md`](03-core-loop.md) | Codzienna pętla i rytm dnia/tygodnia |
@@ -80,3 +80,5 @@ Kod w `apps/mobile` tylko gdy świadomie wychodzimy z trybu koncepcji (albo gdy 
 ## Stan
 
 Filarom służy Markdown. Scaffold V2 w `apps/mobile` jest **cienkim plasterkiem** (5 tabów + lokalne nawyki) — nie dumpem V1.
+
+**MVP lock 2026-10-06** (kanon): [`00-final-picture.md`](00-final-picture.md) — mapa **bez fog**, unlock = **level**; IN/OUT tam. Decision log: [`21`](21-world-bible-mvp.md).

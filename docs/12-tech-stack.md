@@ -29,8 +29,8 @@ Produkt to **hybryda**: codziennie lekka apka nawyków + momenty immersji RPG. T
 | **Nawigacja UI** | Expo Router | Zakładki: Questy · Świat · Bohater · Społeczność · Mentor |
 | **Stan gry / nawyki** | Zustand **podzielony domenowo** (nie jeden god-store na prod) + persystencja | V1 god-store = dług techniczny; koncept: habits / world / hero / social osobno |
 | **Sync / backend** | **Supabase** (Auth, DB, storage) — KEEP kierunek | Profile, social, save; Storage na assety/video jeśli trzeba CDN later |
-| **AI Mentor** | LLM **tylko przez backend** (Edge Function / własny API) | Prod: zero kluczy w apce; karta gracza + rate limits |
-| **Mapa królestwa (pasek)** | Ilustracja + gesty **pan Y** + mgła + piny. MVP = Image+Reanimated (**jest** 2026-09-25). Skia later (życie, maska). | Rive **nie** jest silnikiem mapy świata; pinch i pan X = PARK. [`24`](24-map-production.md) |
+| **AI Mentor** | LLM **tylko przez backend** (Edge Function / własny API) | Filozofia KEEP; **Mentor AI OUT** tego MVP (`00`) |
+| **Mapa królestwa (pasek)** | Ilustracja + gesty **pan Y** + piny. **Bez fog of war.** MVP = Image+Reanimated (**jest** 2026-09-25). Skia later (życie paska, nie maska FoW). Unlock pinów = **level**. | Rive **nie** jest silnikiem mapy świata; pinch i pan X = PARK. [`24`](24-map-production.md) |
 | **Close-up lokacji (życie świata)** | **Rive living scene** (opcjonalnie) | Tu Rive się opłaca: mniejszy kadr, jedna całość art+ruch |
 | **Postacie / itemy / UI motion** | **Rive** | Menus, HUD, bohater, loot — native sweet spot Rive |
 | **Mikro-feel** | Reanimated + Haptics (+ Lottie tylko jeśli coś już jest / rare) | Odhacz nawyku, trajectory lootu — lekcje z V1 |
@@ -60,7 +60,7 @@ Produkt to **hybryda**: codziennie lekka apka nawyków + momenty immersji RPG. T
 | **Unity / Unreal jako cała apka** | Świetne do gier akcji/3D; słabe jako lekka habit-apka + social + Mentor. Podwójny koszt (gra + native shell) albo fatalny UX „aplikacji” |
 | **Godot / Flutter jako rewrite „bo ładniej”** | Nie rozwiązują mapy ilustracyjnej lepiej niż RN+Skia+Rive; koszt migracji > zysk |
 | **Web-only PWA jako core** | OK jako later companion; immersja + push + feel na mobile native wygrywa |
-| **Realtime 3D mapa** | Overkill vs Rev B (piny, close-up arty, lochy ekranowe). Immersja ma iść z **art + fog + story video**, nie z kamerą 3D |
+| **Realtime 3D mapa** | Overkill vs Rev B (piny, close-up arty, lochy ekranowe). Immersja ma iść z **art + story video**, nie z kamerą 3D. Fog of war **nie** jest wymogiem |
 | **Generowanie filmików AI on-device / per walkę** | Koszt, niespójność stylu, brak kontroli; batch + kuracja |
 
 ---
@@ -69,8 +69,8 @@ Produkt to **hybryda**: codziennie lekka apka nawyków + momenty immersji RPG. T
 
 ```text
 1. Art: pionowy pasek królestwa (graybox → 1536×~7550 WebP) — nie 16:9, nie kwadrat
-2. Runtime: pan Y + warstwa mgły (odkryte = wycięte / fade). Bez pinch.
-3. Piny / gesty: Discover once → timer wyprawy → reveal
+2. Runtime: pan Y. **Bez** warstwy mgły FoW. Bez pinch.
+3. Piny: unlock = **level** (kłódka / sticker). Discover once / timer = **OUT** tego MVP.
 4. Tap pin → PeekCard → Enter → CLOSE-UP lokacji (osobny art)
 5. Hotspoty na close-up → NPC window / loch tier 1 → tier 2
 ```
@@ -115,7 +115,7 @@ Rewrite **ekranów świata** = OK. Rewrite **całego frameworka** = nie, dopóki
 - [ ] Budżet MB na launch (ile video onboardingu vs stream)?
 - [ ] Czy close-up lokacji = zawsze bitmapa, czy czasem Rive scene?
 - [ ] Kto robi look-dev gate AI video (założyciel / art contractor)?
-- [x] MVP mapy = **Image + Reanimated pan Y** (2026-09-25). Skia = later (mgła/życie), nie dzień 1.
+- [x] MVP mapy = **Image + Reanimated pan Y** (2026-09-25). Skia = later (życie paska), nie dzień 1. **FoW OUT** (2026-10-06).
 - [ ] Analytics vendor
 
 ---

@@ -13,9 +13,9 @@ Anty-grind: cap złota z nawyków, fatigue XP, limity ekonomiczne lochów.
 | # | Haczyk | Jak w produkcie |
 |---|--------|-----------------|
 | 1 | **Sumienność** | Aktywne dni + diminishing XP — spam jednego dnia nie przechodzi Aktu |
-| 2 | **Codzienny rytuał Finch** | Poranny hex reveal; wieczorny check wyprawy/mapy |
+| 2 | **Codzienny rytuał Finch** | Poranny hex reveal; wieczorny check mapy / lootu / Hero |
 | 3 | **Dopamina lochów** | Darmowe CD per tier (Common częściej, Titan rzadko) + klucze; rano zawsze ktoś do bicia |
-| 4 | **Odkrycie mapy** | Discover once + lampki Main ★ (~30 dni do Titana) |
+| 4 | **Mapa** | **Ten slice:** całe królestwo widać; piny po **levelu**. Cel later: Discover once + lampki Main ★ (~30 dni do Titana) |
 | 5 | **Tożsamość** | Dom, flex, hex, affinity NPC (bez klas) |
 
 ### Anty-cele

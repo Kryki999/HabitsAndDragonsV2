@@ -8,7 +8,7 @@ Habit tracker + fantasy; „czuję się jak w grze”. Obóz/zamek jako hub. Got
 
 - **Dla kogo:** kto chce lekki codzienny rytuał (Finch-feel), ale marzy o byciu bohaterem RPG, nie o hodowli maskotki.
 - **Problem:** habit apki są nudne albo ciężkie (Habitica); brakuje podróży, bossów, NPC i świata, który pamięta.
-- **Obietnica (1 zdanie):** Budzisz się w królestwie, realne nawyki robią z Ciebie kogoś w stolicy, a mapa świata otwiera lochy, ludzi i fabułę.
+- **Obietnica (1 zdanie):** Budzisz się w królestwie, realne nawyki robią z Ciebie kogoś w stolicy, a mapa świata otwiera lochy i ludzi. **Ten slice (2026-10-06):** mapa bez fog, unlock = level; fabuła aktu / Mentor AI / emotki / tytuły = OUT. [`00`](00-final-picture.md).
 - **Vs Finch:** ten sam warm UX/psychologia, inna nagroda tożsamości (bohater, nie kurczak).
 - **Vs Habitica:** prościej; mniej „RPG sheet”, więcej **mapa + podróż + immersja**.
 - **Ton:** cartoon fantasy, kolor, humor + epika; własny styl (Rick & Morty × Vox Machina × Shakes & Fidget).

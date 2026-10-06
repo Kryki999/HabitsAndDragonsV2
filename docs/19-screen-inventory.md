@@ -11,6 +11,8 @@
 
 ## A. Vertical Slice (minimum produktu)
 
+> **MVP lock 2026-10-06:** Slice = onboarding + nawyki + Crownhaven/tutorial + mapa bez fog (unlock = level) + loot + Hero/hex. **Park na ten slice:** S09/S10 wyprawa, S11 Mentor AI, fog overlay. Kanon: [`00`](00-final-picture.md).
+
 | ID | Ekran | Przestrzeń | Typ | Cel gracza | Slice |
 |----|-------|------------|-----|------------|-------|
 | S01 | Cinematic isekai | P0 | flow | Wejść emocjonalnie | Y |
@@ -18,13 +20,13 @@
 | S03 | Stolica — hub (dom tier 0) | P2 | tab | Widzę gdzie żyję | Y |
 | S04 | Lista questów / nawyków | P1 | tab/panel | Odhaczam dzień | Y |
 | S05 | Feedback nagrody (XP/gold) | global | modal | Satysfakcja. Duże momenty = C1 celebracja ([streak](reference/ui/golden/flow-streak.png), [level-up](reference/ui/golden/flow-levelup.png)) | Y |
-| S06 | Mapa królestwa (fog + piny) | P3 | tab | Obietnica świata. **Pasek** fit-width, pan Y (`24` LOCK 2026-09-25). Tap otwartego pinu → PeekCard + „Enter” (LOCK 2026-09-24). Piny bez nazw | Y |
+| S06 | Mapa królestwa (piny, **bez fog**) | P3 | tab | Całe królestwo widać. Unlock pinu = **level**. **Pasek** fit-width, pan Y (`24` LOCK 2026-09-25). Tap otwartego pinu → PeekCard + „Enter” (LOCK 2026-09-24). Piny bez nazw. Fog of war **nie** jest chrome (archetyp E) | Y |
 | S07 | Widok lokacji (NPC i/lub loch) | P3 | drill | RPG atom. Playground: hub still + tawerna Ground / strzałki LevelNav / Cellar; mapa → still lokacji Akt 1 | Y |
 | S08 | Loch — run / wynik | P3 | flow | Boss/loot | Y |
-| S09 | Start wyprawy + timer | P3 | modal | Wyjazd | Y |
-| S10 | Powrót wyprawy (wieczór) | P3 | modal | Finch check | Y |
-| S11 | Mentor fullscreen + mood | P4 | fullscreen | Coach / pamięć | Y |
-| S12 | Bohater — profil + 2 sloty | P5 | tab | Flex / tożsamość ([`golden/hero.png`](reference/ui/golden/hero.png)) | Y |
+| S09 | Start wyprawy + timer | P3 | modal | Wyjazd | **Park** (OUT tego MVP) |
+| S10 | Powrót wyprawy (wieczór) | P3 | modal | Finch check | **Park** (OUT tego MVP) |
+| S11 | Mentor fullscreen + mood | P4 | fullscreen | Coach / pamięć | **Park** — Mentor AI **OUT** |
+| S12 | Bohater — profil + 2 sloty | P5 | tab | Flex / tożsamość + hex polish ([`golden/hero.png`](reference/ui/golden/hero.png)). Emotki / tytuły **OUT** | Y |
 | S13 | Stragan — sklep | P2 drill | drill | Tap straganu → ekran A: winieta babki + dymek, Buy / Sell loot, katalog 3×2 ([`golden/shop.png`](reference/ui/golden/shop.png)). Puste gniazda na stillu = superseded | Y |
 | S14 | Kuźnia — Torrik | P3 drill | drill | Ally / affinity 1/2/3 — AllyCard ([`reference/ui/golden/world-npc-torrik.png`](reference/ui/golden/world-npc-torrik.png)) | Y |
 | S15 | Loch Stillgaze (Anvil Glade) | P3 flow | flow | Common 1-poziom; still: [`prompt-stillgaze-dungeon.md`](reference/art/prompt-stillgaze-dungeon.md) | Y |
@@ -53,7 +55,9 @@ Social (Hall of Heroes) jest **LOCK koncepcji** [`08`](08-social.md) (2026-09-25
 | … | Crafting / wheel / marketplace | Later |
 | … | Multi-tier loch 2–3 | Slice: 1 tier |
 | … | Teleport inventory deep | Slice: 1 zwój lub skip |
-| … | Achievements gablota | Unlock = mapa |
+| … | Fog of war overlay | **OUT** tego MVP — mapa cała widoczna |
+| … | Mentor AI chat | **OUT** tego MVP |
+| … | Emotki / tytuły | **OUT** / **PARK** |
 
 ## C. Do dopisania razem
 

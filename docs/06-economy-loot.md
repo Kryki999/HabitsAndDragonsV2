@@ -151,6 +151,8 @@ U nas meta = **level / mapa / 30 dni**. Gdyby XP/gold nigdy nie padały do zera 
 
 Bez zmian filozofii: **nie za gold**.
 
+> **MVP lock 2026-10-06:** ten slice = piny po **levelu**, mapa **bez fog**, **bez** timera wyprawy. Tabela poniżej = kierunek Aktu 1 (punkty odkrycia / soft breadth), nie near-term. **Liczby gold/XP/CD bez zmian.**
+
 | Beat | Bramka |
 |------|--------|
 | Side R1 | Po Gutterjacku + min. level + **punkt odkrycia**; gracz wybiera pin |
@@ -158,7 +160,7 @@ Bez zmian filozofii: **nie za gold**.
 | Pool R2 (Mag / cmentarz / …) | Soft breadth ≥2 R1 + punkt odkrycia — **kolejność dowolna** |
 | ★2 / ★3 Osiris / Titan | Poprzedni ★ + level + aktywne dni (chronologia Main) |
 
-Discover-once = immersja, nie jedyny hamulec 30 dni.  
+Discover-once = Cel later (immersja), **nie** ten slice.  
 **Level nie przypina konkretnego side-pinu** — szczegóły [`17`](17-player-journey.md).
 
 **Dom:** tier = level/wpływ; gold = skin.
@@ -350,7 +352,7 @@ Reset dnia (rano)
 | 1×/tydzień **freeze streak** | Heroic klasyka |
 | Reroll zadania **Mentora** (1×/dzień lub tydzień) | Unikat/Heroic — zero XP bonus, tylko wybór |
 | Lepsze szanse / 1 extra na **kole** menelni | Tematyczne |
-| Skróć **timer discover** nowej lokacji | Unikat+ — immersja, nie level |
+| Skróć **timer discover** nowej lokacji | Unikat+ — immersja, nie level. **Ten slice: discover timer OUT** |
 | +drip **affinity NPC** (nie XP postaci) | OK małe |
 | Emotka / flex-only | Zwykły |
 
@@ -452,7 +454,7 @@ Dokładne % pasm = per boss w `23` §D.
 |----------------|------|
 | **Outfit** | Strój postaci — **jak wyglądasz** (flex). Afiks rzadki / later; early głównie kosmetyka |
 | **Atrybut** | Gadżet / broń-symbol / pierścień / kruk / dywan / klątwa / cokolwiek **trzymanego lub unoszącego się** przy postaci — flex + **tu siedzą afiksy** |
-| **Emotka** | **Kolekcja** (nie 3. slot EQ): dab / taniec / gest. Jedna **equipped** (tap na postać, profil, level-up). **Zero** win% |
+| **Emotka** | **Kolekcja** (nie 3. slot EQ): dab / taniec / gest. Jedna **equipped** (tap na postać, profil, level-up). **Zero** win%. **Ten slice: OUT** (`00` 2026-10-06) |
 
 **Źródła emotek:** lochy, poziomy affinity NPC, beaty Main ★.  
 Budżet Akt 1: mało, ale charakterystycznych (seed ~8–12), mix meme + lore Crownhaven. Rive na bohaterze.

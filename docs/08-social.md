@@ -11,7 +11,7 @@
 |---------|---------|----------|
 | Job taba | **Flex / tożsamość** — wygląd, itemki, lvl, tytuły, dom, **hex**. Nawyki i streaki **ukryte** nawet przed znajomymi | Habit-police = toksyczny FOMO (`02`). Hex na peek = kształt życia, nie lista tasków |
 | Forma | **Hall of Heroes** — karty: Ty + koło + bohaterowie doliny. Tap = peek | Lista+ranking V1 = pusta drabinka wstydu. Mapa zamków = druga mapa obok królestwa. Tawerna-multiplayer gryzie się z Mentorem / Gutterjackiem |
-| Warstwa produktu | **Later layer**, tab zarezerwowany w HUD | Akt 1 domyka mapę + loot + habit. Social nie jest dziennym domem |
+| Warstwa produktu | **Later layer**, tab zarezerwowany w HUD | Akt 1 domyka mapę + loot + habit. Social nie jest dziennym domem. **Tytuły PARK · emotki OUT** tego MVP (`00`) |
 | First ship | Friends + hall (kod + peek). **Ranking PARK** | `06` wcześniej pisało „friends/ranking” — nadpisane tu |
 | Dodawanie | **Tylko friend code** + akceptacja. Dwa sheety: **Twój kod** (udostępnij + kopiuj) i **Podaj kod** (jawny tekst, nie hasło). Zero wyszukiwarki nicków | Kod nie jest sekretem; mieszanie share + add w jednym sheecie myli |
 | Cold start | Dolina **zawsze 4–6 kart** (seed mock dreamers). Peek tak, friend request **nie** | Tab nie może być pusty na L4/D2 |

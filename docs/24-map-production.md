@@ -24,7 +24,7 @@ Produkt: **pielgrzymka w pionie**, nie orbita strategii. Crownhaven = próg domu
 | Vampire | Pobocze: **rząd skrzydeł**, pin **prawo**, lewo = rezerwa Akt 2 (blob terenu, **nie** pusty pin). |
 | Spawn | Dolny ekran: Crownhaven + Approaches + Teeth / Anvil. Closed Way tuż nad ramką = hak do scrolla. |
 | `MapPin.current` | Kursor wyboru (awatar skacze po tapie), nie „tu mieszkasz”. Chrome: [`design-bible.md`](reference/ui/design-bible.md). |
-| Górna poświata | **KILL.** Ani `ScrimTop`, ani lawendowy `.fog` / `topFog`. Dolny `Seam.dock` zostaje. Mgła wojny = shader. |
+| Górna poświata | **KILL.** Ani `ScrimTop`, ani lawendowy `.fog` / `topFog`. Dolny `Seam.dock` zostaje. **Fog of war nie jest chrome** tego MVP (2026-10-06) — całe królestwo widać; kłódka pinu = za niski level. |
 
 Nie stretchujemy obecnego `map_board.png`. Nie promptujemy „ta sama mapa, tylko wyższa”. **Nie** dociągamy dołu skryptem (kafel morza / pad). Generator dostaje **szary PNG jako composition lock**. Południe pod PeekCard = **namalowane** (port, woda, skały w tej samej kresce), albo zmiana kompozycji Crownhaven — nie pasek pikseli.
 
@@ -82,7 +82,7 @@ Graybox 390×1920 × (1920/390) ≈ **4.92× szerokości**. Limit GPU ~8192 px n
 1. **Nie** 4K 16:9 (kadr filmu) i **nie** kwadrat 4:5 (wymaga panu X).
 2. Mapa = **pionowy pasek**: szerokość telefonu, wysokość ~5× szerokości, scroll tylko w pionie.
 3. **Nie** generuj giganta „całe królestwo” z prompta. Najpierw graybox 11 pinów, potem styl, potem pasy biomów.
-4. **Podejście 1 (teraz):** jedna ilustracja + pan Y + mgła + piny. Pinch PARK.
+4. **Podejście 1 (teraz):** jedna ilustracja + pan Y + piny. **Bez fog of war.** Unlock = level. Pinch PARK.
 5. **Podejście 2 (potem, ten sam art):** subtelne życie na **pasku** + **Rive na close-up**.
 6. Pasek **nie** animuje każdego liścia.
 7. Look-dev close-upów (Crownhaven, woda, las) **przed** pełnym masterem paska — język kreski, nie geografia.
@@ -117,7 +117,7 @@ Założyciel: najpierw **osobne grafiki lokacji** (to, co po Enter); pasek król
 
 | Kadr | Co to jest | Ile detalu |
 |------|------------|------------|
-| **Pasek** (tab Świat) | Jedna diorama królestwa, piny, mgła, scroll Y | Sylwetka biomu + 1 czytelny landmark na pin |
+| **Pasek** (tab Świat) | Jedna diorama królestwa, piny, scroll Y. **Bez FoW overlay.** | Sylwetka biomu + 1 czytelny landmark na pin |
 | **Close-up** (po Enter) | Osobny obraz / later Rive tej lokacji | Targ, hotspoty, NPC, wejście do lochu — tu żyje świat |
 
 Close-up Crownhaven ≠ wycięty fragment mapy. Z paska miasto to **plama dachów + pałac**. Po wejściu: plac, stragan, menelnia (`23` §B0). Gracz ma poczuć „wszedłem bliżej”, nie „powiększyłem JPEG”.
@@ -144,15 +144,14 @@ Nie czekaj na **11 skończonych** close-upów, zanim ruszy pasek. Czekaj na **j�
 
 ## Podejście 1 — proste: ilustracja (START TUTAJ)
 
-To nie jest „tymczasowa tandeta”. To **ten sam master**, na którym później siądzie życie. Mapa z paska = prawie still + mgła + piny.
+To nie jest „tymczasowa tandeta”. To **ten sam master**, na którym później siądzie życie. Mapa z paska = prawie still + piny (**bez FoW**).
 
 ### Co gracz widzi
 
 ```text
 [ ilustracja paska ]
      + gest pan Y (lock X, bez pinch)
-     + warstwa mgły (kod, nie wmalowana)
-     + piny lokacji (UI)
+     + piny lokacji (UI) — kłódka = za niski level
      + tap → PeekCard → Enter → CLOSE-UP
 ```
 
@@ -193,7 +192,7 @@ To nie jest „tymczasowa tandeta”. To **ten sam master**, na którym późnie
 | **1a. Jeden Image + Reanimated pan Y** (fit-width, lock X) | **Jest w apce 2026-09-25.** Czeka na nowy master paska. |
 | **1b. Kafelki + ta sama kamera** | Gdy pasek jąka się na słabszych tel. |
 
-Mgła = maska/overlay w kodzie (odkryte piny wycinają dziurę). Piny w **normalizowanych współrzędnych mapy** (0–1), żeby zmiana rozdzielczości assetu nie rozjechała hotspotów. Szczegół: § Piny vs ekrany.
+Piny w **normalizowanych współrzędnych mapy** (0–1), żeby zmiana rozdzielczości assetu nie rozjechała hotspotów. **Bez** maski fog of war. Szczegół: § Piny vs ekrany.
 
 Close-up na start: **osobny still** per lokacja. Nie wycinaj z paska 100% — mapa nie ma detalu targu (`23` §B0). Close-up to **nowy kadr**, ten sam świat.
 
@@ -201,7 +200,7 @@ Close-up na start: **osobny still** per lokacja. Nie wycinaj z paska 100% — ma
 
 - Cała mapa jako jeden Rive.
 - Lottie-dymki naklejone na PNG (`09` KILL).
-- Wmalowana mgła w asset.
+- Wmalowana mgła-FoW w asset (lock 2026-10-06: FoW **nie** jest chrome).
 - 16:9 „bo 4K”.
 
 ---
@@ -296,11 +295,9 @@ PASEK (P2: Skia na tym samym masterze)
   2. życie authored, 3–5 pętli, przywiązane do współrzędnych:
         woda / piana
         dym kominów Crownhaven
-        dryf mgły na krawędzi nieodkrytego
         (later) flagi / ptaki — max 1–2, albo tandeta
-  3. maska odkryć
-  4. piny + marker gracza (Rive micro later; teraz pin-kursor)
-  5. HUD RN (taby, PeekCard)
+  3. piny + marker gracza (Rive micro later; teraz pin-kursor)
+  4. HUD RN (taby, PeekCard)
 
 ENTER LOKACJI
   CLOSE-UP = Rive living scene  ← tu jest „pełna gra”
@@ -311,7 +308,7 @@ ENTER LOKACJI
 
 | Pasek (tab Świat) | Close-up (stoisz na targu) |
 |-------------------|----------------------------|
-| Czytelność 11 pinów, mgła, wow dioramy | Woda, dym, ludzie, światło okien — **jedna scena** |
+| Czytelność 11 pinów, wow dioramy, **bez FoW** | Woda, dym, ludzie, światło okien — **jedna scena** |
 | Rive całego M1 = MB, pan, piekło authoringu | Sweet spot Rive (`09`, `12`) |
 | Subtelne 3–5 pętli wystarczy, że „oddycha” | Tu gracz ma poczuć miasto |
 
@@ -323,7 +320,7 @@ To jest ten sam trik co gry, które *wydają się* żywe: z lotu ptaka still + 2
 |---------|------|-----------|
 | Shimmer wody | Skia shader / mały looping WebM w AABB wody | P2-A |
 | Dym / kominy tylko nad Crownhaven | Mały Rive lub sprite-sheet, **1–2 emitery** | P2-A |
-| Mgła krawędzi (animowany noise na masce) | Skia | P2-A — spina produkt (odkrycia) |
+| Mgła krawędzi (animowany noise na masce) | Skia | P2-A **art** (życie paska) — **nie** fog of war / odkrycia. FoW = OUT tego MVP |
 | Parallax gór | 1 bitmapa, 5–8% przesunięcia | P2-B, łatwo przesadzić |
 | Ptaki / pochodnie / okna | Tylko jeśli look-dev nie krzyczy „naklejka” | P2-C / park |
 
@@ -347,10 +344,10 @@ Tylko jeśli produkt zmieni się w real-time world / 3D kamerę (`12`). Przy map
 | 1 | Close-up **Crownhaven** (look-dev = biblia) | kadr „po Enter” |
 | 2 | 2–3 close-upy biomów (woda / las / …) | język świata |
 | 3 | Pasek 780×3840 → stitch 1536×~7550, graybox jako ref | P1 mapa |
-| 4 | `layout.ts` piny 0–1 + mgła pasami | P1 |
+| 4 | `layout.ts` piny 0–1 (**bez** mgły pasami / FoW) | P1 |
 | 5 | Reszta close-upów (Main ★ unikalne; side = biom + landmark) | nie blokuje (3) |
 | 6 | Crownhaven close-up → Rive living | **P2 zaczyna się tu** |
-| 7 | 3 pętle na pasku (woda, dym, krawędź mgły) | P2 |
+| 7 | Pętle na pasku (woda, dym) — **nie** FoW | P2 |
 
 Nie skakaj do paska zanim Crownhaven + 1–2 biomy nie przejdą gate’u „jedna gra”. Nie blokuj paska na pełnej jedenastce close-upów. **Nie ruszaj kółek grayboxa** przy generacji.
 

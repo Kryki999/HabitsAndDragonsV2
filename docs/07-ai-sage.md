@@ -1,5 +1,7 @@
 # 07 — AI & Sage
 
+> **MVP lock 2026-10-06:** **Mentor AI OUT** tego slice. Tab Mentor może zostać stubem. Ten plik = Cel (final) / later — nie near-term. Kanon: [`00-final-picture.md`](00-final-picture.md).
+
 ## Z prototypu
 
 - Mędrzec: czat LLM (Groq), lore fantasy, fokus body/mind/work, nastrój, Living World JSON.

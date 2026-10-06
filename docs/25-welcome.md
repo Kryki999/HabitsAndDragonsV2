@@ -26,7 +26,7 @@ Biblia i kod są **rozdzielone**. Pracujemy tak: pomysł → plik filaru → gdy
 
 ## 2. Gra w jednym akapicie
 
-Budzisz się w **kolorowym królestwie RPG** (cartoon fantasy). Zaczynasz jako nikt w **stolicy Crownhaven**. Realne nawyki = zasługi (XP, złoto, iskra). Awansujesz od stodoły do wpływu. Świat odkrywasz na **mapie w mgle**: pierwsza wyprawa odblokowuje lokację na zawsze, potem wracasz bez czekania. Lochy, NPC i fabuła siedzą w lokacjach. Mentora pytasz o życie **w lore gry**, nie w ChatGPT.
+Budzisz się w **kolorowym królestwie RPG** (cartoon fantasy). Zaczynasz jako nikt w **stolicy Crownhaven**. Realne nawyki = zasługi (XP, złoto, iskra). Awansujesz od stodoły do wpływu. **Ten slice (MVP lock 2026-10-06):** mapa królestwa jest **w całości widoczna** (bez fog of war); piny otwierają się **poziomem**. Lochy i NPC siedzą w lokacjach. Fabuła aktu, Mentor AI, emotki i tytuły = poza tym MVP. Kanon: [`00-final-picture.md`](00-final-picture.md).
 
 **Obietnica vs konkurencja**
 
@@ -50,7 +50,7 @@ Prototyp **działa**. Jest też **inną grą**. Świadomie odchodzimy od „upgr
 | Klasy | 4 klasy (warrior/hunter/mage/paladin) | **KILL** na MVP |
 | Smoki | Unlock ze streaku | **PARK** |
 | Walka | Energia / klucze, auto-resolve | **Darmowe CD per loch** + klucze; % wygranej widoczne |
-| Tożsamość | Klasa + smoki + 2 sloty | Dom, **outfit + atrybut**, emotki, hex, affinity NPC |
+| Tożsamość | Klasa + smoki + 2 sloty | Dom, **outfit + atrybut**, hex, affinity NPC. **Emotki / tytuły OUT** tego MVP |
 | Mentor | Czat w tabie, klucz Groq **w kliencie** | Fullscreen z tawerny; **AI tylko przez backend** |
 | Social | Ranking + friends (szkielet) | **Hall of Heroes** — calling card, koło, dolina; peek = przycięty Hero. Launch cienki / later. [`08`](08-social.md) |
 | Store listing | Habit tracker w skórze fantasy | **Isekai wejście** — wypadasz do królestwa |
@@ -82,12 +82,12 @@ To jest **silnik produktowy**, nie kod. Liczby z kłódką = lock założyciela;
 ### 5.1 Pętla dnia (2–10 min × 2–3 wejścia)
 
 ```text
-RANO     hex reveal (wczorajszy batch) + ewentualny powrót wyprawy
+RANO     hex reveal (wczorajszy batch)
 DZIEŃ    odhacz nawyki → gold / XP (pasmami) → walka jeśli CD lub klucz
-WIECZÓR  mapa: discover w toku? nowy pin? Champion? Mentor?
+WIECZÓR  mapa / Hero / loot — co odblokował level
 ```
 
-Nie siedzisz godzinę w apce. Wzorzec Finch: rano wyślij wyprawę, wieczór / następny ranek odbierz.
+Nie siedzisz godzinę w apce. Wzorzec Finch: 2–3 krótkie wejścia / dzień. **Wyprawa discover = OUT** tego MVP.
 
 ### 5.2 Nawyki → paliwo
 
@@ -106,21 +106,19 @@ Zwykła lista zadań (nie osobny „RPG quest log” na start).
 
 **Druga oś tempa:** **aktywne dni** (sumienność). Bramki mapy = **level + aktywne dni + poprzedni Main ★**. Złoto **nie** otwiera fabuły.
 
-### 5.3 Mapa — Discover once, return forever
+### 5.3 Mapa — ten slice: bez fog, unlock = level
 
 ```text
 STOLICA (hub, zawsze)
-    → MAPA (mgła)
-         → wybierasz pin → wyprawa (timer ~4–6 h, zawsze dochodzisz)
-         → lokacja ODKRYTA
-         → odtąd szybki dostęp: NPC / loch bez czekania
+    → MAPA (całe królestwo widać — bez fog of war)
+         → pin locked / open = poziom bohatera
+         → PeekCard „Enter” → close-up: NPC / loch
 ```
 
-- Jedna aktywna wyprawa discover naraz.
-- Fail odkrycia: **KILL**.
-- Side = **pula** (gracz wybiera kolejność). Main ★ = **stała chronologia** dla wszystkich.
-- Soft breadth: pierścień 2 (R2) po **≥2 odkrytych** lokacjach R1.
-- Level daje **punkty odkrycia** (tylko na side) albo **prawo otworzyć następny Main ★** — nie „L9 = idź do Maga”.
+- **Fog of war: OUT** tego MVP. Discover-once / timer wyprawy: **OUT** (Cel later w `04` / `21`).
+- Side = **pula** (gracz wybiera kolejność gdy pin otwarty). Main ★ = **stała chronologia** dla wszystkich (kierunek Aktu 1; narracja aktu = odroczona).
+- Soft breadth: pierścień 2 (R2) po **≥2** lokacjach R1 (kierunek, nie fog).
+- Level otwiera piny — nie „L9 = idź do Maga”.
 
 ### 5.4 Lochy i walka
 
@@ -146,7 +144,7 @@ Walka = auto-resolve z **widocznym %** przed tapem. Składniki (Akt 1):
     + clamp (seed 5%–95%)
 ```
 
-**Hex nie wchodzi do walki w Akcie 1** (tożsamość / Mentor, nie „właściwa droga życia”).  
+**Hex nie wchodzi do walki w Akcie 1** (tożsamość, nie „właściwa droga życia”). Hex polish = **IN** tego MVP. Mentor AI **OUT**.  
 Pierwszy Gutterjack: **darmowy + 100% win** (tutorial).
 
 ### 5.5 Postać — bez klas
@@ -155,7 +153,7 @@ Pierwszy Gutterjack: **darmowy + 100% win** (tutorial).
 |---------|------|
 | Level / wpływ | XP z nawyków (krzywa seed w `17`; absolutne liczby TBD) |
 | Dom | Stodoła (start) → **chata po clear ★1** (dar doradcy) → **murowany po ★3 Osiris** |
-| Loadout | **2 sloty:** Outfit (flex) + Atrybut (tu moc). Emotka = kolekcja, 1 equipped, 0 power |
+| Loadout | **2 sloty:** Outfit (flex) + Atrybut (tu moc). Emotki / tytuły = **OUT** tego MVP (`00`) |
 | Anti-swap | Zmiana **Atrybutu** lockuje slot **do resetu dnia**; Outfit/Emotka zawsze wolne |
 | Hex | 6 osi, nocny batch → poranny reveal |
 | Affinity NPC | 3 levele / sojusznik |
@@ -218,8 +216,8 @@ Produkt to **hybryda**: lekka apka nawyków codziennie **+** momenty immersji RP
 | Nawigacja | Expo Router, 5 tabów | kierunek |
 | Stan klienta | Zustand **podzielony domenowo** (nie god-store V1) | do zaprojektowania |
 | Backend | **Supabase** (Auth, Postgres, Storage) | KEEP kierunku — **Twoja decyzja czy zostaje** |
-| AI Mentor | LLM **tylko przez backend** (Edge / własne API) | LOCK filozofii; vendor otwarty |
-| Mapa pasek | Ilustracja + pan Y + mgła (Image+gesty na MVP; Skia later) | LOCK kamery 2026-09-25 (`24`) |
+| AI Mentor | LLM **tylko przez backend** (Edge / własne API) | Filozofia KEEP; **Mentor AI OUT** tego MVP (`00`) |
+| Mapa pasek | Ilustracja + pan Y, **bez fog of war** (Image+gesty na MVP; Skia later na życie) | LOCK kamery 2026-09-25 (`24`); unlock pinów = level |
 | Close-up / postacie | **Rive** | kierunek art |
 | Cinematics | Pre-render video (batch + human gate), nie gen per user | kierunek |
 | Offline | Odhacz nawyku działa bez siatki; świat się dogrywa | zasada niefunkcjonalna |
@@ -238,7 +236,7 @@ Habit RPG + mapa + loot = raj na cheat, jeśli gold/XP/lochy żyją tylko w Asyn
 | XP, level, aktywne dni, gold, klucze | Bramki fabuły i ekonomia |
 | Wejścia lochów (CD + zużycie klucza) | Inaczej infinite farm |
 | Roll walki i lootu | % i rarity muszą być powtarzalne / audytowalne |
-| Odkrycia mapy, punkty, Main ★ | Progress Aktu |
+| Odkrycia mapy, piny po levelu | Progress Aktu (ten slice: bez fog / bez timera wyprawy) |
 | Loadout + lock Atrybutu do resetu | Anti-swap |
 | Inventory / rarity | Sink straganu, później aukcje |
 | Mentor: kontekst + rate limit + brak klucza w apce | Koszt + prywatność („karta gracza”) |
@@ -256,13 +254,13 @@ Habits          CRUD, schedule, complete, trudność, heatmapa / streak / freeze
 Day tick        pasma 1–5 / 6–10 / 11+, aktywny dzień, hex batch w nocy
 Economy         gold, klucze, sinki (sklep, koło, kubeczki)
 Combat          per-dungeon CD, klucz, win%, first-clear flag
-Loot            pasma rarity (nie stack %), 4 wiadra: atrybut / outfit / emotka / pot
+Loot            pasma rarity (nie stack %), wiadra IN: atrybut / outfit / pot (emotka OUT tego MVP)
 Loadout         2 sloty + lock atrybutu
-World           fog, piny, expedition timer, soft breadth, Main chronologia
+World           piny, unlock = level, bez fog, bez expedition timer
 Hub             dom tier, 3 hotspoty Crownhaven (stragan / menelnia / pałac)
 NPC             affinity 1/2/3, sklep, mikstury Maga
-Mentor          living-memory card, chat, granice kryzysu
-Content         lokacje, bossy, tabele dropu, beaty ★ — dane, nie hardcoded UI
+Mentor          tab placeholder; **Mentor AI OUT** tego MVP
+Content         lokacje, bossy, tabele dropu — dane, nie hardcoded UI; **narracja aktu odroczona**
 Social          later: Hall of Heroes (friends + dolina); ranking PARK; aukcje PARK M1
 ```
 
@@ -285,11 +283,11 @@ Rewrite **ekranów świata** = OK. Rewrite **całego frameworka** = nie, dopóki
 Nie musisz odpowiadać day 1. To lista, przy której chcielibyśmy Cię mieć w pokoju:
 
 1. **Supabase zostaje** (Auth + RLS + Edge) czy własny API przed Postgresem?
-2. **Event log vs snapshot** — dzienny tick ekonomii, CD, wyprawy: jak modelować, żeby dało się debugować „dlaczego nie dostał golda”?
+2. **Event log vs snapshot** — dzienny tick ekonomii, CD: jak modelować, żeby dało się debugować „dlaczego nie dostał golda”? (Wyprawy discover **OUT** tego MVP.)
 3. **Offline-first** — jak głęboko? Tylko nawyki, czy też walka (ryzyko desync lootu)?
 4. **Czas gracza** — dzień gry = lokalna północ? UTC? Streak przy zmianie strefy?
 5. **Anti-cheat poziom 1** — świadomie „uczciwy gracz na telefonie”, nie MMO-grade; gdzie twarda walidacja, gdzie ufamy klientowi?
-6. **Mentor** — jeden pipeline LLM vs osobno chat / oracle / karta; vendor; budżet tokenów / user / dzień.
+6. **Mentor** — **OUT** tego MVP. Gdy wróci: jeden pipeline LLM vs osobno chat / oracle / karta; vendor; budżet tokenów / user / dzień.
 7. **Content pipeline** — JSON w repo, CMS, czy coś innego, gdy designerzy dopisują dropy bez deployu apki?
 8. **Analytics** — Day 1/7, odkrycia mapy, clear ★ — vendor TBD.
 9. **Lock stacku na 6–12 mies.** — Expo + mapa ilustracyjna + Rive + pre-render video: Twoje „tak / tak, ale / nie”.
@@ -315,7 +313,7 @@ Monetyzacja ([`14`](14-monetization-liveops.md)) jest **prawie pusta**. Fair-pla
 
 ### Co jest względnie zwarte
 
-- Obraz gry: [`00-final-picture.md`](00-final-picture.md)
+- Obraz gry: [`00-final-picture.md`](00-final-picture.md) — **MVP lock 2026-10-06** tu
 - Psychologia + pętla: [`02`](02-psychology.md), [`03`](03-core-loop.md)
 - Ekonomia / walka / loot: [`06`](06-economy-loot.md) (najgrubszy filar mechanik)
 - Journey Akt 1: [`17`](17-player-journey.md)
@@ -367,7 +365,7 @@ Pytania, które są **cenniejsze** niż „czy mogę zacząć pisać serwis”:
 
 - Gdzie Twoim zdaniem prawda gry **musi** żyć na serwerze day 1?
 - Co z V1 (nawyki, sync profilu) da się uratować, a co jest pułapką?
-- Jaki najcieńszy backend pozwoli zagrać **Day 0 → Gutterjack → pierwszy pin mapy**?
+- Jaki najcieńszy backend pozwoli zagrać **Day 0 → Gutterjack → pin otwarty levelem**?
 
 ---
 
@@ -376,11 +374,12 @@ Pytania, które są **cenniejsze** niż „czy mogę zacząć pisać serwis”:
 **Kierunek, z którego wychodzimy (nie święte, ale nie „wszystko w powietrzu”):**
 
 - Mapa królestwa + stolica + isekai, nie obóz V1
-- 5 tabów, discover-once, klasy KILL, smoki PARK
+- 5 tabów; **ten slice:** mapa bez fog, unlock = level; discover-once = Cel later; klasy KILL, smoki PARK
 - Sumienność > spam; fabuła ≠ gold; CD per loch
-- Akt 1 ≈ 11 lokacji, Titan Ananiel, ~3 tygodnie sumiennego
-- Expo shell; AI nie w kliencie
+- Akt 1 ≈ 11 lokacji (miejsca **są**); **narracja aktu odroczona**; Titan Ananiel = kierunek, nie ten slice
+- Expo shell; AI nie w kliencie; **Mentor AI OUT**
 - Zero kary za miss (nie toksyczny FOMO)
+- Emotki / tytuły **OUT** (tytuły PARK)
 
 **Jawne dziury:**
 

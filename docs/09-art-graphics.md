@@ -90,13 +90,13 @@ Nie robimy pełnego flat R&M. Robimy: **painterly baza + graphic readable landma
 
 | Powierzchnia | Narzędzie | Dlaczego |
 |--------------|-----------|----------|
-| **Mapa królestwa (pasek)** | Ilustracja + runtime mapy (Image+gesty teraz; Skia later, mgła, piny) | Pionowy pasek, pan Y, 11 pinów — **nie** sweet spot Rive. Rive = UI/aktorzy/interaktywne sceny, nie „silnik mapy świata” |
+| **Mapa królestwa (pasek)** | Ilustracja + runtime mapy (Image+gesty teraz; Skia later, piny; **bez FoW**) | Pionowy pasek, pan Y, 11 pinów — **nie** sweet spot Rive. Rive = UI/aktorzy/interaktywne sceny, nie „silnik mapy świata” |
 | **Close-up lokacji** (targ, menelnia, kryjówka, las) | **Rive living scene** — tu się opłaca | Mniejszy kadr = jedna całość art+ruch (woda/dym/liście w tym samym pliku). Wow immersji bez gigantycznego `.riv` |
 | Bohater, itemy, loot, HUD micro | **Rive** — KEEP | Dokładnie to, do czego Rive jest stworzony |
 | Filmiki fabularne | Pre-render video | Poza Rive |
 
 ```text
-Pasek mapa    →  piękna diorama (ref), lekkość Finch, odkrycia
+Pasek mapa    →  piękna diorama (ref), lekkość Finch, piny po levelu
 Tap → Enter   →  CLOSE-UP living (Rive)  = „świat oddycha”
 Powrót        →  mapa
 ```
@@ -123,9 +123,9 @@ Wtedy filmik isekai i mapa to **to samo miasto**, nie „inne IP”.
 
 ### 5. Mgła (produkt × art)
 
-- Na mapie runtime: warstwa odkryć (Ghost of Tsushima vibe) — maska / overlay, nie nowy styl.  
-- W filmikach: mgła = motyw fabularny, ten sam kolor/akcent Dreamwake.  
-- Nie maluj całej mapy na stale „w mgle” — odsłanianie ma być nagrodą.
+- **Mapa (ten slice, 2026-10-06):** fog of war **OUT**. Całe królestwo widać. Kłódka pinu = za niski level — nie overlay.  
+- W filmikach: mgła = motyw **fabularny** Dreamwake (lore), nie chrome mapy.  
+- Nie maluj FoW w stillu paska.
 
 ---
 
@@ -148,7 +148,7 @@ LOOK-DEV (1 lokacja = Crownhaven)
 
 | Asset | Zasada |
 |-------|--------|
-| **Mapa** | Jedna (lub strefowa) ilustracja; piny/hotspoty UI osobno; mgła = kod. Produkcja / rozdzielczości / P1 vs P2: [`24`](24-map-production.md) |
+| **Mapa** | Jedna (lub strefowa) ilustracja; piny/hotspoty UI osobno; **bez** fog of war. Produkcja / rozdzielczości / P1 vs P2: [`24`](24-map-production.md) |
 | **Close-up lokacji** | Ten sam world-style co mapa; hotspoty (domek / jaskinia) jak w `23` |
 | **Rive** | Postać i item **nie** próbują malować painterly brush stroke — uproszczone, ale kolory + proporcje świata |
 | **Filmiki** | Grade i tła = świat A; aktorzy ≈ B; **zakaz** losowego stylu modelu AI per klip |

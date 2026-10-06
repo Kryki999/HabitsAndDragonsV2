@@ -75,6 +75,7 @@
 | Elite loot | Unikat **~7%** · Heroic **~2%** · pasma **nie stackują** · zero pity; Necklace = **Second Tide** (retry Common/Elite, nie ★/Titan) | `23` D1 · `06` |
 | Item afiksy / aukcje | Equipped-only · XP z itemów **KILL** · durability **KILL** · aukcje **PARK M1** · **Atrybut lock do resetu dnia**; Outfit/Emotka free | `06` §6c |
 | Mgła wojny na mapie (2026-10-06) | **KILL** z product path. Pełny korytarz widoczny. Pin unlocked gdy `hero.playerLevel ≥ unlockLevel` (`layout.ts`). Crownhaven always (0). Locked tap = PeekCard „from level X”, bez Enter. Discover-once / veil / DEV unveil = nie bramkują gry. | Founder: nie „undiscovered mist”. Punkty odkrycia z `17` collapsed do stałych progów south→north. |
+| **Narrow MVP (2026-10-06)** | **IN:** mapa **bez fog of war** (całe królestwo widać) · piny = **level** · onboarding · Crownhaven/tutorial · level-gated miejsca Aktu 1 · prawdziwy loot + Hero · hex polish · UI kit landed. **OUT:** fog · fabuła aktu / narracja · emotki · Mentor AI · tytuły **PARK**. Wyprawa discover **nie** jest near-term. | Jawna decyzja założyciela. Kanon: [`00`](00-final-picture.md). Nie kasuje locków Discover once / Mentor / emotki jako Cel — tylko ten slice. |
 
 **Odrzucone nazwy tierów (nie wracać bez powodu):** Scum, Foe, Dread, Hero-class, Rabble, Greater Elite (jako osobna 5. nazwa).
 
@@ -164,10 +165,10 @@ Każda lokacja odpowiadana na: *co tu kradnie / wiąże wolę?*
 | Close-up hub | **3 hotspoty:** stragan → menelnia → pałac; pałac zawsze w tle dioramy — `23` §B0 |
 | Dom gracza | rynsztok → … (UI start: **stodoła** u straganu — `17`) |
 | Onboarding | **Sprzedawca ze straganu** na rynku (nie „Kapusta”) — guide #1; sklep + stodoła |
-| Mentor | Menelnia, Day 0–1, fullscreen |
+| Mentor | Menelnia, Day 0–1, fullscreen — Cel later. **Ten slice: Mentor AI OUT** |
 | Early loch | **Gutterjack the Sot** — piwnice; po clear → parter **koło** + piętro **kubeczki** (honest odds) |
 | Loot Gutterjack | **Gutter Cork** · **Gutterjack's Wine** (+5% 1×) · **Gold** · Unikat **Gutterjack's Tulip** (+10% vs Common, ~5%); pusto OK na farmie; first clear = Cork | `23` §B2c |
-| Pałac (2026-08-04) | Widoczny od startu; **wejście** po clear ★1 → **doradca** (guide #2, affinity ×3); po Titanie / końcu Aktu 1 → schody / audiencja króla | Hub layer; nie pin mgły; `17` |
+| Pałac (2026-08-04) | Widoczny od startu; **wejście** po clear ★1 → **doradca** (guide #2, affinity ×3); po Titanie / końcu Aktu 1 → schody / audiencja króla | Hub layer; nie pin mapy; `17` |
 | Dom | Stodoła → **chata po ★1** → **murowany po ★3 Osiris** (oba u doradcy) | Fame Championów |
 
 ---
@@ -219,11 +220,13 @@ Proporcja startowa **60/40** — nie dogmat; per lokacja.
 
 ## K. Travel (wszystkie lokacje)
 
-1. Mgła na mapie (Ghost of Tsushima vibe).  
-2. Prawo odkrycia → 2–3 piny (side) albo 1 pin Main ★.  
-3. Pierwsza wyprawa = timer → zawsze dochodzisz.  
-4. Potem fast travel.  
-5. R2: ta sama zasada; odblokowanie R2 wymaga **≥2 odkrytych R1**.  
+> **MVP lock 2026-10-06:** to **nie** jest ten slice. Mapa **bez** fog of war (całe królestwo widać). Piny otwierają się **poziomem**. Wyprawa discover = **OUT**. Poniżej = Cel (final) / later, nie near-term. [`00`](00-final-picture.md).
+
+1. Cel (final): mgła na mapie (Ghost of Tsushima vibe) — **nie** chrome tego MVP.  
+2. Cel (final): prawo odkrycia → 2–3 piny (side) albo 1 pin Main ★. **Ten slice:** unlock = level.  
+3. Cel (final): pierwsza wyprawa = timer → zawsze dochodzisz. **Ten slice:** brak timera discover.  
+4. Potem fast travel (gdy discover wróci).  
+5. R2: ta sama zasada; odblokowanie R2 wymaga **≥2 odkrytych R1** (kierunek Aktu 1, nie fog).  
 6. Zwoje teleportu: PARK (Margonem flavor later).
 
 ---
@@ -232,7 +235,7 @@ Proporcja startowa **60/40** — nie dogmat; per lokacja.
 
 > **2026-07-31:** tabela poniżej = **stary układ (Rev A)**. Aktualny zarys lokacji = [`23-act1-location-brainstorm.md`](23-act1-location-brainstorm.md) **Rev B** (hub targ+menelnia → R1 piraci/szlak/las+kowal → ★ zakazana ścieżka → R2 mag+cmentarz → ★ zamek/kruki → pustynia Osiris → Ananiel). Sync tej sekcji po locku Rev B.
 
-**Hub:** Crownhaven (Gutterjack w środku — nie zjada pinu mgły).  
+**Hub:** Crownhaven (Gutterjack w środku — nie zjada pinu mapy).  
 **Main ★** = stała chronologia. **Side** = pula (różna kolejność per gracz).  
 **Tydzień** = tempo sumiennego (~co 2 dni nowa lokacja po rozpędzeniu).
 
@@ -308,6 +311,6 @@ T4: Champion ★ Akt 2 + side (nowe reguły świata)
 
 1. **Aktualizuj** decyzje w sekcji A (log), nie usuwaj historii.  
 2. Bank bossów (H) i inspiracje (B) = **pool** — wolno oznaczać „użyte w T1”, nie kasować.  
-3. Crownhaven / Ananiel / 4 tiery / Discover once = **nie zmieniać bez jawnej decyzji założyciela**.  
+3. Crownhaven / Ananiel / 4 tiery = **nie zmieniać bez jawnej decyzji założyciela**. Discover once zostaje Cel (final); **ten slice (2026-10-06)** = mapa bez fog, unlock = level — to **jest** ta decyzja.  
 4. Przy konflikcie z prototypem V1 → wygrywa ta biblia + `00-final-picture.md`.  
 5. Nie slimować tego pliku do „final only” — kolejni agenci potrzebują pamięci.

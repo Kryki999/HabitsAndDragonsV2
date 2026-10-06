@@ -26,14 +26,14 @@
 |-------|------|------|-------|
 | **A1. Hub stały** | Winieta na Questy **zawsze** = dom w stolicy (rynnsztok→chata→zamek). Lokacje ogarniasz w Świecie. | Czysty habit focus; czytelny awans „domu” | Mniej „jestem w lesie” na home |
 | **A2. Obecność twarda** | Postać realnie jest w lokacji; Questy pokazują tło tej lokacji. Podróż wymagana. | Max immersja podróży | Tarcie; home miesza nawyki z travel state |
-| **A3. Soft focus** | Dom w stolicy na Questy; na Mapie wybierasz **fokus** lokacji (bez „przeprowadzki”). Opcjonalna **wyprawa** = timer + beat (Finch wieczór). | Habit czysty + mapa żywa + wyprawy mają sens | Trzeba dobrze nazwać UX („fokus” ≠ „mieszkam tu”) |
+| **A3. Soft focus** | Dom w stolicy na Questy; na Mapie wybierasz **fokus** lokacji (bez „przeprowadzki”). Wyprawa timer = **OUT** tego MVP. | Habit czysty + mapa żywa | — |
 
 ### Decyzja B — Mapa vs zakładka lokacji
 
 | Model | Opis |
 |-------|------|
 | **B1. Dwa taby** | `Lokacja` (treść miejsca) + `Mapa` (odkrywanie) |
-| **B2. Jeden tab Świat** | Domyślnie mapa; tap w pin → drill-in lokacji (historia, NPC, lochy, start wyprawy) |
+| **B2. Jeden tab Świat** | Domyślnie mapa; tap w pin → drill-in lokacji (historia, NPC, lochy). Start wyprawy = **OUT** tego MVP |
 
 ---
 
@@ -44,7 +44,7 @@
 ### Dlaczego A3
 - Sam powiedziałeś: **pierwszy ekran ma być bardzo czysty pod listę zadań IRL** — to święte.
 - Awans stolicy (rynnsztok→zamek) zostaje **najważniejszym klockiem home** — nie rozmywamy go skakaniem po biomach na tym samym tabie.
-- Wyprawy czasowe dalej mają po co istnieć (Finch), bez wymuszania travel do każdego locha.
+- Wyprawy czasowe (Finch) = **Cel later**, nie ten slice (lock 2026-10-06). Ten slice: pin otwarty levelem, Enter od razu.
 
 ### Dlaczego B2 (Mapa + lokacja w jednym)
 - Osobno `Lokacja` + `Mapa` + Questy + Bohater + Social + Mentor = **6** i wrażenie ciężaru.
@@ -54,7 +54,7 @@
 1. Questy → odhaczasz życie (tło = Twój dom w stolicy).  
 2. Świat → mapa → wybierasz Piramidę → widzisz historię / lochy / NPC.  
 3. Odpalasz loch albo misję sojusznika **od razu** (fokus).  
-4. Albo startujesz **wyprawę** (timer) → wieczorem check (immersja podróży bez blokowania nawyków).
+4. Albo Enter od razu (ten slice). Wyprawa timer = **OUT** tego MVP.
 
 Zwoje teleportu = natychmiastowy fokus / skip timera (później).
 
@@ -79,7 +79,7 @@ Hotspot schodów na stillu jest **opcjonalny** i woła to samo `setFloor` co str
 Plansza królestwa — produkt, nie korytarz 9:16:
 
 1. **Kamera** — fit-width, **zero panu X**, **zero pinch**. Jedna skala. Scroll tylko góra–dół. Spawn = dolny fold (Crownhaven). Graybox 390×1920, B=200. Kwadrat 4:5 / hub w środku / zoom 1.85× = superseded (`24`).
-2. **Piny** — rzędy: albo jeden środek, albo para L/P. Vampire = skrzydło + rezerwa, nie na trakcie. Odkryte: sticker landmarku. Nieodkryte: **kłódka**. `MapPin.current` = kursor wyboru (awatar skacze). Tap kłódki nie otwiera lokacji.
+2. **Piny** — rzędy: albo jeden środek, albo para L/P. Vampire = skrzydło + rezerwa, nie na trakcie. Otwarte (level OK): sticker landmarku. Zamknięte (za niski level): **kłódka**. Fog of war **nie** jest chrome. `MapPin.current` = kursor wyboru (awatar skacze). Tap kłódki nie otwiera lokacji.
 3. **Account HUD** — zostaje na Questy, Hero, Social, Mentor. Na World paska nie ma: plansza full-bleed pod status barem. Bez górnej lawendowej poświaty.
 
 ---
@@ -88,11 +88,11 @@ Plansza królestwa — produkt, nie korytarz 9:16:
 
 | # | Tab | Job | Co widać |
 |---|-----|-----|----------|
-| 1 | **Questy** | Habit core | Czysta lista nawyków IRL + winieta bohatera w **domu stolicy** (tier wpływu). Chip: „wyprawa w toku” jeśli aktywna. |
-| 2 | **Świat** | RPG fantasy | **Mapa królestwa** → drill-in **lokacji** (lore, sojusznik, lochy 1–n, start wyprawy). |
-| 3 | **Bohater** | Tożsamość / flex | 2 sloty, hex, milestone’y gry, odblokowane lokacje, tytuły. |
+| 1 | **Questy** | Habit core | Czysta lista nawyków IRL + winieta bohatera w **domu stolicy** (tier wpływu). |
+| 2 | **Świat** | RPG fantasy | **Mapa królestwa** (cała widoczna) → drill-in **lokacji** (NPC, lochy). Unlock pinu = level. |
+| 3 | **Bohater** | Tożsamość / flex | 2 sloty, hex polish. Tytuły **PARK**. Emotki **OUT**. |
 | 4 | **Społeczność** | Hall of Heroes (flex) | Calling card + koło + bohaterowie doliny. Peek = przycięty Hero. Soft gate L4/D2. [`08`](08-social.md). |
-| 5 | **Mentor** | Coach | Wejście do tawerny → **fullscreen** rozmowa (+ mood). Dostęp zawsze, niezależnie od fokusu mapy. |
+| 5 | **Mentor** | Placeholder | Tab zostaje. **Mentor AI OUT** tego MVP. |
 
 ### Świadomy park
 - Smoki (osobna decyzja później)
@@ -124,10 +124,10 @@ Warunek: Mentor jako **HUD icon** zamiast taba → wracamy do 5.
 | Questy = czysta lista IRL + dom stolicy | **PROPOSE KEEP** |
 | Świat = mapa + drill lokacji | **PROPOSE KEEP** |
 | Crownhaven hub / tawerna / piętra | **LOCK** — hotspoty, nie lista wyjść. Piętra/poziomy = **LevelNav** z lookdev (strzałki + kłódka), 2026-09-24; labeled lift z 2026-09-21 unieważniony |
-| World chrome / ikony | **LOCK v2** (2026-09-24) — still bez HUD; nameplate z kotwicą na landmarku; sticker (treść) vs MingCute Fill (system); ten sam tab bar co Home + szew; mgła wojny = mgła UI; [`reference/ui/design-bible.md`](reference/ui/design-bible.md) |
+| World chrome / ikony | **LOCK v2** (2026-09-24) — still bez HUD; nameplate z kotwicą na landmarku; sticker (treść) vs MingCute Fill (system); ten sam tab bar co Home + szew. Fog of war **nie** jest chrome mapy (2026-10-06). Canvas `mgła` = tło sheetów A/B, nie overlay FoW. [`reference/ui/design-bible.md`](reference/ui/design-bible.md) |
 | Mapa: tap pinu | **LOCK** (2026-09-24) — PeekCard (nazwa + „Enter”); piny dalej bez nazw. Szept = superseded |
 | Mapa: kamera + siatka | **LOCK** (2026-09-25) — pionowy pasek, lock X, bez pinch, Crownhaven na dole, B=200, środek-albo-para. [`24`](24-map-production.md) |
-| Bohater / Społeczność / Mentor | **PROPOSE KEEP** (Społeczność = Hall of Heroes, LOCK `08` 2026-09-25) |
+| Bohater / Społeczność / Mentor | **PROPOSE KEEP** tabów (Społeczność = Hall of Heroes, LOCK `08` 2026-09-25). **Mentor AI OUT** · tytuły **PARK** (2026-10-06) |
 | Obecność twarda vs soft focus | **Czeka na Twój werdykt** (rekomendacja: soft focus A3) |
 | Day 0–7 | Po potwierdzeniu HUD |
 
@@ -136,6 +136,6 @@ Warunek: Mentor jako **HUD icon** zamiast taba → wracamy do 5.
 ## Pytanie do Ciebie (jedna odpowiedź wystarczy)
 
 Wybierz:
-1. **A3+B2** — rekomendacja (5 tabów, dom w stolicy, mapa=świat, wyprawy opcjonalne)  
+1. **A3+B2** — rekomendacja (5 tabów, dom w stolicy, mapa=świat; wyprawa timer **OUT** tego MVP)  
 2. **A2** — twarda obecność (postać zawsze „jest” w lokacji)  
 3. **B1** — osobno Lokacja i Mapa (świadomie 6 albo Mentor w HUD)
