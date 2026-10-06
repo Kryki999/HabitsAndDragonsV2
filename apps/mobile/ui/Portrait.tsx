@@ -1,23 +1,42 @@
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 
+import { ItemTile } from '@/ui/ItemTile';
 import { Glyph } from '@/ui/Glyph';
 import { shadow, tokens } from '@/ui/tokens';
+import type { StickerName } from '@/ui/stickerRegistry';
+import type { LootRarity } from '@/types/dungeonLoot';
 
 const FACE = require('../lookdev/assets/avatar-hero.jpg');
+
+export type PortraitLoadoutChip = {
+  sticker: StickerName;
+  rarity: LootRarity;
+};
 
 type Props = {
   size?: number;
   xl?: boolean;
   edit?: boolean;
   onEdit?: () => void;
+  /** Placeholder wearables — no outfit PNG sets this slice. */
+  outfit?: PortraitLoadoutChip | null;
+  relic?: PortraitLoadoutChip | null;
 };
 
-export function Portrait({ size, xl = false, edit = false, onEdit }: Props) {
+export function Portrait({
+  size,
+  xl = false,
+  edit = false,
+  onEdit,
+  outfit = null,
+  relic = null,
+}: Props) {
   const dim = size ?? (xl ? 196 : 84);
   const border = xl ? 7 : 4;
   const gold = xl ? 6 : 3;
   const lip = xl ? 7 : 4;
   const inner = dim - gold * 2;
+  const chip = xl ? 44 : 28;
 
   return (
     <View
@@ -49,6 +68,16 @@ export function Portrait({ size, xl = false, edit = false, onEdit }: Props) {
       >
         <Image source={FACE} style={styles.face} />
       </View>
+      {outfit ? (
+        <View style={[styles.chip, styles.chipOutfit, { width: chip, height: chip }]}>
+          <ItemTile rarity={outfit.rarity} sticker={outfit.sticker} size={chip} radius={Math.round(chip * 0.28)} />
+        </View>
+      ) : null}
+      {relic ? (
+        <View style={[styles.chip, styles.chipRelic, { width: chip, height: chip }]}>
+          <ItemTile rarity={relic.rarity} sticker={relic.sticker} size={chip} radius={Math.round(chip * 0.28)} />
+        </View>
+      ) : null}
       {edit ? (
         <Pressable
           accessibilityRole={onEdit ? 'button' : 'none'}
@@ -79,6 +108,18 @@ const styles = StyleSheet.create({
   face: {
     width: '100%',
     height: '100%',
+  },
+  chip: {
+    position: 'absolute',
+    zIndex: 2,
+  },
+  chipOutfit: {
+    left: -8,
+    top: -6,
+  },
+  chipRelic: {
+    right: -8,
+    top: -6,
   },
   edit: {
     position: 'absolute',

@@ -49,6 +49,12 @@ const LOOT_STICKER: Record<LootIconId, StickerName> = {
   anchor: 'nazar',
   moon: 'nazar',
   wine: 'wine',
+  cloak: 'coat',
+  leaf: 'leaf',
+  raven: 'blackbird',
+  sand: 'desert',
+  tide: 'droplet',
+  fang: 'bat',
 };
 
 export function stickerForLootIcon(icon: LootIconId): StickerName {

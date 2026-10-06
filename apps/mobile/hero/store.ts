@@ -15,7 +15,7 @@ import { applyXpDelta, KEY_PRICE_GOLD, XP_PER_LEVEL, type HabitCompletionGrant }
 import { todayKey, yesterdayKey } from '@/lib/dateKey';
 import { sumHexDeltas } from '@/lib/hexEconomy';
 import { sellPriceForRarity } from '@/lib/inventoryEconomy';
-import { resolveLootItemById } from '@/lib/itemCatalog';
+import { canEquipItem, resolveLootItemById } from '@/lib/itemCatalog';
 
 import type { HeroActions, HeroState } from './types';
 
@@ -46,9 +46,6 @@ function nextLoginStreak(lastMorningFlowDate: string | null, loginStreakDays: nu
   if (lastMorningFlowDate === yesterday) return Math.max(1, loginStreakDays) + 1;
   return 1;
 }
-
-/** Visual stand-ins until dungeon loot exists. Lucide glyphs, not raster art. */
-const DEMO_OWNED_ITEM_IDS = ['wayfarer_cloak', 'ember_charm'] as const;
 
 type HeroStore = HeroState & HeroActions;
 
@@ -90,7 +87,8 @@ export const useHeroStore = create<HeroStore>()(
       lastMorningFlowDate: null,
       loginStreakDays: 0,
       morningLoginDates: [],
-      ownedItemIds: [...DEMO_OWNED_ITEM_IDS],
+      /** New heroes start empty. Gutterjack first clear grants Cork (teach Relic). */
+      ownedItemIds: [],
       equippedOutfitId: null,
       equippedRelicId: null,
       bossesDefeated: 0,
@@ -135,9 +133,12 @@ export const useHeroStore = create<HeroStore>()(
 
       equipItemById: (itemId) => {
         const entry = resolveLootItemById(itemId);
-        if (!entry) return;
-        if (entry.itemSlot === 'outfit') set({ equippedOutfitId: itemId });
-        else set({ equippedRelicId: itemId });
+        if (!entry || !canEquipItem(entry)) return;
+        set((state) => {
+          if (!state.ownedItemIds.includes(itemId)) return state;
+          if (entry.itemSlot === 'outfit') return { equippedOutfitId: itemId };
+          return { equippedRelicId: itemId };
+        });
       },
 
       unequipLoadoutSlot: (slot) => {
