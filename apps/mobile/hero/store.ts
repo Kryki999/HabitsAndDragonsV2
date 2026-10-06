@@ -158,6 +158,15 @@ export const useHeroStore = create<HeroStore>()(
         set((state) => ({ gold: Math.max(0, state.gold + amount) }));
       },
 
+      setHeroDisplayName: (name) => {
+        const trimmed = name.trim().replace(/\s+/g, ' ').slice(0, 48);
+        if (!trimmed) return;
+        set((state) => ({
+          heroDisplayName: trimmed,
+          createdAt: state.createdAt ?? new Date().toISOString(),
+        }));
+      },
+
       spendGold: (amount) => {
         if (amount <= 0) return false;
         let spent = false;

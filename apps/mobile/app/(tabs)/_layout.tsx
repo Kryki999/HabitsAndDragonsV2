@@ -1,11 +1,15 @@
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { DevToolsButton } from '@/components/DevToolsButton';
+import { useOnboardingStore } from '@/onboarding/store';
 import { TabBar } from '@/ui/TabBar';
 import { tokens } from '@/ui/tokens';
 
 export default function TabLayout() {
+  const complete = useOnboardingStore((s) => s.complete);
+  if (!complete) return <Redirect href="/onboarding" />;
+
   return (
     <View style={styles.shell}>
       <Tabs

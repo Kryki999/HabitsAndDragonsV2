@@ -1,3 +1,4 @@
+import { useOnboardingStore } from '@/onboarding/store';
 import { LevelNav } from '@/ui/LevelNav';
 
 import BossApproach from './BossApproach';
@@ -29,7 +30,10 @@ export default function GutterjackLocation() {
       skipEntryGate={!alreadyCleared}
       sipWine
       onBack={openHub}
-      onCleared={markGutterjackCleared}
+      onCleared={() => {
+        markGutterjackCleared();
+        useOnboardingStore.getState().markTutorialDone();
+      }}
       sceneKicker={TAVERN_INTERIOR.name}
       sceneName={floor?.label ?? 'Cellar'}
       levelNav={

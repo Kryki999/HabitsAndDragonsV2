@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Colors from '@/constants/colors';
 import { useHeroStore } from '@/hero/store';
 import { impactAsync, ImpactFeedbackStyle, notificationAsync, NotificationFeedbackType } from '@/lib/hapticsGate';
+import { useOnboardingStore } from '@/onboarding/store';
 import { useWorldStore } from '@/world/store';
 
 type Props = {
@@ -52,6 +53,7 @@ function DevToolsBody({ onClose }: { onClose: () => void }) {
   const setPlayerLevel = useHeroStore((s) => s.setPlayerLevel);
   const resetWorldDiscovery = useWorldStore((s) => s.resetWorldDiscovery);
   const clearEncounterCooldowns = useWorldStore((s) => s.clearEncounterCooldowns);
+  const resetOnboarding = useOnboardingStore((s) => s.resetOnboarding);
 
   const [levelDraft, setLevelDraft] = useState(String(playerLevel));
   const [resetArmed, setResetArmed] = useState(false);
@@ -161,6 +163,19 @@ function DevToolsBody({ onClose }: { onClose: () => void }) {
               <ToolButton
                 label={resetArmed ? 'Confirm reset' : 'Reset world'}
                 onPress={resetWorld}
+                wide
+                danger
+              />
+            </Section>
+
+            <Section label="Onboarding">
+              <ToolButton
+                label="Replay Day 0"
+                onPress={() => {
+                  resetOnboarding();
+                  notificationAsync(NotificationFeedbackType.Warning);
+                  setNote('Onboarding gate cleared. Flow will replay.');
+                }}
                 wide
                 danger
               />

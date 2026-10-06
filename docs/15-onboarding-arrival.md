@@ -23,6 +23,20 @@ Inspiracja UX/psychologia: **Finch** (lekkość, rytuał, warm UI) — ale nagro
 
 ---
 
+## W apce (V2, 2026-10-06)
+
+MVP Day 0 (bez AI video / Rive cinematic):
+
+1. First-run gate — persist `hnd-onboarding-local` until complete.
+2. C2 stall keeper (Crownhaven still): arrival beat → **required display name** (no silent Wayfarer) → **6 one-tap lifestyle questions** (sleep / move / mood / focus / mornings / people).
+3. Answers **weight a habit template bank**; take the strongest **3–5** dailies. Not a fixed pick-list.
+4. Land on **Quests** with those habits. AccountBar shows the name.
+5. Soft handoff sheet → World → Crownhaven (tavern featured) → cellar **Gutterjack**. First clear already uses `skipEntryGate` + `tutorialLock`.
+
+Full 10–15 NPC questions remain Cel. This slice is Finch-short.
+
+---
+
 ## Cel (final) — przebieg (szkic)
 
 ### 1. Przejście światów (cinematic)
@@ -69,5 +83,5 @@ Zamiast „rozwijaj swoją wioskę na pustkowiu”: **awans w stolicy** (rynnszt
 - [ ] Mentor AI: **OUT** tego MVP (lock 2026-10-06). Tab może zostać stubem.
 - [ ] Auth (konto) przed cinematic, w środku, czy po pierwszej nagrodzie?
 - [ ] Długość cinematicu (15s / 45s / 90s)?
-- [ ] Ile starter questów (3 vs 5)?
+- [ ] Ile starter questów (3 vs 5)? → **MVP:** 3–5, assigned from the 6-question quiz (not a canned list)
 - [ ] Jak kapusta-NPC łączy się z późniejszym systemem sojuszników / dróg?
