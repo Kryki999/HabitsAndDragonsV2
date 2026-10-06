@@ -12,6 +12,7 @@ import {
 } from '@/constants/heroHexStats';
 import { useHabitsStore } from '@/habits/store';
 import { useHeroStore } from '@/hero/store';
+import { useOnboardingStore } from '@/onboarding/store';
 import { startOfWeekMonday, shiftDateKey, todayKey, yesterdayKey } from '@/lib/dateKey';
 import { ButtonFlow } from '@/ui/Button';
 import { Card } from '@/ui/Card';
@@ -59,6 +60,7 @@ export function MorningLoginGate() {
   const heroDisplayName = useHeroStore((s) => s.heroDisplayName);
   const completeMorningLogin = useHeroStore((s) => s.completeMorningLogin);
   const previewMorningHexReveal = useHeroStore((s) => s.previewMorningHexReveal);
+  const onboardingComplete = useOnboardingStore((s) => s.complete);
 
   const [step, setStep] = useState<Step>('welcome');
   const [hexAnim, setHexAnim] = useState<{
@@ -74,7 +76,7 @@ export function MorningLoginGate() {
     return () => sub.remove();
   }, []);
 
-  const open = hydrated && lastMorningFlowDate !== clock;
+  const open = hydrated && onboardingComplete && lastMorningFlowDate !== clock;
 
   useEffect(() => {
     if (open) {

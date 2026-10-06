@@ -20,7 +20,7 @@
 | S03 | Stolica — hub (dom tier 0) | P2 | tab | Widzę gdzie żyję | Y |
 | S04 | Lista questów / nawyków | P1 | tab/panel | Odhaczam dzień | Y |
 | S05 | Feedback nagrody (XP/gold) | global | modal | Satysfakcja. Duże momenty = C1 celebracja ([streak](reference/ui/golden/flow-streak.png), [level-up](reference/ui/golden/flow-levelup.png)) | Y |
-| S05b | Poranny login | global | flow | Raz na dzień kalendarzowy: Welcome → streak → wczorajszy hex expand ([streak](reference/ui/golden/flow-streak.png) C1). Gate: `hero.lastMorningFlowDate` | Y |
+| S05b | Poranny login | global | flow | Po `onboarding.complete`. Raz na dzień kalendarzowy: Welcome → streak → wczorajszy hex expand ([streak](reference/ui/golden/flow-streak.png) C1). Gate: `hero.lastMorningFlowDate`. Day 0 quiz nie pokazuje morning. | Y |
 | S06 | Mapa królestwa (piny, **bez fog**) | P3 | tab | Całe królestwo widać. Unlock pinu = **level**. **Pasek** fit-width, pan Y (`24` LOCK 2026-09-25). Tap otwartego pinu → PeekCard + „Enter” (LOCK 2026-09-24). Piny bez nazw. Fog of war **nie** jest chrome (archetyp E) | Y |
 | S07 | Widok lokacji (NPC i/lub loch) | P3 | drill | RPG atom. Playground: hub still + tawerna Ground / strzałki LevelNav / Cellar; mapa → still lokacji Akt 1 | Y |
 | S08 | Loch — run / wynik | P3 | flow | Boss/loot | Y |

@@ -108,6 +108,8 @@ type HabitsState = {
   completeHabit: (habitId: string) => void;
   uncompleteHabit: (habitId: string) => void;
   addHabit: (habit: AddHabitInput) => void;
+  /** Day 0 only. No-ops if any active habit already exists. */
+  seedStarterHabits: (habits: AddHabitInput[]) => void;
   removeHabit: (habitId: string) => void;
   updateHabit: (
     habitId: string,
@@ -306,6 +308,45 @@ export const useHabitsStore = create<HabitsState>()(
           habits: [...s.habits, newHabit],
           castleQuestOrderIds: [...s.castleQuestOrderIds, newHabit.id],
         }));
+      },
+
+      seedStarterHabits: (inputs) => {
+        get().resetDailyIfNeeded();
+        set((s) => {
+          if (s.habits.some((h) => h.isActive)) return s;
+          const now = new Date().toISOString();
+          const created: Habit[] = [];
+          for (const habit of inputs) {
+            const name = habit.name.trim();
+            if (!name) continue;
+            const taskType = habit.taskType ?? 'daily';
+            const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+            created.push({
+              id: `starter_${slug || created.length}`,
+              name,
+              description: (habit.description ?? '').trim() || name,
+              stat: habit.stat ?? 'intelligence',
+              taskType,
+              icon: habit.icon?.trim() || '⚔️',
+              scheduledDate: null,
+              isActive: true,
+              completedToday: false,
+              difficulty: habit.difficulty ?? 'medium',
+              hexAxes: sanitizeHexAxes(habit.hexAxes),
+              createdAt: now,
+              currentStreak: taskType === 'daily' ? 0 : undefined,
+              longestStreak: taskType === 'daily' ? 0 : undefined,
+              totalCompletions: taskType === 'daily' ? 0 : undefined,
+              completionDates: [],
+            });
+          }
+          if (created.length === 0) return s;
+          return {
+            habits: created,
+            castleQuestOrderIds: created.map((h) => h.id),
+            accountCreatedAtDateKey: s.accountCreatedAtDateKey ?? todayKey(),
+          };
+        });
       },
 
       setHabitScheduledDate: (habitId, scheduledDate) => {

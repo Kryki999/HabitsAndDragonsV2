@@ -15,6 +15,8 @@ import { orderDueHabitsForCastle } from '@/lib/castleQuestOrder';
 import { displayRewardsForHabit } from '@/lib/economy';
 import { impactAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
 import { applyPlanningOrderForDate } from '@/lib/planningDayOrder';
+import { TutorialHandoffSheet } from '@/onboarding/TutorialHandoffSheet';
+import { useOnboardingStore } from '@/onboarding/store';
 import { AccountBar, type AccountBarHandle } from '@/ui/AccountBar';
 import { BottomSheet } from '@/ui/BottomSheet';
 import { ButtonPrimary } from '@/ui/Button';
@@ -104,6 +106,9 @@ export default function QuestsScreen() {
   const [editIcon, setEditIcon] = useState('⚔️');
   const [editTaskType, setEditTaskType] = useState<Habit['taskType']>('daily');
   const [rescheduleDateInput, setRescheduleDateInput] = useState('');
+
+  const tutorialCueSeen = useOnboardingStore((s) => s.tutorialCueSeen);
+  const tutorialDone = useOnboardingStore((s) => s.tutorialDone);
 
   const barRef = useRef<AccountBarHandle>(null);
   const flyLayerRef = useRef<View>(null);
@@ -430,6 +435,7 @@ export default function QuestsScreen() {
         userId={null}
       />
       <TaskSortBottomSheet visible={sortMenuOpen} onClose={() => setSortMenuOpen(false)} />
+      <TutorialHandoffSheet visible={!tutorialCueSeen && !tutorialDone} />
 
       <BottomSheet visible={rescheduleOpen} onClose={() => setRescheduleOpen(false)}>
         <Text style={styles.sheetTitle}>Reschedule Quest</Text>

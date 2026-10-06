@@ -195,6 +195,15 @@ export const useHeroStore = create<HeroStore>()(
         set((state) => ({ gold: Math.max(0, state.gold + amount) }));
       },
 
+      setHeroDisplayName: (name) => {
+        const trimmed = name.trim().replace(/\s+/g, ' ').slice(0, 48);
+        if (!trimmed) return;
+        set((state) => ({
+          heroDisplayName: trimmed,
+          createdAt: state.createdAt ?? new Date().toISOString(),
+        }));
+      },
+
       spendGold: (amount) => {
         if (amount <= 0) return false;
         let spent = false;
@@ -351,6 +360,25 @@ export const useHeroStore = create<HeroStore>()(
           };
         });
         return result;
+      },
+
+      skipMorningToday: () => {
+        const today = todayKey();
+        const yesterday = yesterdayKey();
+        set((state) => {
+          if (state.lastMorningFlowDate === today) return state;
+          return {
+            lastMorningFlowDate: today,
+            loginStreakDays: nextLoginStreak(
+              state.lastMorningFlowDate,
+              state.loginStreakDays,
+              today,
+              yesterday,
+            ),
+            morningLoginDates: uniqueDates(state.morningLoginDates ?? [], today).slice(-90),
+            createdAt: state.createdAt ?? new Date().toISOString(),
+          };
+        });
       },
     }),
     {

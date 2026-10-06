@@ -7,6 +7,9 @@ import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { MorningLoginGate } from '@/morning/MorningLoginGate';
+import OnboardingScreen from '@/onboarding/OnboardingScreen';
+import { useOnboardingStore } from '@/onboarding/store';
+import { usePersistReady } from '@/onboarding/usePersistReady';
 import { tokens } from '@/ui/tokens';
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
@@ -34,26 +37,35 @@ export default function RootLayout() {
     Nunito_800ExtraBold,
     Nunito_900Black,
   });
+  const persistReady = usePersistReady();
+  const complete = useOnboardingStore((s) => s.complete);
 
   useEffect(() => {
-    if (loaded) SplashScreen.hideAsync().catch(() => undefined);
-  }, [loaded]);
+    if (loaded && persistReady) SplashScreen.hideAsync().catch(() => undefined);
+  }, [loaded, persistReady]);
 
-  if (!loaded) return null;
+  if (!loaded || !persistReady) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: tokens.canvas }}>
       <ThemeProvider value={navTheme}>
         <StatusBar style="light" />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: tokens.canvas },
-          }}
-        >
-          <Stack.Screen name="(tabs)" />
-        </Stack>
-        <MorningLoginGate />
+        {complete ? (
+          <>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: tokens.canvas },
+              }}
+            >
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="onboarding" options={{ gestureEnabled: false, animation: 'fade' }} />
+            </Stack>
+            <MorningLoginGate />
+          </>
+        ) : (
+          <OnboardingScreen />
+        )}
       </ThemeProvider>
     </GestureHandlerRootView>
   );

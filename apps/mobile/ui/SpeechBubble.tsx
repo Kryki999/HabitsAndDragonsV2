@@ -7,15 +7,26 @@ type Props = {
   caption?: string;
   children: ReactNode;
   tail?: 'left' | 'down-left';
+  /** C2 onboarding question — 21/900. Default is shop/body 15/800. */
+  emphasis?: 'body' | 'question';
+  /** Mist (C2) uses the softer drop. Art stills keep drop-on-art. */
+  onCanvas?: boolean;
   style?: StyleProp<ViewStyle>;
 };
 
-export function SpeechBubble({ caption, children, tail = 'left', style }: Props) {
+export function SpeechBubble({
+  caption,
+  children,
+  tail = 'left',
+  emphasis = 'body',
+  onCanvas = false,
+  style,
+}: Props) {
   return (
-    <View style={[styles.bubble, style]}>
+    <View style={[styles.bubble, onCanvas && styles.onCanvas, style]}>
       {tail === 'left' ? <View style={styles.tailLeft} /> : <View style={styles.tailDown} />}
       {caption ? <Text style={styles.caption}>{caption}</Text> : null}
-      <Text style={styles.body}>{children}</Text>
+      <Text style={emphasis === 'question' ? styles.question : styles.body}>{children}</Text>
     </View>
   );
 }
@@ -30,6 +41,9 @@ const styles = StyleSheet.create({
     backgroundColor: tokens.surface,
     boxShadow: [shadow.lipSurface, shadow.dropOnArt],
   },
+  onCanvas: {
+    boxShadow: [shadow.lipSurface, shadow.dropMd],
+  },
   caption: {
     fontFamily: tokens.font800,
     fontSize: 11,
@@ -43,6 +57,12 @@ const styles = StyleSheet.create({
     fontFamily: tokens.font800,
     fontSize: 15,
     lineHeight: 19.5,
+    color: tokens.ink,
+  },
+  question: {
+    fontFamily: tokens.font900,
+    fontSize: 21,
+    lineHeight: 25,
     color: tokens.ink,
   },
   tailLeft: {
