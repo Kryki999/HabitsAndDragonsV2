@@ -38,7 +38,7 @@ Kod w `apps/mobile` tylko gdy świadomie wychodzimy z trybu koncepcji (albo gdy 
 | [`07-ai-sage.md`](07-ai-sage.md) | Mędrzec, Oracle, coaching |
 | [`08-social.md`](08-social.md) | Hall of Heroes — friends, peek, dolina (ranking/gildie PARK) |
 | [`09-art-graphics.md`](09-art-graphics.md) | Styl wizualny, assety, UI |
-| [`10-animation-feel.md`](10-animation-feel.md) | Animacje, Lottie, haptics, game feel |
+| [`10-animation-feel.md`](10-animation-feel.md) | Animacje, Lottie, haptics, game feel; **żywy świat + walka kartami later** (LOCK 2026-10-06) |
 | [`11-audio.md`](11-audio.md) | SFX, muzyka, ambient |
 | [`12-tech-stack.md`](12-tech-stack.md) | Technologie (app, backend, AI, art pipeline) |
 | [`13-game-systems.md`](13-game-systems.md) | „Silnik gry” — systemy logiczne (nie kod) |
