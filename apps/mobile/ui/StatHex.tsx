@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, G, Line, Polygon } from 'react-native-svg';
 
@@ -10,6 +10,7 @@ import {
   formatStatValue,
   HERO_HEX_LABELS,
   HERO_HEX_STAT_AXIS_ORDER,
+  lerpHex,
   radarDynamicMax,
   type HeroHexStatId,
   type HeroHexStats,
@@ -23,6 +24,8 @@ const STAT_STICKER: Record<HeroHexStatId, StickerName> = {
   spirit: 'sparkles',
   discipline: 'bullseye',
 };
+
+export const HEX_STAT_STICKER = STAT_STICKER;
 
 const CX = 100;
 const CY = 100;
@@ -61,12 +64,35 @@ function vertex(radius: number, i: number) {
 
 type Props = {
   stats: HeroHexStats;
+  /** When set, the fill grows from this snapshot to `stats`. */
+  animateFrom?: HeroHexStats;
+  durationMs?: number;
 };
 
-export function StatHex({ stats }: Props) {
-  const max = radarDynamicMax(stats);
-  const data = dataPoints(stats, max);
+export function StatHex({ stats, animateFrom, durationMs = 1400 }: Props) {
+  const [shown, setShown] = useState<HeroHexStats>(animateFrom ?? stats);
   const [openId, setOpenId] = useState<HeroHexStatId | null>(null);
+
+  useEffect(() => {
+    if (!animateFrom) {
+      setShown(stats);
+      return;
+    }
+    setShown(animateFrom);
+    const start = Date.now();
+    let raf = 0;
+    const tick = () => {
+      const t = Math.min(1, (Date.now() - start) / Math.max(1, durationMs));
+      const eased = 1 - (1 - t) ** 3;
+      setShown(lerpHex(animateFrom, stats, eased));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [animateFrom, stats, durationMs]);
+
+  const max = radarDynamicMax(stats);
+  const data = dataPoints(shown, max);
 
   const dismiss = useCallback(() => setOpenId(null), []);
 
@@ -101,7 +127,7 @@ export function StatHex({ stats }: Props) {
           />
           <G fill={tokens.surface} stroke={tokens.brand} strokeWidth={2.5}>
             {HERO_HEX_STAT_AXIS_ORDER.map((id, i) => {
-              const t = Math.max(0, Math.min(1, stats[id] / max));
+              const t = Math.max(0, Math.min(1, shown[id] / max));
               const p = vertex(R * t, i);
               return <Circle key={id} cx={p.x} cy={p.y} r={4} />;
             })}
@@ -116,7 +142,7 @@ export function StatHex({ stats }: Props) {
             key={id}
             onPress={() => onStat(id)}
             accessibilityRole="button"
-            accessibilityLabel={`${HERO_HEX_LABELS[id]} ${formatStatValue(stats[id])}`}
+            accessibilityLabel={`${HERO_HEX_LABELS[id]} ${formatStatValue(shown[id])}`}
             style={[
               styles.stat,
               on && styles.statOn,
@@ -134,7 +160,7 @@ export function StatHex({ stats }: Props) {
         <View style={styles.tip} pointerEvents="none">
           <Sticker name={STAT_STICKER[openId]} size={26} />
           <Text style={styles.tipName}>{HERO_HEX_LABELS[openId]}</Text>
-          <Text style={styles.tipValue}>{formatStatValue(stats[openId])}</Text>
+          <Text style={styles.tipValue}>{formatStatValue(shown[openId])}</Text>
         </View>
       ) : null}
     </View>

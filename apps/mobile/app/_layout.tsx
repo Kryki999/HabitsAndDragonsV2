@@ -6,6 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { MorningLoginGate } from '@/morning/MorningLoginGate';
 import OnboardingScreen from '@/onboarding/OnboardingScreen';
 import { useOnboardingStore } from '@/onboarding/store';
 import { usePersistReady } from '@/onboarding/usePersistReady';
@@ -50,15 +51,18 @@ export default function RootLayout() {
       <ThemeProvider value={navTheme}>
         <StatusBar style="light" />
         {complete ? (
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: tokens.canvas },
-            }}
-          >
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="onboarding" options={{ gestureEnabled: false, animation: 'fade' }} />
-          </Stack>
+          <>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: tokens.canvas },
+              }}
+            >
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="onboarding" options={{ gestureEnabled: false, animation: 'fade' }} />
+            </Stack>
+            <MorningLoginGate />
+          </>
         ) : (
           <OnboardingScreen />
         )}

@@ -20,7 +20,18 @@ export type HeroState = {
   playerLevel: number;
   currentLevelXP: number;
   xpForNextLevel: number;
+  /** Revealed hex totals. Hero UI reads this — not MOCK_HERO_HEX_STATS. */
   hexStats: HeroHexStats;
+  /**
+   * Last calendar day whose habit hex deltas have been folded into `hexStats`.
+   * Gains sit on grant logs until the next morning flow.
+   */
+  hexRevealedThroughDate: string | null;
+  /** Once-per-calendar-day morning gate. Key: `YYYY-MM-DD` (same clock as habit reset). */
+  lastMorningFlowDate: string | null;
+  loginStreakDays: number;
+  /** Dates the morning flow was finished; week strip + streak math. */
+  morningLoginDates: string[];
   ownedItemIds: string[];
   equippedOutfitId: string | null;
   equippedRelicId: string | null;
@@ -59,4 +70,12 @@ export type HeroActions = {
   buyDungeonKey: () => boolean;
   spendDungeonKey: () => boolean;
   applyLootPrize: (prize: FightLootPrize) => void;
+  /**
+   * Once per calendar day: fold unrevealed hex (through yesterday) into `hexStats`,
+   * bump login streak, mark the morning gate done.
+   */
+  completeMorningLogin: () => { from: HeroHexStats; to: HeroHexStats; delta: HeroHexStats };
+  previewMorningHexReveal: () => { from: HeroHexStats; to: HeroHexStats; delta: HeroHexStats };
+  /** Day 0 finish: close the morning gate without hex reveal so quiz isn't stacked. */
+  skipMorningToday: () => void;
 };

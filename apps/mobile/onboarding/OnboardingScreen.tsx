@@ -75,6 +75,7 @@ export default function OnboardingScreen() {
         useHabitsStore.getState().seedStarterHabits(habitsFromAnswers(nextAnswers));
         useWorldStore.getState().openHub();
         useOnboardingStore.getState().completeOnboarding();
+        useHeroStore.getState().skipMorningToday();
         return;
       }
       setIndex(nextIndex);

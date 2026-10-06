@@ -20,6 +20,6 @@ npx expo start
 
 Typecheck: `npm run typecheck` w `apps/mobile`.
 
-Pięć tabów: **Questy · World · Hero · Społeczność · Mentor**. First launch = stall-keeper onboarding (name + lifestyle quiz → starter dailies), then Quests. Questy = V1 Castle UI na store `habits`. Hero = V1 Hero UI na cienkim store `hero` (EN). World = playground mapa (piny odblokowane **levelem**, **bez fog**) → Crownhaven / tawerna (winda) → Gutterjack, plus close-upy lokacji Akt 1 (store `world` + `combat/`). Społeczność / Mentor = placeholdery.
+Pięć tabów: **Questy · World · Hero · Społeczność · Mentor**. First launch = stall-keeper onboarding (name + lifestyle quiz → starter dailies), then Quests. Later mornings = Welcome → streak → hex expand. Questy = V1 Castle UI na store `habits`. Hero = V1 Hero UI na cienkim store `hero` (EN) — **prawdziwy hex** z tagów nawyków, nie mock. World = playground mapa (piny odblokowane **levelem**, **bez fog**) → Crownhaven / tawerna (winda) → Gutterjack, plus close-upy lokacji Akt 1 (store `world` + `combat/`). Społeczność / Mentor = placeholdery.
 
 Pełna mapa filarów: [`docs/README.md`](docs/README.md).

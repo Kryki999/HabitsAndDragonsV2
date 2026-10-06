@@ -3,6 +3,8 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { computeHabitGrant, countKeyDropsOnDate, lastGrantForHabit } from '@/lib/economy';
+import { computeHexDelta, sumHexDeltas } from '@/lib/hexEconomy';
+import { sanitizeHexAxes } from '@/constants/heroHexStats';
 import { useHeroStore } from '@/hero/store';
 
 import type { ActivityDay, AddHabitInput, Habit, HabitDifficulty } from './types';
@@ -38,6 +40,7 @@ function ensureHabitDefaults(habit: Habit): Habit {
     isFrozen: habit.isFrozen ?? false,
     frozenAtDate: habit.frozenAtDate ?? null,
     difficulty: (habit.difficulty ?? 'medium') as HabitDifficulty,
+    hexAxes: sanitizeHexAxes(habit.hexAxes),
   };
 }
 
@@ -184,7 +187,15 @@ export const useHabitsStore = create<HabitsState>()(
               today,
             ),
           });
-          grantToApply = grant;
+          const hexDelta = computeHexDelta({
+            axes: habit.hexAxes,
+            difficulty: (habit.difficulty ?? 'medium') as HabitDifficulty,
+            band: grant.band,
+            axisGainsAlreadyToday: sumHexDeltas(
+              (useHeroStore.getState().habitGrantLogByDate ?? {})[today],
+            ),
+          });
+          grantToApply = { ...grant, hexDelta };
 
           const updatedHabits = state.habits.map((h) => {
             if (h.id !== habitId) return h;
@@ -285,6 +296,7 @@ export const useHabitsStore = create<HabitsState>()(
           isActive: true,
           completedToday: false,
           difficulty: habit.difficulty ?? 'medium',
+          hexAxes: sanitizeHexAxes(habit.hexAxes),
           createdAt: new Date().toISOString(),
           currentStreak: taskType === 'daily' ? 0 : undefined,
           longestStreak: taskType === 'daily' ? 0 : undefined,
@@ -320,6 +332,7 @@ export const useHabitsStore = create<HabitsState>()(
               isActive: true,
               completedToday: false,
               difficulty: habit.difficulty ?? 'medium',
+              hexAxes: sanitizeHexAxes(habit.hexAxes),
               createdAt: now,
               currentStreak: taskType === 'daily' ? 0 : undefined,
               longestStreak: taskType === 'daily' ? 0 : undefined,
@@ -382,7 +395,7 @@ export const useHabitsStore = create<HabitsState>()(
     }),
     {
       name: 'hnd-habits-local',
-      version: 2,
+      version: 3,
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({
         habits: state.habits,

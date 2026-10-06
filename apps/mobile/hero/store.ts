@@ -3,15 +3,48 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import type { FightLootPrize } from '@/combat/types';
-import { MOCK_HERO_HEX_STATS } from '@/constants/heroHexStats';
+import {
+  addHex,
+  cloneHex,
+  emptyHex,
+  looksLikeMockHeroHex,
+  ZERO_HERO_HEX_STATS,
+  type HeroHexStats,
+} from '@/constants/heroHexStats';
 import { applyXpDelta, KEY_PRICE_GOLD, XP_PER_LEVEL, type HabitCompletionGrant } from '@/lib/economy';
+import { todayKey, yesterdayKey } from '@/lib/dateKey';
+import { sumHexDeltas } from '@/lib/hexEconomy';
 import { sellPriceForRarity } from '@/lib/inventoryEconomy';
 import { canEquipItem, resolveLootItemById } from '@/lib/itemCatalog';
 
 import type { HeroActions, HeroState } from './types';
 
-function todayKey(): string {
-  return new Date().toISOString().split('T')[0]!;
+function uniqueDates(dates: readonly string[], extra?: string): string[] {
+  const set = new Set(dates.filter(Boolean));
+  if (extra) set.add(extra);
+  return [...set].sort();
+}
+
+function pendingHexReveal(
+  hexStats: HeroHexStats,
+  grantLog: Record<string, HabitCompletionGrant[]>,
+  revealedThrough: string | null,
+  yesterday: string,
+): { from: HeroHexStats; to: HeroHexStats; delta: HeroHexStats } {
+  const from = cloneHex(hexStats);
+  let delta = emptyHex();
+  for (const [date, grants] of Object.entries(grantLog)) {
+    if (date > yesterday) continue;
+    if (revealedThrough && date <= revealedThrough) continue;
+    delta = addHex(delta, sumHexDeltas(grants));
+  }
+  return { from, delta, to: addHex(from, delta) };
+}
+
+function nextLoginStreak(lastMorningFlowDate: string | null, loginStreakDays: number, today: string, yesterday: string): number {
+  if (lastMorningFlowDate === today) return Math.max(1, loginStreakDays);
+  if (lastMorningFlowDate === yesterday) return Math.max(1, loginStreakDays) + 1;
+  return 1;
 }
 
 type HeroStore = HeroState & HeroActions;
@@ -40,7 +73,7 @@ function ownedWithLoot(ownedItemIds: string[], prize: FightLootPrize): string[] 
 
 export const useHeroStore = create<HeroStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       heroDisplayName: null,
       unlockedTitleIds: [],
       createdAt: null,
@@ -49,7 +82,11 @@ export const useHeroStore = create<HeroStore>()(
       playerLevel: 1,
       currentLevelXP: 0,
       xpForNextLevel: XP_PER_LEVEL,
-      hexStats: { ...MOCK_HERO_HEX_STATS },
+      hexStats: { ...ZERO_HERO_HEX_STATS },
+      hexRevealedThroughDate: null,
+      lastMorningFlowDate: null,
+      loginStreakDays: 0,
+      morningLoginDates: [],
       /** New heroes start empty. Gutterjack first clear grants Cork (teach Relic). */
       ownedItemIds: [],
       equippedOutfitId: null,
@@ -282,18 +319,88 @@ export const useHeroStore = create<HeroStore>()(
           };
         });
       },
+
+      previewMorningHexReveal: () => {
+        const state = get();
+        return pendingHexReveal(
+          state.hexStats,
+          state.habitGrantLogByDate ?? {},
+          state.hexRevealedThroughDate ?? null,
+          yesterdayKey(),
+        );
+      },
+
+      completeMorningLogin: () => {
+        const today = todayKey();
+        const yesterday = yesterdayKey();
+        let result = pendingHexReveal(emptyHex(), {}, null, yesterday);
+        set((state) => {
+          if (state.lastMorningFlowDate === today) {
+            result = { from: cloneHex(state.hexStats), to: cloneHex(state.hexStats), delta: emptyHex() };
+            return state;
+          }
+          result = pendingHexReveal(
+            state.hexStats,
+            state.habitGrantLogByDate ?? {},
+            state.hexRevealedThroughDate ?? null,
+            yesterday,
+          );
+          const loginStreakDays = nextLoginStreak(
+            state.lastMorningFlowDate,
+            state.loginStreakDays,
+            today,
+            yesterday,
+          );
+          return {
+            hexStats: result.to,
+            hexRevealedThroughDate: yesterday,
+            lastMorningFlowDate: today,
+            loginStreakDays,
+            morningLoginDates: uniqueDates(state.morningLoginDates ?? [], today).slice(-90),
+            createdAt: state.createdAt ?? new Date().toISOString(),
+          };
+        });
+        return result;
+      },
+
+      skipMorningToday: () => {
+        const today = todayKey();
+        const yesterday = yesterdayKey();
+        set((state) => {
+          if (state.lastMorningFlowDate === today) return state;
+          return {
+            lastMorningFlowDate: today,
+            loginStreakDays: nextLoginStreak(
+              state.lastMorningFlowDate,
+              state.loginStreakDays,
+              today,
+              yesterday,
+            ),
+            morningLoginDates: uniqueDates(state.morningLoginDates ?? [], today).slice(-90),
+            createdAt: state.createdAt ?? new Date().toISOString(),
+          };
+        });
+      },
     }),
     {
       name: 'hnd-hero-local',
-      version: 3,
+      version: 4,
       storage: createJSONStorage(() => AsyncStorage),
       migrate: (persisted) => {
         const prev = persisted as Partial<HeroState> | undefined;
+        const hexStats = looksLikeMockHeroHex(prev?.hexStats)
+          ? { ...ZERO_HERO_HEX_STATS }
+          : { ...ZERO_HERO_HEX_STATS, ...(prev?.hexStats ?? {}) };
         return {
           ...prev,
           dungeonKeys: prev?.dungeonKeys ?? 0,
           xpForNextLevel: prev?.xpForNextLevel ?? XP_PER_LEVEL,
           habitGrantLogByDate: prev?.habitGrantLogByDate ?? {},
+          hexStats,
+          hexRevealedThroughDate: prev?.hexRevealedThroughDate ?? null,
+          lastMorningFlowDate: prev?.lastMorningFlowDate ?? null,
+          loginStreakDays: prev?.loginStreakDays ?? 0,
+          morningLoginDates: prev?.morningLoginDates ?? [],
         };
       },
       partialize: (state) => ({
@@ -306,6 +413,10 @@ export const useHeroStore = create<HeroStore>()(
         currentLevelXP: state.currentLevelXP,
         xpForNextLevel: state.xpForNextLevel,
         hexStats: state.hexStats,
+        hexRevealedThroughDate: state.hexRevealedThroughDate,
+        lastMorningFlowDate: state.lastMorningFlowDate,
+        loginStreakDays: state.loginStreakDays,
+        morningLoginDates: state.morningLoginDates,
         ownedItemIds: state.ownedItemIds,
         equippedOutfitId: state.equippedOutfitId,
         equippedRelicId: state.equippedRelicId,

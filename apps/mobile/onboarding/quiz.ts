@@ -36,6 +36,7 @@ const TEMPLATES: Record<string, HabitTemplate> = {
     taskType: 'daily',
     icon: '💧',
     difficulty: 'easy' satisfies HabitDifficulty,
+    hexAxes: ['vitality'],
   },
   short_walk: {
     templateId: 'short_walk',
@@ -45,6 +46,7 @@ const TEMPLATES: Record<string, HabitTemplate> = {
     taskType: 'daily',
     icon: '🚶',
     difficulty: 'easy',
+    hexAxes: ['agility', 'vitality'],
   },
   stretch: {
     templateId: 'stretch',
@@ -54,6 +56,7 @@ const TEMPLATES: Record<string, HabitTemplate> = {
     taskType: 'daily',
     icon: '🧘',
     difficulty: 'easy',
+    hexAxes: ['agility'],
   },
   read_pages: {
     templateId: 'read_pages',
@@ -63,6 +66,7 @@ const TEMPLATES: Record<string, HabitTemplate> = {
     taskType: 'daily',
     icon: '📖',
     difficulty: 'easy',
+    hexAxes: ['intelligence'],
   },
   breaths: {
     templateId: 'breaths',
@@ -72,6 +76,7 @@ const TEMPLATES: Record<string, HabitTemplate> = {
     taskType: 'daily',
     icon: '🍃',
     difficulty: 'easy',
+    hexAxes: ['spirit', 'discipline'],
   },
   journal: {
     templateId: 'journal',
@@ -81,6 +86,7 @@ const TEMPLATES: Record<string, HabitTemplate> = {
     taskType: 'daily',
     icon: '📝',
     difficulty: 'easy',
+    hexAxes: ['spirit'],
   },
   real_breakfast: {
     templateId: 'real_breakfast',
@@ -90,6 +96,7 @@ const TEMPLATES: Record<string, HabitTemplate> = {
     taskType: 'daily',
     icon: '🍞',
     difficulty: 'medium',
+    hexAxes: ['vitality'],
   },
   no_screens: {
     templateId: 'no_screens',
@@ -99,6 +106,7 @@ const TEMPLATES: Record<string, HabitTemplate> = {
     taskType: 'daily',
     icon: '📵',
     difficulty: 'medium',
+    hexAxes: ['discipline', 'spirit'],
   },
   bedtime: {
     templateId: 'bedtime',
@@ -108,6 +116,7 @@ const TEMPLATES: Record<string, HabitTemplate> = {
     taskType: 'daily',
     icon: '🌙',
     difficulty: 'medium',
+    hexAxes: ['vitality', 'discipline'],
   },
   one_task: {
     templateId: 'one_task',
@@ -117,6 +126,7 @@ const TEMPLATES: Record<string, HabitTemplate> = {
     taskType: 'daily',
     icon: '🎯',
     difficulty: 'medium',
+    hexAxes: ['intelligence', 'discipline'],
   },
   text_friend: {
     templateId: 'text_friend',
@@ -126,6 +136,7 @@ const TEMPLATES: Record<string, HabitTemplate> = {
     taskType: 'daily',
     icon: '💬',
     difficulty: 'easy',
+    hexAxes: ['spirit'],
   },
   wash_face: {
     templateId: 'wash_face',
@@ -135,6 +146,7 @@ const TEMPLATES: Record<string, HabitTemplate> = {
     taskType: 'daily',
     icon: '🧼',
     difficulty: 'easy',
+    hexAxes: ['vitality'],
   },
 };
 

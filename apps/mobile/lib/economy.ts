@@ -1,3 +1,4 @@
+import type { HeroHexStats } from '@/constants/heroHexStats';
 import type { CombatSynergyTier } from '@/types/dungeonLoot';
 import type { HabitDifficulty } from '@/habits/types';
 
@@ -44,6 +45,8 @@ export type HabitCompletionGrant = {
   xp: number;
   keys: number;
   band: DailyRewardBand;
+  /** Axis weights for this completion. Empty / omitted = no hex (untagged). */
+  hexDelta?: HeroHexStats;
 };
 
 export function bandForCompletionIndex(index1Based: number): DailyRewardBand {

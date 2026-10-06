@@ -9,6 +9,7 @@ export const suggestedHabits: SuggestedHabit[] = [
     taskType: 'daily',
     icon: '💪',
     difficulty: 'medium',
+    hexAxes: ['strength'],
   },
   {
     name: 'Cold Shower',
@@ -18,6 +19,7 @@ export const suggestedHabits: SuggestedHabit[] = [
     taskType: 'daily',
     icon: '🧊',
     difficulty: 'easy',
+    hexAxes: ['discipline', 'vitality'],
   },
   {
     name: 'Morning Run',
@@ -27,6 +29,7 @@ export const suggestedHabits: SuggestedHabit[] = [
     taskType: 'daily',
     icon: '🏃',
     difficulty: 'hard',
+    hexAxes: ['agility', 'vitality'],
   },
   {
     name: 'Stretch Routine',
@@ -36,6 +39,7 @@ export const suggestedHabits: SuggestedHabit[] = [
     taskType: 'daily',
     icon: '🧘',
     difficulty: 'easy',
+    hexAxes: ['agility'],
   },
   {
     name: 'Read 10 Pages',
@@ -45,6 +49,7 @@ export const suggestedHabits: SuggestedHabit[] = [
     taskType: 'daily',
     icon: '📖',
     difficulty: 'easy',
+    hexAxes: ['intelligence'],
   },
   {
     name: 'Journal Entry',
@@ -54,6 +59,7 @@ export const suggestedHabits: SuggestedHabit[] = [
     taskType: 'daily',
     icon: '📝',
     difficulty: 'easy',
+    hexAxes: ['spirit'],
   },
   {
     name: 'Gym Session',
@@ -63,6 +69,7 @@ export const suggestedHabits: SuggestedHabit[] = [
     taskType: 'one-off',
     icon: '🏋️',
     difficulty: 'hard',
+    hexAxes: ['strength', 'vitality'],
   },
   {
     name: 'Walk 10K Steps',
@@ -72,6 +79,7 @@ export const suggestedHabits: SuggestedHabit[] = [
     taskType: 'one-off',
     icon: '🚶',
     difficulty: 'medium',
+    hexAxes: ['agility', 'vitality'],
   },
   {
     name: 'Deep Work Block',
@@ -81,6 +89,7 @@ export const suggestedHabits: SuggestedHabit[] = [
     taskType: 'one-off',
     icon: '🧠',
     difficulty: 'hard',
+    hexAxes: ['intelligence', 'discipline'],
   },
   {
     name: 'Learn a New Skill',
@@ -90,6 +99,7 @@ export const suggestedHabits: SuggestedHabit[] = [
     taskType: 'one-off',
     icon: '🎓',
     difficulty: 'medium',
+    hexAxes: ['intelligence'],
   },
   {
     name: 'Evening Walk',
@@ -99,6 +109,7 @@ export const suggestedHabits: SuggestedHabit[] = [
     taskType: 'daily',
     icon: '🌙',
     difficulty: 'easy',
+    hexAxes: ['vitality'],
   },
   {
     name: 'No Screens Before Bed',
@@ -108,6 +119,7 @@ export const suggestedHabits: SuggestedHabit[] = [
     taskType: 'daily',
     icon: '📵',
     difficulty: 'medium',
+    hexAxes: ['discipline', 'spirit'],
   },
   {
     name: 'Meditation',
@@ -117,6 +129,7 @@ export const suggestedHabits: SuggestedHabit[] = [
     taskType: 'daily',
     icon: '🧘‍♂️',
     difficulty: 'medium',
+    hexAxes: ['spirit', 'discipline'],
   },
   {
     name: 'Meal Prep',
@@ -126,5 +139,6 @@ export const suggestedHabits: SuggestedHabit[] = [
     taskType: 'daily',
     icon: '🍲',
     difficulty: 'medium',
+    hexAxes: ['vitality'],
   },
 ];
