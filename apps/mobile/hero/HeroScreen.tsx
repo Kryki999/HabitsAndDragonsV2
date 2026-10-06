@@ -8,6 +8,7 @@ import BackpackInventoryBody from '@/components/BackpackInventoryBody';
 import { ChroniclesSheet } from '@/hero/ChroniclesSheet';
 import { TITLE_DEFINITIONS } from '@/constants/titles';
 import { impactAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
+import { resolveLootItemById } from '@/lib/itemCatalog';
 import { useHabitsStore } from '@/habits/store';
 import { useHeroStore } from '@/hero/store';
 import { useSocialStore } from '@/social/store';
@@ -17,6 +18,7 @@ import { ButtonSoft } from '@/ui/Button';
 import { Card } from '@/ui/Card';
 import { Glyph } from '@/ui/Glyph';
 import { Heatmap } from '@/ui/Heatmap';
+import { stickerForLootIcon } from '@/ui/ItemTile';
 import { Portrait } from '@/ui/Portrait';
 import { Progress } from '@/ui/Progress';
 import { SectionHead } from '@/ui/SectionHead';
@@ -38,6 +40,8 @@ export default function HeroScreen() {
   const hexStats = useHeroStore((s) => s.hexStats);
   const heroDisplayName = useHeroStore((s) => s.heroDisplayName);
   const unlockedTitleIds = useHeroStore((s) => s.unlockedTitleIds);
+  const equippedOutfitId = useHeroStore((s) => s.equippedOutfitId);
+  const equippedRelicId = useHeroStore((s) => s.equippedRelicId);
 
   const activityByDate = useHabitsStore((s) => s.activityByDate);
   const completedHabitNamesByDate = useHabitsStore((s) => s.completedHabitNamesByDate);
@@ -50,6 +54,8 @@ export default function HeroScreen() {
 
   const name = (heroDisplayName?.trim() || 'Wayfarer').slice(0, 48);
   const unlocked = useMemo(() => new Set(unlockedTitleIds), [unlockedTitleIds]);
+  const outfitEntry = equippedOutfitId ? resolveLootItemById(equippedOutfitId) : null;
+  const relicEntry = equippedRelicId ? resolveLootItemById(equippedRelicId) : null;
 
   const onCopyFriendCode = useCallback(async () => {
     if (!myCode) return;
@@ -76,7 +82,19 @@ export default function HeroScreen() {
 
           <Card style={styles.profile}>
             <View style={styles.profileTop}>
-              <Portrait edit />
+              <Portrait
+                edit
+                outfit={
+                  outfitEntry
+                    ? { sticker: stickerForLootIcon(outfitEntry.icon), rarity: outfitEntry.rarity }
+                    : null
+                }
+                relic={
+                  relicEntry
+                    ? { sticker: stickerForLootIcon(relicEntry.icon), rarity: relicEntry.rarity }
+                    : null
+                }
+              />
               <View style={styles.profileCol}>
                 <Text style={styles.levelCaption}>Level {playerLevel}</Text>
                 <Text style={styles.heroName} numberOfLines={1}>

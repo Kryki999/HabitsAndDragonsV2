@@ -44,19 +44,6 @@ function itemById(id: string): LootItemEntry | null {
   return lootItemById(id);
 }
 
-function equippedBonus(
-  equippedRelicId: string | null,
-  challenge: CombatChallenge,
-): { bonus: number; name: string | null } {
-  if (!equippedRelicId) return { bonus: 0, name: null };
-  const item = itemById(equippedRelicId);
-  if (!item || item.consumable) return { bonus: 0, name: null };
-  const vsTier = item.synergyTier === challenge.tier;
-  const vsBoss = item.synergyBossId === challenge.bossId;
-  if (!vsTier && !vsBoss) return { bonus: 0, name: null };
-  return { bonus: item.synergyWinChanceBonus ?? 0, name: item.name };
-}
-
 export function wineInPack(ownedItemIds: readonly string[]): boolean {
   return ownedItemIds.includes(GUTTERJACK_WINE_ID);
 }
@@ -64,6 +51,7 @@ export function wineInPack(ownedItemIds: readonly string[]): boolean {
 export type WinChanceInput = {
   isFirstClear: boolean;
   playerLevel: number;
+  /** Ignored this slice — equipped Outfit/Relic is cosmetic only (docs/06 park). */
   equippedRelicId: string | null;
   ownedItemIds: readonly string[];
   /** When true, Fight will sip a wine if one is in the pack (skipped on 100% tutorial). */
@@ -71,8 +59,8 @@ export type WinChanceInput = {
 };
 
 /**
- * V2 Bible combat (Act 1): level Δ + equipped affixes + one pot.
- * No hex, no class, no dragons. Gutterjack first fight = 100% tutorial lock.
+ * V2 Bible combat (Act 1 this slice): level Δ + Gutterjack wine sip.
+ * Equipped gear does not add damage, defense, or win%. Affixes stay catalog-only.
  */
 export function computeWinChance(
   challenge: CombatChallenge,
@@ -82,11 +70,10 @@ export function computeWinChance(
   const sipWine = opts?.sipWine === true;
   const levelDelta = input.playerLevel - challenge.bossLevel;
   const levelBonus = levelDelta * LEVEL_STEP;
-  const gear = equippedBonus(input.equippedRelicId, challenge);
   const hasWine = sipWine && wineInPack(input.ownedItemIds);
   const potionBonus = sipWine && input.willSipWine && hasWine ? 0.05 : 0;
 
-  const raw = challenge.baseWinChance + levelBonus + gear.bonus + potionBonus;
+  const raw = challenge.baseWinChance + levelBonus + potionBonus;
   const farm = clamp01(Math.min(CHANCE_CEIL, Math.max(CHANCE_FLOOR, raw)));
   const tutorialLock = opts?.tutorialLock === true;
   const chance = tutorialLock ? 1 : farm;
@@ -98,9 +85,9 @@ export function computeWinChance(
       pct: Math.round(levelBonus * 100),
     },
     {
-      label: gear.bonus > 0 ? `${gear.name} (equipped)` : 'Gear affix',
-      detail: gear.bonus > 0 ? `+${Math.round(gear.bonus * 100)}% vs ${challenge.tier}` : 'None equipped',
-      pct: Math.round(gear.bonus * 100),
+      label: 'Equipped gear',
+      detail: 'Cosmetic only — combat affixes parked',
+      pct: 0,
     },
   ];
 
@@ -127,11 +114,6 @@ export function computeWinChance(
   }
 
   const howToImprove: string[] = [];
-  if (gear.bonus <= 0) {
-    howToImprove.push(
-      sipWine ? "Equip Gutterjack's Tulip — +10% vs Common." : 'Equip a synergy relic for a win bump.',
-    );
-  }
   if (sipWine && !hasWine) {
     howToImprove.push("Keep Gutterjack's Wine in your pack — Fight sips it for +5%.");
   } else if (sipWine && !input.willSipWine) {
@@ -143,7 +125,7 @@ export function computeWinChance(
   if (howToImprove.length === 0) {
     howToImprove.push(
       sipWine
-        ? 'This cellar is as stacked as it gets. Farm for the Tulip flex, or move on.'
+        ? 'This cellar is as stacked as it gets. Farm for flex loot, or move on.'
         : 'This fight is as stacked as it gets. Farm, or move on.',
     );
   }
@@ -211,7 +193,7 @@ export function rollGutterjackLoot(isFirstClear: boolean): FightLootPrize {
   return prizeFromRow(pickFarmRow());
 }
 
-/** Playground map bosses: gold on first clear, gold/empty on farm. No unique items yet. */
+/** Fallback roller if a floor has no farmWeights. Act 1 floors should not hit this. */
 export function rollPlaygroundLoot(isFirstClear: boolean): FightLootPrize {
   if (isFirstClear || pickWeightedRow(PLAYGROUND_FARM_WEIGHTS) === PLAYGROUND_GOLD_ID) {
     return {

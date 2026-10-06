@@ -11,7 +11,7 @@ import {
 import { ButtonFlow } from '@/ui/Button';
 import { Card } from '@/ui/Card';
 import { Glyph } from '@/ui/Glyph';
-import { ItemTile, stickerForLootIcon } from '@/ui/ItemTile';
+import { ItemTile, bibleRarityName, stickerForLootIcon } from '@/ui/ItemTile';
 import type { StickerName } from '@/ui/stickerRegistry';
 import { tokens } from '@/ui/tokens';
 import type { DungeonLootEntry, LootRarity } from '@/types/dungeonLoot';
@@ -26,14 +26,6 @@ const ITEM_WIDTH = 82;
 const ITEM_GAP = 8;
 const ITEM_TOTAL = ITEM_WIDTH + ITEM_GAP;
 const ROULETTE_ANIM_DURATION_MS = 5000;
-
-const RARITY_LABEL: Record<LootRarity, string> = {
-  common: 'Common',
-  uncommon: 'Uncommon',
-  rare: 'Rare',
-  epic: 'Epic',
-  legendary: 'Legendary',
-};
 
 type Phase = 'spinning' | 'reveal';
 
@@ -73,15 +65,19 @@ function rewardKicker(prize: FightLootPrize): string {
   if (prize.kind === 'gold') return 'Gold';
   if (prize.kind === 'empty') return 'Empty';
   const item = prize.kind === 'items' ? prize.headline : prize.item;
-  const slot = item.itemSlot === 'relic' ? 'relic' : item.itemSlot === 'outfit' ? 'outfit' : '';
-  return slot ? `${RARITY_LABEL[item.rarity]} ${slot}` : RARITY_LABEL[item.rarity];
+  const rarity = bibleRarityName(item.rarity);
+  const slot = item.consumable ? 'consumable' : item.itemSlot === 'outfit' ? 'outfit' : 'relic';
+  return `${rarity} ${slot}`;
 }
 
 function rewardHint(prize: FightLootPrize): string | undefined {
-  if (prize.kind === 'item') return prize.item.combatHint;
-  if (prize.kind === 'items') return prize.headline.combatHint;
   if (prize.kind === 'gold') return `+${prize.amount}`;
-  return undefined;
+  if (prize.kind === 'empty') return undefined;
+  const item = prize.kind === 'items' ? prize.headline : prize.item;
+  if (item.consumable) {
+    return item.id === 'gutterjack_wine' ? item.combatHint : 'Goes to your pack';
+  }
+  return 'Wear on Hero — cosmetic only';
 }
 
 function rewardSticker(prize: FightLootPrize): StickerName | undefined {
