@@ -16,6 +16,12 @@ import {
   Anchor,
   Moon,
   Wine,
+  Shirt,
+  Leaf,
+  Bird,
+  Pyramid,
+  Droplets,
+  Drama,
 } from "lucide-react-native";
 import type { LootIconId } from "@/types/dungeonLoot";
 
@@ -62,6 +68,18 @@ export function LootGlyph({
       return <Moon {...p} />;
     case "wine":
       return <Wine {...p} />;
+    case "cloak":
+      return <Shirt {...p} />;
+    case "leaf":
+      return <Leaf {...p} />;
+    case "raven":
+      return <Bird {...p} />;
+    case "sand":
+      return <Pyramid {...p} />;
+    case "tide":
+      return <Droplets {...p} />;
+    case "fang":
+      return <Drama {...p} />;
     default:
       return <Sparkles {...p} />;
   }

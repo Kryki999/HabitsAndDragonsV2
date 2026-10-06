@@ -17,6 +17,8 @@ import { impactAsync, ImpactFeedbackStyle } from "@/lib/hapticsGate";
 import Colors from "@/constants/colors";
 import { LOOT_RARITY_COLOR } from "@/constants/lootRarity";
 import { sellPriceForRarity } from "@/lib/inventoryEconomy";
+import { canEquipItem } from "@/lib/itemCatalog";
+import { GUTTERJACK_WINE_ID } from "@/world/content";
 import { useHeroStore } from "@/hero/store";
 import type { LootEmptyEntry, LootGoldEntry, LootIconId, LootItemEntry, LootRarity } from "@/types/dungeonLoot";
 
@@ -27,10 +29,10 @@ export type LootModalPayload =
 
 const RARITY_LABEL: Record<LootRarity, string> = {
   common: "Common",
-  uncommon: "Uncommon",
-  rare: "Rare",
-  epic: "Epic",
-  legendary: "Legendary",
+  uncommon: "Unique",
+  rare: "Unique",
+  epic: "Heroic",
+  legendary: "Artifact",
 };
 
 const RARITY_COLOR = LOOT_RARITY_COLOR;
@@ -87,12 +89,22 @@ export default function LootDetailModal({
   const backpackMode =
     payload.type === "item" && typeof itemInventoryIndex === "number" && itemInventoryIndex >= 0;
   const itemEntry = payload.type === "item" ? payload.entry : null;
+  const canWear = itemEntry != null && canEquipItem(itemEntry);
   const isEquipped =
     itemEntry != null &&
+    canWear &&
     (itemEntry.itemSlot === "outfit"
       ? equippedOutfitId === itemEntry.id
       : equippedRelicId === itemEntry.id);
   const sellPrice = itemEntry ? sellPriceForRarity(itemEntry.rarity) : 0;
+  const itemTag =
+    itemEntry == null
+      ? null
+      : itemEntry.consumable
+        ? itemEntry.id === GUTTERJACK_WINE_ID
+          ? itemEntry.combatHint ?? "Consumable"
+          : "Consumable — not a loadout piece"
+        : "Cosmetic — no combat stats";
 
   const handleSell = () => {
     if (!backpackMode || !itemEntry) return;
@@ -184,13 +196,7 @@ export default function LootDetailModal({
 
             {payload.type === "item" ? (
               <View style={styles.itemMetaRow}>
-                <Text style={styles.cosmeticTag}>
-                  {payload.entry.combatHint
-                    ? payload.entry.combatHint
-                    : payload.entry.consumable
-                      ? "Consumable"
-                      : "Cosmetic — no combat stats"}
-                </Text>
+                <Text style={styles.cosmeticTag}>{itemTag}</Text>
                 <View
                   style={[
                     styles.slotPill,
@@ -242,22 +248,24 @@ export default function LootDetailModal({
 
             {backpackMode && itemEntry ? (
               <View style={styles.backpackActions}>
-                {isEquipped ? (
-                  <Pressable onPress={handleUnequip} style={styles.unequipBtn}>
-                    <Text style={styles.unequipBtnText}>Unequip</Text>
-                  </Pressable>
-                ) : (
-                  <Pressable onPress={handleEquip} style={styles.equipBtn}>
-                    <LinearGradient
-                      colors={[Colors.dark.emerald + "cc", Colors.dark.emeraldDark]}
-                      style={styles.equipBtnGradient}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                    >
-                      <Text style={styles.equipBtnText}>Equip</Text>
-                    </LinearGradient>
-                  </Pressable>
-                )}
+                {canWear ? (
+                  isEquipped ? (
+                    <Pressable onPress={handleUnequip} style={styles.unequipBtn}>
+                      <Text style={styles.unequipBtnText}>Unequip</Text>
+                    </Pressable>
+                  ) : (
+                    <Pressable onPress={handleEquip} style={styles.equipBtn}>
+                      <LinearGradient
+                        colors={[Colors.dark.emerald + "cc", Colors.dark.emeraldDark]}
+                        style={styles.equipBtnGradient}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                      >
+                        <Text style={styles.equipBtnText}>Equip</Text>
+                      </LinearGradient>
+                    </Pressable>
+                  )
+                ) : null}
                 <Pressable onPress={handleSell} style={styles.sellBtn}>
                   <Text style={styles.sellBtnText}>
                     Sell ({sellPrice} 🪙)

@@ -9,6 +9,25 @@ import type {
   LootItemEntry,
 } from '@/types/dungeonLoot';
 
+import {
+  ACT1_LATER_EMPTY,
+  ACT1_LATER_GOLD,
+  ACT1_LATER_ITEMS,
+  PALE_TABLE,
+  PALE_WEIGHTS,
+  RAVEN_CHAMP_TABLE,
+  RAVEN_CHAMP_WEIGHTS,
+  RAVEN_ELITE_TABLE,
+  RAVEN_ELITE_WEIGHTS,
+  SAND_CHAMP_TABLE,
+  SAND_CHAMP_WEIGHTS,
+  SAND_ELITE_TABLE,
+  SAND_ELITE_WEIGHTS,
+  TIDE_TABLE,
+  TIDE_WEIGHTS,
+  TITAN_TABLE,
+  TITAN_WEIGHTS,
+} from './act1Loot';
 import type { CoverAnchor } from './StillFrame';
 import type { InteriorFloorDef } from './interiors';
 import { WORLD_ART } from './layout';
@@ -103,7 +122,7 @@ export const GUTTERJACK_ITEMS: LootItemEntry[] = [
     synergyBossId: GUTTERJACK_BOSS_ID,
     synergyTier: 'common',
     synergyWinChanceBonus: 0.1,
-    combatHint: '+10% win vs Common',
+    combatHint: 'Unique — Common affix parked',
   },
 ];
 
@@ -151,14 +170,14 @@ export const GUTTERJACK_CHALLENGE = {
   failureConsolationGoldRange: [8, 16] as [number, number],
 } as const;
 
-/** Shared tray for seed dungeons without a Bible drop table yet. */
+/** Fallback only — unknown ids / missing floor tables. Act 1 floors have real bands. */
 export const PLAYGROUND_GOLD_ID = 'playground_gold';
 export const PLAYGROUND_EMPTY_ID = 'playground_empty';
 
 export const PLAYGROUND_GOLD: LootGoldEntry = goldLoot(
   PLAYGROUND_GOLD_ID,
   'Pocket coins',
-  'A handful of coins from the road. Placeholder loot until this dungeon has a table.',
+  'A handful of coins from the road.',
   18,
   32,
 );
@@ -422,6 +441,16 @@ const CLOSED_WAY_ITEMS: LootItemEntry[] = [
     itemSlot: 'relic',
     combatHint: 'Heroic — Main QoL later',
   },
+  {
+    id: 'thornseal_mantle',
+    kind: 'item',
+    name: 'Thornseal Mantle',
+    rarity: 'rare',
+    description: 'Green-thorn cloth from the Closed Way. Looks like a hunter. Hits like cloth.',
+    icon: 'cloak',
+    itemSlot: 'outfit',
+    combatHint: 'Cosmetic — wear on Hero. Combat affix parked.',
+  },
 ];
 
 const CLOSED_WAY_ELITE_GOLD = goldLoot(
@@ -452,6 +481,7 @@ export const WORLD_LOOT_ITEMS: LootItemEntry[] = [
   ...APPROACHES_ELITE_ITEMS,
   ...ANVIL_ITEMS,
   ...CLOSED_WAY_ITEMS,
+  ...ACT1_LATER_ITEMS,
 ];
 
 const ALL_GOLD: LootGoldEntry[] = [
@@ -464,6 +494,7 @@ const ALL_GOLD: LootGoldEntry[] = [
   ANVIL_GOLD,
   CLOSED_WAY_ELITE_GOLD,
   CLOSED_WAY_CHAMP_GOLD,
+  ...ACT1_LATER_GOLD,
 ];
 
 const ALL_EMPTY: LootEmptyEntry[] = [
@@ -476,6 +507,7 @@ const ALL_EMPTY: LootEmptyEntry[] = [
   ANVIL_EMPTY,
   CLOSED_WAY_ELITE_EMPTY,
   CLOSED_WAY_CHAMP_EMPTY,
+  ...ACT1_LATER_EMPTY,
 ];
 
 export function lootItemById(id: string): LootItemEntry | null {
@@ -761,6 +793,7 @@ export const DUNGEONS: Record<string, DungeonDef> = {
           CLOSED_WAY_ITEMS.find((i) => i.id === 'trail_trophy')!,
           CLOSED_WAY_ITEMS.find((i) => i.id === 'greenway_draught')!,
           CLOSED_WAY_ITEMS.find((i) => i.id === 'hunters_snare_charm')!,
+          CLOSED_WAY_ITEMS.find((i) => i.id === 'thornseal_mantle')!,
           CLOSED_WAY_ITEMS.find((i) => i.id === 'horn_of_the_closed_way')!,
           CLOSED_WAY_ELITE_GOLD,
           CLOSED_WAY_ELITE_EMPTY,
@@ -770,7 +803,8 @@ export const DUNGEONS: Record<string, DungeonDef> = {
           { id: CLOSED_WAY_ELITE_GOLD.id, weight: 30 },
           { id: 'trail_trophy', weight: 20 },
           { id: 'greenway_draught', weight: 18 },
-          { id: 'hunters_snare_charm', weight: 7 },
+          { id: 'hunters_snare_charm', weight: 4 },
+          { id: 'thornseal_mantle', weight: 3 },
           { id: 'horn_of_the_closed_way', weight: 2 },
         ],
       },
@@ -797,7 +831,8 @@ export const DUNGEONS: Record<string, DungeonDef> = {
           { id: CLOSED_WAY_CHAMP_GOLD.id, weight: 28 },
           { id: 'trail_trophy', weight: 19 },
           { id: 'greenway_draught', weight: 19 },
-          { id: 'hunters_snare_charm', weight: 10 },
+          { id: 'hunters_snare_charm', weight: 5 },
+          { id: 'thornseal_mantle', weight: 5 },
           { id: 'horn_of_the_closed_way', weight: 4 },
         ],
       },
@@ -824,7 +859,8 @@ export const DUNGEONS: Record<string, DungeonDef> = {
           baseWinChance: 0.5,
           failureConsolationGoldRange: [16, 28],
         }),
-        lootTable: PLAYGROUND_LOOT_TABLE,
+        lootTable: RAVEN_ELITE_TABLE,
+        farmWeights: RAVEN_ELITE_WEIGHTS,
       },
       {
         id: 'champion',
@@ -843,7 +879,8 @@ export const DUNGEONS: Record<string, DungeonDef> = {
           baseWinChance: 0.4,
           failureConsolationGoldRange: [18, 30],
         }),
-        lootTable: PLAYGROUND_LOOT_TABLE,
+        lootTable: RAVEN_CHAMP_TABLE,
+        farmWeights: RAVEN_CHAMP_WEIGHTS,
       },
     ],
   },
@@ -868,7 +905,8 @@ export const DUNGEONS: Record<string, DungeonDef> = {
           baseWinChance: 0.58,
           failureConsolationGoldRange: [12, 22],
         }),
-        lootTable: PLAYGROUND_LOOT_TABLE,
+        lootTable: TIDE_TABLE,
+        farmWeights: TIDE_WEIGHTS,
       },
     ],
   },
@@ -893,7 +931,8 @@ export const DUNGEONS: Record<string, DungeonDef> = {
           baseWinChance: 0.52,
           failureConsolationGoldRange: [14, 24],
         }),
-        lootTable: PLAYGROUND_LOOT_TABLE,
+        lootTable: PALE_TABLE,
+        farmWeights: PALE_WEIGHTS,
       },
     ],
   },
@@ -918,7 +957,8 @@ export const DUNGEONS: Record<string, DungeonDef> = {
           baseWinChance: 0.45,
           failureConsolationGoldRange: [20, 32],
         }),
-        lootTable: PLAYGROUND_LOOT_TABLE,
+        lootTable: SAND_ELITE_TABLE,
+        farmWeights: SAND_ELITE_WEIGHTS,
       },
       {
         id: 'champion',
@@ -937,7 +977,8 @@ export const DUNGEONS: Record<string, DungeonDef> = {
           baseWinChance: 0.35,
           failureConsolationGoldRange: [22, 36],
         }),
-        lootTable: PLAYGROUND_LOOT_TABLE,
+        lootTable: SAND_CHAMP_TABLE,
+        farmWeights: SAND_CHAMP_WEIGHTS,
       },
     ],
   },
@@ -962,11 +1003,23 @@ export const DUNGEONS: Record<string, DungeonDef> = {
           baseWinChance: 0.28,
           failureConsolationGoldRange: [28, 44],
         }),
-        lootTable: PLAYGROUND_LOOT_TABLE,
+        lootTable: TITAN_TABLE,
+        farmWeights: TITAN_WEIGHTS,
       },
     ],
   },
 };
+
+if (__DEV__) {
+  for (const dungeon of Object.values(DUNGEONS)) {
+    for (const floor of dungeon.floors) {
+      const total = floor.farmWeights?.reduce((sum, row) => sum + row.weight, 0);
+      if (total != null && total !== 100) {
+        console.warn(`[loot] ${dungeon.id}/${floor.id} farm weights sum to ${total}, expected 100`);
+      }
+    }
+  }
+}
 
 /* -------------------------------------------------------------------------- */
 /*  Map locations (close-up + hotspots)                                        */

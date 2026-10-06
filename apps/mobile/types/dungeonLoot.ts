@@ -17,7 +17,13 @@ export type LootIconId =
   | "orb"
   | "anchor"
   | "moon"
-  | "wine";
+  | "wine"
+  | "cloak"
+  | "leaf"
+  | "raven"
+  | "sand"
+  | "tide"
+  | "fang";
 
 /** Combat biome / tier affix. Act 1 uses all four Bible names. */
 export type CombatSynergyTier = "common" | "elite" | "champion" | "titan";
@@ -33,14 +39,14 @@ export interface LootItemEntry {
   description: string;
   icon: LootIconId;
   itemSlot: ItemLoadoutSlot;
-  /** Hidden combat relation used by auto-battler chance engine. */
+  /** Parked combat relation. Equipped gear does not change win chance this slice. */
   synergyBossId?: string | null;
   synergyWinChanceBonus?: number;
-  /** Broad affix, e.g. Tulip +10% vs Common. */
+  /** Parked broad affix, e.g. Tulip +10% vs Common — catalog only. */
   synergyTier?: CombatSynergyTier | null;
-  /** Sipped on Fight; not a loadout piece. */
+  /** Sipped on Fight (Gutterjack wine); not a loadout piece. */
   consumable?: boolean;
-  /** Short combat line for item preview, e.g. "+10% win vs Common". */
+  /** Preview line. Gear hints are cosmetic; only Gutterjack wine applies in combat. */
   combatHint?: string;
 }
 
