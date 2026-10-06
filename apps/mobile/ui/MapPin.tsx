@@ -1,4 +1,4 @@
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Glyph } from '@/ui/Glyph';
 import { Sticker } from '@/ui/Sticker';
@@ -20,6 +20,8 @@ type Props = {
   onPress: () => void;
   onLongPress?: () => void;
   accessibilityLabel: string;
+  /** Required hero level, drawn on locked pins only. */
+  lockLevel?: number;
 };
 
 export function MapPin({
@@ -31,6 +33,7 @@ export function MapPin({
   onPress,
   onLongPress,
   accessibilityLabel,
+  lockLevel,
 }: Props) {
   const head = (kind === 'current' ? 56 : kind === 'locked' ? 36 : 46) * scale;
   const tip = 10 * scale;
@@ -51,7 +54,7 @@ export function MapPin({
     >
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={locked ? `${accessibilityLabel}, locked` : accessibilityLabel}
+        accessibilityLabel={accessibilityLabel}
         onPress={onPress}
         onLongPress={onLongPress}
         delayLongPress={480}
@@ -74,7 +77,14 @@ export function MapPin({
           {kind === 'current' ? (
             <Image source={FACE} style={styles.face} />
           ) : locked ? (
-            <Glyph name="lock" size={18 * scale} color={tokens.ink3} />
+            <View style={styles.lockStack}>
+              <Glyph name="lock" size={14 * scale} color={tokens.ink3} />
+              {lockLevel != null ? (
+                <Text style={[styles.lockLevel, { fontSize: 11 * scale, lineHeight: 12 * scale }]}>
+                  {lockLevel}
+                </Text>
+              ) : null}
+            </View>
           ) : (
             <Sticker name={sticker} size={30 * scale} />
           )}
@@ -142,5 +152,14 @@ const styles = StyleSheet.create({
   },
   tipLocked: {
     borderTopColor: tokens.surface3,
+  },
+  lockStack: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  lockLevel: {
+    fontFamily: tokens.font800,
+    color: tokens.ink2,
+    marginTop: -1,
   },
 });

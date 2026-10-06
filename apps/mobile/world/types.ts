@@ -25,8 +25,6 @@ export type WorldState = {
   currentHotspotId: string | null;
   /** Location ids the player has seen. Crownhaven starts discovered. */
   discoveredLocationIds: string[];
-  /** Kingdom-map fog holes that have opened. Crownhaven starts clear. */
-  discoveredRegionIds: string[];
   /** Boss encounter ids that have been first-cleared. */
   clearedEncounterIds: string[];
   gutterjackCleared: boolean;
@@ -46,9 +44,6 @@ export type WorldActions = {
   markEncounterCleared: (id: string) => void;
   startEncounterCooldown: (encounterId: string, durationMs: number) => void;
   clearEncounterCooldowns: () => void;
-  discoverRegion: (id: string) => void;
-  /** Opens every fog region and marks map pins discovered. */
-  revealAllMap: () => void;
-  /** Fog + location flags back to first launch. Navigation returns to the map. */
+  /** Combat / location flags back to first launch. Navigation returns to the map. */
   resetWorldDiscovery: () => void;
 };

@@ -15,7 +15,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Colors from '@/constants/colors';
 import { useHeroStore } from '@/hero/store';
 import { impactAsync, ImpactFeedbackStyle, notificationAsync, NotificationFeedbackType } from '@/lib/hapticsGate';
-import { nextHiddenFogRegionId } from '@/world/layout';
 import { useWorldStore } from '@/world/store';
 
 type Props = {
@@ -51,11 +50,8 @@ function DevToolsBody({ onClose }: { onClose: () => void }) {
   const addGold = useHeroStore((s) => s.addGold);
   const addDungeonKeys = useHeroStore((s) => s.addDungeonKeys);
   const setPlayerLevel = useHeroStore((s) => s.setPlayerLevel);
-  const discoverRegion = useWorldStore((s) => s.discoverRegion);
-  const revealAllMap = useWorldStore((s) => s.revealAllMap);
   const resetWorldDiscovery = useWorldStore((s) => s.resetWorldDiscovery);
   const clearEncounterCooldowns = useWorldStore((s) => s.clearEncounterCooldowns);
-  const discoveredRegionIds = useWorldStore((s) => s.discoveredRegionIds);
 
   const [levelDraft, setLevelDraft] = useState(String(playerLevel));
   const [resetArmed, setResetArmed] = useState(false);
@@ -71,28 +67,9 @@ function DevToolsBody({ onClose }: { onClose: () => void }) {
     return () => clearTimeout(t);
   }, [resetArmed]);
 
-  const nextFog = nextHiddenFogRegionId(discoveredRegionIds);
-
   const bump = (run: () => void) => {
     impactAsync(ImpactFeedbackStyle.Light);
     run();
-  };
-
-  const revealNext = () => {
-    const id = nextHiddenFogRegionId(useWorldStore.getState().discoveredRegionIds);
-    if (!id) {
-      setNote('All fog regions already open.');
-      return;
-    }
-    discoverRegion(id);
-    notificationAsync(NotificationFeedbackType.Success);
-    setNote(`Revealed ${id}.`);
-  };
-
-  const revealAll = () => {
-    revealAllMap();
-    notificationAsync(NotificationFeedbackType.Success);
-    setNote('All map locations revealed.');
   };
 
   const resetWorld = () => {
@@ -103,7 +80,7 @@ function DevToolsBody({ onClose }: { onClose: () => void }) {
     resetWorldDiscovery();
     setResetArmed(false);
     notificationAsync(NotificationFeedbackType.Warning);
-    setNote('World discovery reset.');
+    setNote('World combat flags reset.');
   };
 
   const applyLevel = () => {
@@ -180,14 +157,7 @@ function DevToolsBody({ onClose }: { onClose: () => void }) {
               />
             </Section>
 
-            <Section label="Map">
-              <ToolButton
-                label={nextFog ? `Reveal next fog (${nextFog})` : 'Reveal next fog (none left)'}
-                onPress={revealNext}
-                disabled={!nextFog}
-                wide
-              />
-              <ToolButton label="Reveal all map locations" onPress={revealAll} wide />
+            <Section label="World">
               <ToolButton
                 label={resetArmed ? 'Confirm reset' : 'Reset world'}
                 onPress={resetWorld}

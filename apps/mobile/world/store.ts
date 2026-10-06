@@ -9,26 +9,15 @@ import {
   isDungeonFloorUnlocked,
 } from './content';
 import { INTERIORS, floorById, isFloorOpen, resolveFloorId, type InteriorFloorId } from './interiors';
-import { DEFAULT_REVEALED_REGION_IDS, MAP_FOG_REGIONS } from './layout';
 import type { MapLocationId, WorldActions, WorldInteriorId, WorldState } from './types';
 
 const ALWAYS_DISCOVERED = ['crownhaven'] as const;
-const REGION_IDS = new Set(MAP_FOG_REGIONS.map((region) => region.id));
 
 type WorldStore = WorldState & WorldActions;
 
 function uniquePush(ids: string[], id: string): string[] {
   if (ids.includes(id)) return ids;
   return [...ids, id];
-}
-
-function withCapital(ids: string[]): string[] {
-  return uniquePush(ids, 'crownhaven');
-}
-
-function asRegionIds(ids: string[] | undefined): string[] {
-  const fromSave = (ids ?? []).filter((id) => REGION_IDS.has(id));
-  return withCapital([...DEFAULT_REVEALED_REGION_IDS, ...fromSave]);
 }
 
 function asClearedEncounterIds(
@@ -49,7 +38,6 @@ export const useWorldStore = create<WorldStore>()(
       currentLocationId: null,
       currentHotspotId: null,
       discoveredLocationIds: [...ALWAYS_DISCOVERED],
-      discoveredRegionIds: [...DEFAULT_REVEALED_REGION_IDS],
       clearedEncounterIds: [],
       gutterjackCleared: false,
       encounterCooldownUntil: {},
@@ -169,23 +157,6 @@ export const useWorldStore = create<WorldStore>()(
 
       clearEncounterCooldowns: () => set({ encounterCooldownUntil: {} }),
 
-      discoverRegion: (id: string) =>
-        set((state) => {
-          if (!REGION_IDS.has(id)) return state;
-          return { discoveredRegionIds: uniquePush(withCapital(state.discoveredRegionIds), id) };
-        }),
-
-      revealAllMap: () =>
-        set((state) => {
-          const regionIds = [...REGION_IDS];
-          let locations = withCapital(state.discoveredLocationIds);
-          for (const id of regionIds) locations = uniquePush(locations, id);
-          return {
-            discoveredRegionIds: withCapital(regionIds),
-            discoveredLocationIds: locations,
-          };
-        }),
-
       resetWorldDiscovery: () =>
         set({
           currentScreen: 'map',
@@ -194,7 +165,6 @@ export const useWorldStore = create<WorldStore>()(
           currentLocationId: null,
           currentHotspotId: null,
           discoveredLocationIds: [...ALWAYS_DISCOVERED],
-          discoveredRegionIds: [...DEFAULT_REVEALED_REGION_IDS],
           clearedEncounterIds: [],
           gutterjackCleared: false,
           encounterCooldownUntil: {},
@@ -202,7 +172,7 @@ export const useWorldStore = create<WorldStore>()(
     }),
     {
       name: 'hnd-world-local',
-      version: 6,
+      version: 7,
       storage: createJSONStorage(() => AsyncStorage),
       migrate: (persisted) => {
         const prev = persisted as Partial<WorldState> | undefined;
@@ -212,7 +182,6 @@ export const useWorldStore = create<WorldStore>()(
         );
         return {
           discoveredLocationIds: prev?.discoveredLocationIds ?? [...ALWAYS_DISCOVERED],
-          discoveredRegionIds: asRegionIds(prev?.discoveredRegionIds ?? prev?.discoveredLocationIds),
           clearedEncounterIds,
           gutterjackCleared: prev?.gutterjackCleared ?? clearedEncounterIds.includes('gutterjack'),
           encounterCooldownUntil: prev?.encounterCooldownUntil ?? {},
@@ -220,7 +189,6 @@ export const useWorldStore = create<WorldStore>()(
       },
       partialize: (state) => ({
         discoveredLocationIds: state.discoveredLocationIds,
-        discoveredRegionIds: state.discoveredRegionIds,
         clearedEncounterIds: state.clearedEncounterIds,
         gutterjackCleared: state.gutterjackCleared,
         encounterCooldownUntil: state.encounterCooldownUntil,

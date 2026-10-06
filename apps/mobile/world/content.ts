@@ -1001,7 +1001,7 @@ export type MapLocationDef = {
   hotspots: LocationHotspotDef[];
 };
 
-/** Discover seed order: Approaches first; Teeth/Anvil optional sides; Main ★ separate. */
+/** Corridor order (south→north). Unlock levels live on `KINGDOM_PINS` in layout.ts. */
 export const MAP_LOCATION_IDS: readonly MapLocationId[] = [
   'crown-approaches',
   'smugglers-teeth',
