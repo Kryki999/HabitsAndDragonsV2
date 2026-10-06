@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { BackHandler, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { usePathname } from 'expo-router';
 
+import { useOnboardingStore } from '@/onboarding/store';
 import { tokens } from '@/ui/tokens';
 
 import AllyStill from './AllyStill';
@@ -35,6 +36,9 @@ export default function WorldScreen() {
   const openHub = useWorldStore((s) => s.openHub);
   const openMap = useWorldStore((s) => s.openMap);
   const closeEncounter = useWorldStore((s) => s.closeEncounter);
+  const onboardingComplete = useOnboardingStore((s) => s.complete);
+  const tutorialDone = useOnboardingStore((s) => s.tutorialDone);
+  const guidedHub = useRef(false);
 
   const interior = screen === 'interior' && interiorId ? INTERIORS[interiorId] : undefined;
   const interiorFloor = interior
@@ -60,6 +64,12 @@ export default function WorldScreen() {
   const encounterLocation = locationId ? MAP_LOCATIONS[locationId] : undefined;
   const encounterAllyTrack =
     encounterNpc?.id === 'torrik' ? TORRIK_TRACK : encounterNpc?.id === 'miro' ? MIRO_TRACK : null;
+
+  useEffect(() => {
+    if (!focused || !onboardingComplete || tutorialDone || guidedHub.current) return;
+    guidedHub.current = true;
+    if (useWorldStore.getState().currentScreen === 'map') openHub();
+  }, [focused, onboardingComplete, tutorialDone, openHub]);
 
   useEffect(() => {
     const sub = BackHandler.addEventListener('hardwareBackPress', () => {

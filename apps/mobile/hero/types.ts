@@ -43,6 +43,8 @@ export type HeroActions = {
   /** Stall shop: one copy of itemId for this gold. Does not use Hero backpack prices. */
   sellOwnedItemForGold: (itemId: string, gold: number) => boolean;
   addGold: (amount: number) => void;
+  /** Required display name from Day 0. Empty/whitespace is ignored. */
+  setHeroDisplayName: (name: string) => void;
   /** Returns false if the wallet cannot cover it. */
   spendGold: (amount: number) => boolean;
   addDungeonKeys: (amount: number) => void;
