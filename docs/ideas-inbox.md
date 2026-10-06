@@ -4,6 +4,13 @@ Tu wrzucamy **surowe** pomysły. Rozrzut do filarów robi partner / agent.
 
 ---
 
+## Dump — 2026-10-06 żywy świat + motion walki kartami
+
+Lock Krystiana: świat ma **żyć** (idle / oddech / sway na close-upach lokacji i lochów), walka kartami (~1 min) = boss i gracz ruszają się **przeciw sobie** (skill → hit → VFX), nie statyczne karty. Dwie warstwy: chrome (Lottie / Reanimated / spring) vs świat+walka (Rive rest → akcja → rest). Źródło smaku: [John / Meta — vibe-coded apps feel alive](https://www.youtube.com/watch?v=f-Ar8mwm3kQ).  
+**Park → przeniesione** do [`10-animation-feel.md`](10-animation-feel.md) (LOCK 2026-10-06). Nie ten MVP: bez nowych deps, bez silnika animacji, bez Rive na cały pasek.
+
+---
+
 ## Dump — 2026-08-16 ekran straganu
 
 Tap hotspotu → grafika babki + straganu, itemy po bokach.  
@@ -76,6 +83,7 @@ Emotki = kolekcja kosmetyczna (`05`/`06`). Skup: zwykły ~10–15g, unikaty/hero
 
 | Data | Fragment | Trafił do |
 |------|----------|-----------|
+| 2026-10-06 | Living-world + card-combat motion (YouTube smak) | [`10-animation-feel.md`](10-animation-feel.md) |
 | 2026-09-24 | 5 SS sheet look-dev (Home/Hero/onboarding/streak/shop) | [`reference/ui/mocks/`](reference/ui/mocks/) |
 | 2026-09-24 | Goldeny Hero / streak / level-up / sklep (kierunek `shop.png`) / 2× onboarding; Talk out z NPC; niższa AllyCard; poświata za kartą → szew do tab bara; brak Fight/Talk w kit-sheet | [`reference/ui/design-bible.md`](reference/ui/design-bible.md) v2.2, `19`, `15`, `06` §7 |
 | 2026-09-24 | Founder: PeekCard „Enter”; sklep Buy / Sell jako zakładki; LevelNav z lookdev = najnowsza nawigacja pięter. Szept, dolny pasek sprzedaży, winda z etykietami, gniazda SKU = superseded | `reference/ui/design-bible.md` v2.3, `00`, `06` §7, `18`, `19` S06, `21`, `23` B0–B1, `24`, `prompt-vendor-shop` |
