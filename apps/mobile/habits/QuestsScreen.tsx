@@ -10,7 +10,7 @@ import TaskCardOverlay, { type CardMetrics } from '@/components/TaskCardOverlay'
 import TaskSortBottomSheet from '@/components/TaskSortBottomSheet';
 import { useHeroStore } from '@/hero/store';
 import { useHabitsStore } from '@/habits/store';
-import type { Habit, StatType, TaskType } from '@/habits/types';
+import type { Habit } from '@/habits/types';
 import { orderDueHabitsForCastle } from '@/lib/castleQuestOrder';
 import { displayRewardsForHabit } from '@/lib/economy';
 import { impactAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
@@ -115,14 +115,7 @@ export default function QuestsScreen() {
   }, [resetDailyIfNeeded]);
 
   const handleAddHabit = useCallback(
-    (habit: {
-      name: string;
-      description: string;
-      stat: StatType;
-      taskType: TaskType;
-      icon: string;
-      scheduledDate?: string | null;
-    }) => {
+    (habit: Parameters<typeof addHabit>[0]) => {
       addHabit(habit);
     },
     [addHabit],

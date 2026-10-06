@@ -11,6 +11,11 @@ import {
   useWindowDimensions,
 } from 'react-native';
 
+import {
+  HERO_HEX_LABELS,
+  HERO_HEX_STAT_AXIS_ORDER,
+  type HeroHexStatId,
+} from '@/constants/heroHexStats';
 import type { StatType, SuggestedHabit, TaskType } from '@/habits/types';
 import { impactAsync, ImpactFeedbackStyle } from '@/lib/hapticsGate';
 import { suggestedHabits } from '@/mocks/suggestedHabits';
@@ -18,6 +23,7 @@ import { BottomSheet } from '@/ui/BottomSheet';
 import { ButtonPrimary } from '@/ui/Button';
 import { Card } from '@/ui/Card';
 import { Glyph } from '@/ui/Glyph';
+import { HEX_STAT_STICKER } from '@/ui/StatHex';
 import { Sticker } from '@/ui/Sticker';
 import { stickerForHabitIcon } from '@/ui/stickerRegistry';
 import { tokens } from '@/ui/tokens';
@@ -35,6 +41,7 @@ interface AddHabitModalProps {
     taskType: TaskType;
     icon: string;
     scheduledDate?: string | null;
+    hexAxes?: HeroHexStatId[];
   }) => void;
 }
 
@@ -50,6 +57,12 @@ function dateKeyFromOffsetDays(offsetDays: number): string {
 
 type ModalView = 'choose' | 'suggested' | 'custom';
 
+function statFromHexAxes(axes: HeroHexStatId[]): StatType {
+  const first = axes[0];
+  if (first === 'strength' || first === 'agility' || first === 'intelligence') return first;
+  return 'intelligence';
+}
+
 const ICON_OPTIONS = ['⚔️', '🛡️', '🏃', '📖', '🧠', '💪', '🎯', '🔥', '⭐', '🌟', '💎', '🏆'];
 
 export default function AddHabitModal({ visible, onClose, onAddHabit, initialScheduledDateKey }: AddHabitModalProps) {
@@ -59,6 +72,7 @@ export default function AddHabitModal({ visible, onClose, onAddHabit, initialSch
   const [customDesc, setCustomDesc] = useState('');
   const [selectedTaskType, setSelectedTaskType] = useState<TaskType>('daily');
   const [selectedIcon, setSelectedIcon] = useState('⚔️');
+  const [selectedHexAxes, setSelectedHexAxes] = useState<HeroHexStatId[]>([]);
   const [selectedScheduledDateKey, setSelectedScheduledDateKey] = useState<string | null>(initialScheduledDateKey ?? null);
   const [customNameInputH, setCustomNameInputH] = useState(56);
   const scheduleScrollRef = useRef<ScrollView>(null);
@@ -86,6 +100,7 @@ export default function AddHabitModal({ visible, onClose, onAddHabit, initialSch
       setCustomDesc('');
       setSelectedTaskType('daily');
       setSelectedIcon('⚔️');
+      setSelectedHexAxes([]);
       setCustomNameInputH(56);
       const today = getTodayKey();
       setSelectedScheduledDateKey(
@@ -119,6 +134,7 @@ export default function AddHabitModal({ visible, onClose, onAddHabit, initialSch
         taskType: habit.taskType,
         icon: habit.icon,
         scheduledDate: selectedScheduledDateKey ?? null,
+        hexAxes: habit.hexAxes,
       });
       handleClose();
     },
@@ -131,13 +147,22 @@ export default function AddHabitModal({ visible, onClose, onAddHabit, initialSch
     onAddHabit({
       name: customName.trim(),
       description: customDesc.trim() || customName.trim(),
-      stat: 'intelligence',
+      stat: statFromHexAxes(selectedHexAxes),
       taskType: selectedTaskType,
       icon: selectedIcon,
       scheduledDate: selectedScheduledDateKey ?? null,
+      hexAxes: selectedHexAxes,
     });
     handleClose();
-  }, [customName, customDesc, selectedTaskType, selectedIcon, onAddHabit, handleClose, selectedScheduledDateKey]);
+  }, [customName, customDesc, selectedTaskType, selectedIcon, selectedHexAxes, onAddHabit, handleClose, selectedScheduledDateKey]);
+
+  const toggleHexAxis = useCallback((id: HeroHexStatId) => {
+    setSelectedHexAxes((prev) => {
+      if (prev.includes(id)) return prev.filter((a) => a !== id);
+      if (prev.length >= 2) return prev;
+      return [...prev, id];
+    });
+  }, []);
 
   const schedulePicker = (
     <View style={styles.scheduleWrap}>
@@ -271,6 +296,27 @@ export default function AddHabitModal({ visible, onClose, onAddHabit, initialSch
                 return (
                   <Pressable key={icon} onPress={() => setSelectedIcon(icon)} style={[styles.iconOption, on && styles.iconOptionOn]}>
                     <Sticker name={stickerForHabitIcon(icon)} size={28} />
+                  </Pressable>
+                );
+              })}
+            </View>
+            <Text style={styles.fieldLabel}>This habit trains</Text>
+            <Text style={styles.axisHint}>One tap. A second axis is optional. Skip to leave the hex untouched.</Text>
+            <View style={styles.axisGrid}>
+              {HERO_HEX_STAT_AXIS_ORDER.map((id) => {
+                const on = selectedHexAxes.includes(id);
+                const locked = !on && selectedHexAxes.length >= 2;
+                return (
+                  <Pressable
+                    key={id}
+                    onPress={() => toggleHexAxis(id)}
+                    disabled={locked}
+                    accessibilityRole="button"
+                    accessibilityLabel={HERO_HEX_LABELS[id]}
+                    style={[styles.axisChip, on && styles.axisChipOn, locked && styles.axisChipLocked]}
+                  >
+                    <Sticker name={HEX_STAT_STICKER[id]} size={22} />
+                    <Text style={[styles.axisChipText, on && styles.axisChipTextOn]}>{HERO_HEX_LABELS[id]}</Text>
                   </Pressable>
                 );
               })}
@@ -438,5 +484,42 @@ const styles = StyleSheet.create({
     backgroundColor: tokens.brandSoft,
     boxShadow: [{ offsetX: 0, offsetY: 3, blurRadius: 0, color: tokens.brand }],
   },
+  axisHint: {
+    fontFamily: tokens.font700,
+    fontSize: 13,
+    color: tokens.ink2,
+    marginTop: -4,
+    marginBottom: 10,
+  },
+  axisGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16,
+  },
+  axisChip: {
+    width: '48%',
+    flexGrow: 1,
+    minHeight: 48,
+    borderRadius: tokens.rSm,
+    backgroundColor: tokens.surface2,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  axisChipOn: {
+    backgroundColor: tokens.brandSoft,
+    boxShadow: [{ offsetX: 0, offsetY: 3, blurRadius: 0, color: tokens.brand }],
+  },
+  axisChipLocked: { opacity: 0.45 },
+  axisChipText: {
+    fontFamily: tokens.font800,
+    fontSize: 13,
+    color: tokens.ink,
+    flex: 1,
+  },
+  axisChipTextOn: { color: tokens.brandDeep },
   endPad: { height: 28 },
 });

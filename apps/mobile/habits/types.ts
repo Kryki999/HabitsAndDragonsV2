@@ -1,3 +1,5 @@
+import type { HeroHexStatId } from '@/constants/heroHexStats';
+
 export type StatType = 'strength' | 'agility' | 'intelligence';
 export type TaskType = 'daily' | 'one-off';
 export type HabitDifficulty = 'easy' | 'medium' | 'hard';
@@ -23,6 +25,11 @@ export type Habit = {
   completedToday: boolean;
   icon: string;
   difficulty?: HabitDifficulty;
+  /**
+   * Hex axes this habit trains (0–2). Empty = untagged, no hex gains.
+   * Separate from leftover `stat` (STR/AGI/INT) so onboarding can keep using `stat`.
+   */
+  hexAxes?: HeroHexStatId[];
   isFrozen?: boolean;
   frozenAtDate?: string | null;
   createdAt?: string;
@@ -36,6 +43,7 @@ export type SuggestedHabit = {
   taskType: TaskType;
   icon: string;
   difficulty: HabitDifficulty;
+  hexAxes: HeroHexStatId[];
 };
 
 export type ActivityDay = {
@@ -51,4 +59,5 @@ export type AddHabitInput = {
   icon: string;
   difficulty?: HabitDifficulty;
   scheduledDate?: string | null;
+  hexAxes?: HeroHexStatId[];
 };
