@@ -61,6 +61,17 @@ export default function LivingScene({
   const parallaxActive = ordered.length > 1;
   const clock = useLivingClock(running);
   const { tiltX, tiltY } = useTiltParallax(parallaxActive && running);
+  const visible = useMemo(() => {
+    if (fitted.width <= 0 || fitted.height <= 0) {
+      return { x0: 0, y0: 0, x1: 1, y1: 1 };
+    }
+    return {
+      x0: -fitted.left / fitted.width,
+      y0: -fitted.top / fitted.height,
+      x1: (-fitted.left + viewport.width) / fitted.width,
+      y1: (-fitted.top + viewport.height) / fitted.height,
+    };
+  }, [fitted.height, fitted.left, fitted.top, fitted.width, viewport.height, viewport.width]);
 
   const onLayout = (event: LayoutChangeEvent) => {
     const { width, height } = event.nativeEvent.layout;
@@ -99,6 +110,7 @@ export default function LivingScene({
               size={{ width: fitted.width, height: fitted.height }}
               feel={feel}
               particles={running}
+              visible={visible}
             />
           </Canvas>
           {front.map((layer, index) => (

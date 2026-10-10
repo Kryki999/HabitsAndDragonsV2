@@ -1,16 +1,13 @@
 import { useMemo } from 'react';
-import {
-  Circle,
-  Fill,
-  Group,
-  RadialGradient,
-  vec,
-} from '@shopify/react-native-skia';
+import { Circle, Fill, Group, RadialGradient, vec } from '@shopify/react-native-skia';
 import { useDerivedValue, type SharedValue } from 'react-native-reanimated';
 
 import { type LivingFeel } from './feel';
 
 type Size = { width: number; height: number };
+
+/** Visible slice of the still, normalized 0–1 (cover-crop on a phone). */
+export type VisibleNorm = { x0: number; y0: number; x1: number; y1: number };
 
 function fract(n: number): number {
   'worklet';
@@ -36,56 +33,83 @@ function mulberry32(seed: number): () => number {
   };
 }
 
+/**
+ * If the hearth is cropped off the phone, park the glow on the visible edge
+ * so light still spills into the wizard — same coords stay correct on 9:16.
+ */
+function projectIntoView(
+  x: number,
+  y: number,
+  vis: VisibleNorm,
+  pad: number,
+): { x: number; y: number } {
+  const xMin = vis.x0 + pad;
+  const xMax = vis.x1 - pad;
+  const yMin = vis.y0 + pad;
+  const yMax = vis.y1 - pad;
+  return {
+    x: Math.min(Math.max(x, xMin), xMax),
+    y: Math.min(Math.max(y, yMin), yMax),
+  };
+}
+
 export function TavernEffects({
   clock,
   size,
   feel,
   particles,
+  visible,
 }: {
   clock: SharedValue<number>;
   size: Size;
   feel: LivingFeel;
   particles: boolean;
+  visible: VisibleNorm;
 }) {
   const { width, height } = size;
   if (width <= 0 || height <= 0) return null;
 
+  const hearth = projectIntoView(feel.fire.x, feel.fire.y, visible, feel.light.edgePad);
+
   return (
     <Group>
       <AmbientWash clock={clock} feel={feel} />
-      <FireGlow clock={clock} size={size} feel={feel} />
-      <CandleGlows clock={clock} size={size} feel={feel} />
-      {particles ? <DustField clock={clock} size={size} feel={feel} /> : null}
-      {particles ? <SparkField clock={clock} size={size} feel={feel} /> : null}
+      <FireGlow clock={clock} size={size} feel={feel} hearth={hearth} />
+      <CandleGlows clock={clock} size={size} feel={feel} visible={visible} />
+      {particles ? <DustField clock={clock} size={size} feel={feel} hearthX={hearth.x} /> : null}
+      {particles ? <SparkField clock={clock} size={size} feel={feel} hearth={hearth} /> : null}
     </Group>
   );
 }
 
 function AmbientWash({ clock, feel }: { clock: SharedValue<number>; feel: LivingFeel }) {
   const opacity = useDerivedValue(() => {
-    const pulse = hearthPulse(clock.value / 1000, feel.light.flickerAmp * 0.45);
-    return feel.light.ambient * feel.light.intensity * (0.75 + 0.25 * pulse);
+    const pulse = hearthPulse(clock.value / 1000, feel.light.flickerAmp * 0.5);
+    return feel.light.ambient * feel.light.intensity * (0.7 + 0.3 * pulse);
   });
-  return <Fill opacity={opacity} color={feel.colors.ochre} blendMode="softLight" />;
+  // srcOver on a transparent canvas — blend modes cannot see the RN Image below.
+  return <Fill opacity={opacity} color="rgba(232, 150, 70, 1)" />;
 }
 
 function FireGlow({
   clock,
   size,
   feel,
+  hearth,
 }: {
   clock: SharedValue<number>;
   size: Size;
   feel: LivingFeel;
+  hearth: { x: number; y: number };
 }) {
-  const fx = feel.fire.x * size.width;
-  const fy = feel.fire.y * size.height;
+  const fx = hearth.x * size.width;
+  const fy = hearth.y * size.height;
   const unit = Math.min(size.width, size.height);
   const origin = vec(fx, fy);
 
   const opacity = useDerivedValue(() => {
     const pulse = hearthPulse(clock.value / 1000, feel.light.flickerAmp);
-    return feel.light.intensity * (0.62 + 0.38 * pulse);
+    return feel.light.intensity * (0.55 + 0.45 * pulse);
   });
 
   const transform = useDerivedValue(() => {
@@ -95,35 +119,35 @@ function FireGlow({
   });
 
   return (
-    <Group origin={origin} transform={transform} opacity={opacity} blendMode="softLight">
-      <Group origin={origin} transform={[{ scaleX: 1.35 }, { scaleY: 0.72 }]}>
+    <Group origin={origin} transform={transform} opacity={opacity}>
+      <Group origin={origin} transform={[{ scaleX: 1.45 }, { scaleY: 0.78 }]}>
         <Circle c={origin} r={feel.light.washRadius * unit}>
           <RadialGradient
             c={origin}
             r={feel.light.washRadius * unit}
             colors={[
-              'rgba(232, 150, 60, 0.34)',
-              'rgba(212, 130, 48, 0.16)',
-              'rgba(196, 110, 40, 0.05)',
-              'rgba(196, 110, 40, 0)',
+              'rgba(255, 168, 72, 0.28)',
+              'rgba(232, 130, 48, 0.14)',
+              'rgba(210, 100, 36, 0.05)',
+              'rgba(210, 100, 36, 0)',
             ]}
-            positions={[0, 0.28, 0.58, 1]}
+            positions={[0, 0.32, 0.62, 1]}
           />
         </Circle>
         <Circle c={origin} r={feel.light.midRadius * unit}>
           <RadialGradient
             c={origin}
             r={feel.light.midRadius * unit}
-            colors={['rgba(255, 196, 110, 0.42)', 'rgba(232, 140, 50, 0.16)', 'rgba(232, 140, 50, 0)']}
-            positions={[0, 0.4, 1]}
+            colors={['rgba(255, 196, 110, 0.32)', 'rgba(255, 150, 60, 0.12)', 'rgba(255, 150, 60, 0)']}
+            positions={[0, 0.42, 1]}
           />
         </Circle>
-        <Circle c={origin} r={feel.light.coreRadius * unit} blendMode="plus">
+        <Circle c={origin} r={feel.light.coreRadius * unit}>
           <RadialGradient
             c={origin}
             r={feel.light.coreRadius * unit}
-            colors={['rgba(255, 214, 140, 0.28)', 'rgba(255, 170, 70, 0.08)', 'rgba(255, 170, 70, 0)']}
-            positions={[0, 0.45, 1]}
+            colors={['rgba(255, 220, 150, 0.34)', 'rgba(255, 170, 80, 0.1)', 'rgba(255, 170, 80, 0)']}
+            positions={[0, 0.4, 1]}
           />
         </Circle>
       </Group>
@@ -135,29 +159,36 @@ function CandleGlows({
   clock,
   size,
   feel,
+  visible,
 }: {
   clock: SharedValue<number>;
   size: Size;
   feel: LivingFeel;
+  visible: VisibleNorm;
 }) {
-  const r = Math.min(size.width, size.height) * 0.045;
+  const r = Math.min(size.width, size.height) * 0.07;
   const opacity = useDerivedValue(() => {
     const t = clock.value / 1000;
-    const pulse = hearthPulse(t * 0.72 + 0.8, feel.light.flickerAmp * 0.7);
-    return feel.candleIntensity * feel.light.intensity * (0.7 + 0.3 * pulse);
+    const pulse = hearthPulse(t * 0.72 + 0.8, feel.light.flickerAmp * 0.75);
+    return feel.candleIntensity * feel.light.intensity * (0.65 + 0.35 * pulse);
   });
 
+  const candles = feel.candles.filter(
+    (c) => c.x >= visible.x0 && c.x <= visible.x1 && c.y >= visible.y0 && c.y <= visible.y1,
+  );
+  if (candles.length === 0) return null;
+
   return (
-    <Group opacity={opacity} blendMode="softLight">
-      {feel.candles.map((c, i) => {
+    <Group opacity={opacity}>
+      {candles.map((c, i) => {
         const origin = vec(c.x * size.width, c.y * size.height);
         return (
           <Circle key={i} c={origin} r={r}>
             <RadialGradient
               c={origin}
               r={r}
-              colors={['rgba(255, 220, 140, 0.5)', 'rgba(255, 180, 80, 0.12)', 'rgba(255, 180, 80, 0)']}
-              positions={[0, 0.4, 1]}
+              colors={['rgba(255, 214, 130, 0.42)', 'rgba(255, 170, 70, 0.12)', 'rgba(255, 170, 70, 0)']}
+              positions={[0, 0.38, 1]}
             />
           </Circle>
         );
@@ -182,12 +213,14 @@ function DustField({
   clock,
   size,
   feel,
+  hearthX,
 }: {
   clock: SharedValue<number>;
   size: Size;
   feel: LivingFeel;
+  hearthX: number;
 }) {
-  const motes = useMemo(() => seedMotes(feel), [feel]);
+  const motes = useMemo(() => seedMotes(feel, hearthX), [feel, hearthX]);
   return (
     <>
       {motes.map((mote, i) => (
@@ -230,9 +263,12 @@ function DustMote({
   return <Circle cx={cx} cy={cy} r={spec.size} opacity={opacity} color={color} />;
 }
 
-function seedMotes(feel: LivingFeel): MoteSpec[] {
+function seedMotes(feel: LivingFeel, hearthX: number): MoteSpec[] {
   const rand = mulberry32(0xa3e1);
-  const shafts = feel.shafts;
+  const shafts = [
+    ...feel.shafts.filter((s) => s.x < 0.75),
+    { x: hearthX, y0: 0.28, y1: 0.78, width: 0.14, weight: 0.32 },
+  ];
   const totalWeight = shafts.reduce((sum, s) => sum + s.weight, 0);
   const motes: MoteSpec[] = [];
   for (let i = 0; i < feel.dust.count; i++) {
@@ -253,7 +289,7 @@ function seedMotes(feel: LivingFeel): MoteSpec[] {
       swayHz: 0.18 + rand() * 0.28,
       period: feel.dust.riseSeconds * (0.75 + rand() * 0.55),
       phase: rand(),
-      size: 0.7 + rand() * 1.3,
+      size: 0.8 + rand() * 1.4,
       opacity: feel.dust.opacity * (0.45 + rand() * 0.55),
     });
   }
@@ -274,10 +310,12 @@ function SparkField({
   clock,
   size,
   feel,
+  hearth,
 }: {
   clock: SharedValue<number>;
   size: Size;
   feel: LivingFeel;
+  hearth: { x: number; y: number };
 }) {
   const sparks = useMemo(() => seedSparks(feel), [feel]);
   return (
@@ -287,8 +325,8 @@ function SparkField({
           key={i}
           spec={spark}
           clock={clock}
-          originX={feel.fire.x * size.width}
-          originY={feel.fire.y * size.height}
+          originX={hearth.x * size.width}
+          originY={hearth.y * size.height}
           height={size.height}
           color={i % 2 === 0 ? feel.colors.spark : feel.colors.gold}
         />
@@ -338,10 +376,10 @@ function seedSparks(feel: LivingFeel): SparkSpec[] {
     sparks.push({
       phase: rand(),
       period: feel.sparks.riseSeconds * (0.7 + rand() * 0.7),
-      rise: 0.08 + rand() * 0.1,
-      wobble: 6 + rand() * 10,
+      rise: 0.1 + rand() * 0.14,
+      wobble: 8 + rand() * 14,
       wobbleHz: 1.1 + rand() * 1.4,
-      size: 0.9 + rand() * 1.1,
+      size: 1.1 + rand() * 1.3,
       opacity: feel.sparks.opacity * (0.55 + rand() * 0.45),
     });
   }

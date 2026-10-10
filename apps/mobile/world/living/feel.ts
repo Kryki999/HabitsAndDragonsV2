@@ -33,6 +33,7 @@ export type LivingFeel = {
     midRadius: number;
     washRadius: number;
     pulseScale: number;
+    edgePad: number;
   };
   fire: { x: number; y: number };
   candles: { x: number; y: number }[];
@@ -61,17 +62,18 @@ export type LivingFeel = {
 export const TAVERN_FEEL: LivingFeel = {
   light: {
     /** Master strength of the hearth wash (0 = off, 1 = loud). */
-    intensity: 0.7,
+    intensity: 0.82,
     /** How much the flame wanders. 0.15–0.25 = calm hearth. */
-    flickerAmp: 0.2,
+    flickerAmp: 0.24,
     /** Whole-scene amber pulse, on top of the local fire. */
-    ambient: 0.055,
+    ambient: 0.07,
     /** Radii as a fraction of min(frame w, h). */
-    coreRadius: 0.1,
-    midRadius: 0.22,
-    washRadius: 0.7,
+    coreRadius: 0.16,
+    midRadius: 0.34,
+    washRadius: 0.92,
     /** Extra scale on the glow blob while it pulses. */
-    pulseScale: 0.08,
+    pulseScale: 0.1,
+    edgePad: 0.07,
   },
   /** Hearth mouth on tavernsage.png / mentor-pass-A3. */
   fire: { x: 0.868, y: 0.575 },
@@ -83,7 +85,7 @@ export const TAVERN_FEEL: LivingFeel = {
     { x: 0.47, y: 0.108 },
     { x: 0.53, y: 0.108 },
   ],
-  candleIntensity: 0.16,
+  candleIntensity: 0.28,
   dust: {
     count: 22,
     /** Peak mote alpha before shaft fade. */
