@@ -9,7 +9,8 @@ import { SceneHead } from '@/ui/SceneHead';
 import { ScrimTop, SeamDock } from '@/ui/Seam';
 import { tokens } from '@/ui/tokens';
 
-import StillFrame from './StillFrame';
+import LivingScene from './living/LivingScene';
+import { TAVERN_FEEL } from './living/feel';
 import { isFloorOpen, TAVERN_INTERIOR } from './interiors';
 import { useTavernLift } from './useTavernLift';
 import { useWorldStore } from './store';
@@ -37,7 +38,12 @@ export default function TavernGround() {
 
   return (
     <View style={styles.root}>
-      <StillFrame source={still.source} intrinsicWidth={still.width} intrinsicHeight={still.height}>
+      <LivingScene
+        layers={[{ id: 'mid', source: still.source }]}
+        feel={TAVERN_FEEL}
+        intrinsicWidth={still.width}
+        intrinsicHeight={still.height}
+      >
         {(box) => {
           if (!stairTo) return null;
           const target = TAVERN_INTERIOR.floors.find((entry) => entry.id === stairTo.to);
@@ -57,7 +63,7 @@ export default function TavernGround() {
             />
           );
         }}
-      </StillFrame>
+      </LivingScene>
       <ScrimTop />
       <SeamDock fade={90} />
       <SceneHead kicker={TAVERN_INTERIOR.name} name={floor?.label ?? TAVERN_INTERIOR.name} onBack={openHub} />
